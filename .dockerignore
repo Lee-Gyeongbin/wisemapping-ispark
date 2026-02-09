@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# Node modules
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+**/dist
+target
+**/target
+*.jar
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Logs
+*.log
+logs
+**/logs
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+**/test
+**/__tests__
+**/cypress
+**/coverage
+
+# Documentation
+*.md
+!README.md
+

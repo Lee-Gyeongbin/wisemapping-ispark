@@ -1,0 +1,20 @@
+# Java / Spring
+target/
+*.class
+
+# Node / Front
+node_modules/
+dist/
+build/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Env / Secret
+.env
+application-*.yml
+
+# OS
+.DS_Store
+Thumbs.db

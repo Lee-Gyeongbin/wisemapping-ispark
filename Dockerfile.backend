@@ -1,0 +1,56 @@
+################################################################################
+# Backend Dockerfile - 로컬 소스에서 빌드
+################################################################################
+
+################################################################################
+# Stage 1: Build Backend JAR
+################################################################################
+FROM eclipse-temurin:24-jdk-alpine AS backend-builder
+WORKDIR /build
+
+RUN apk add --no-cache maven
+
+COPY wisemapping-open-source/wise-api/pom.xml ./wise-api/
+COPY wisemapping-open-source/wise-api/src ./wise-api/src/
+
+WORKDIR /build/wise-api
+RUN mvn clean package -DskipTests \
+    -Dgit.branch=unknown \
+    -Dgit.commit.id.abbrev=unknown \
+    -Dgit.commit.id.full=unknown \
+    -Dgit.commit.time=unknown
+
+################################################################################
+# Stage 2: Runtime
+################################################################################
+FROM eclipse-temurin:24-jre-alpine
+LABEL maintainer="WiseMapping"
+
+ARG ENABLE_NEWRELIC=false
+
+RUN addgroup -g 1001 -S wisemapping && \
+    adduser -S -u 1001 -G wisemapping wisemapping
+
+VOLUME /tmp
+COPY --chown=wisemapping:wisemapping wisemapping-open-source/distribution/api/env-config.sh /app/config-gen.sh
+COPY --from=backend-builder --chown=wisemapping:wisemapping /build/wise-api/target/wisemapping-api.jar /app/wisemapping-api.jar
+# Windows 호스트에서 빌드 시 CRLF 제거 (그렇지 않으면 /app/config-gen.sh: not found 발생)
+RUN sed -i 's/\r$//' /app/config-gen.sh && chmod +x /app/config-gen.sh
+
+RUN mkdir -p /app /app/logs && \
+    apk add --no-cache curl && \
+    chown -R wisemapping:wisemapping /app && \
+    if [ "$ENABLE_NEWRELIC" = "true" ]; then \
+        curl -o /app/newrelic.jar https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar && \
+        chown wisemapping:wisemapping /app/newrelic.jar; \
+    fi
+
+WORKDIR /app
+USER wisemapping
+
+EXPOSE 8080
+
+ENV JAVA_OPTS="-XX:InitialRAMPercentage=60 -XX:MaxRAMPercentage=60"
+
+ENTRYPOINT ["sh", "-c", "/app/config-gen.sh && java ${JAVA_OPTS} ${NEW_RELIC_OPTS} -Dspring.config.additional-location=optional:file:/app/config/ -jar wisemapping-api.jar"]
+
