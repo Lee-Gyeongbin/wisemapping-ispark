@@ -38,7 +38,7 @@ public class DisposableEmailService {
     private Set<String> disposableDomains = new HashSet<>();
 
     @Value("${app.registration.disposable-email.blocking.enabled:false}")
-    private boolean blockingEnabled;
+    private boolean blockingEnabled; // true if disposable email blocking is enabled
 
     @PostConstruct
     public void loadDisposableDomains() {
