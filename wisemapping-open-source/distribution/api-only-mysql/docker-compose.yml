@@ -1,0 +1,40 @@
+# =============================================================================
+# Backend API만 Docker로 실행 (MySQL 사용)
+# ERP 시스템과 연동하기 위한 구성
+# =============================================================================
+#
+# 사용 전 (wisemapping-open-source 루트에서):
+#   docker build -f distribution/api/Dockerfile.from-source -t wisemapping-api .
+# (Maven 없이 소스에서 이미지 빌드. 또는 JAR 빌드 후 distribution/api/Dockerfile 사용)
+#
+# 실행: 이 디렉터리에서
+#   docker-compose up -d
+#
+# API: http://localhost:8081 (기본값, API_PORT 환경변수로 변경 가능)
+# =============================================================================
+
+services:
+  wisemapping-api:
+    build:
+      context: ../..
+      dockerfile: distribution/api/Dockerfile.from-source
+    image: wisemapping-api
+    container_name: wisemapping-api
+    ports:
+      - "${API_PORT:-8081}:8080"
+    volumes:
+      - ./app.yml:/app/config/application.yml:ro
+    environment:
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx1024m -Xms512m}
+      # Spring Boot 추가 설정을 환경변수로 전달 (선택사항)
+      - SPRING_CONFIG_ADDITIONAL_FILE_CONTENT=${SPRING_CONFIG_ADDITIONAL_FILE_CONTENT:-}
+    networks:
+      - wisemapping-network
+    restart: unless-stopped
+    # 외부 MySQL 서버 사용 시 healthcheck 불필요
+    # depends_on은 제거 (외부 DB 사용)
+
+networks:
+  wisemapping-network:
+    driver: bridge
+

@@ -1,0 +1,72 @@
+{
+    "name": "@wisemapping/webapp",
+    "version": "6.0.1",
+    "homepage": "https://www.wisemapping.com/opensource/",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:wisemapping/wisemapping-frontend.git"
+    },
+    "license": "MIT",
+    "author": "Paulo Veiga <pveiga@wisemapping.com>",
+    "main": "app.jsx",
+    "files": [
+        "src"
+    ],
+    "scripts": {
+        "build": "vite build",
+        "build:analyze": "ANALYZE=true vite build",
+        "clean": "rm -rf dist node_modules/.cache cypress/screenshots cypress/videos cypress/downloads debug-storybook.log test-results.json .eslintcache",
+        "cy:open": "npx cypress open",
+        "cy:run": "npx cypress run",
+        "dev": "vite",
+        "i18n:compile": "bash -c 'for lang in {'es','en','fr','de','zh','zh-CN','ru','uk','ja','pt','it','hi'};do formatjs compile lang/${lang}.json --ast --out-file src/compiled-lang/${lang}.json;done'",
+        "i18n:extract": "formatjs extract 'src/**/*.ts*' --ignore 'src/@types/**/*' --out-file lang/en.json",
+        "lint": "eslint src --ext js,ts,tsx",
+        "lint:fix": "eslint src --ext js,ts,tsx --fix",
+        "start": "vite",
+        "storybook": "storybook dev -p ${PORT:-6007} --quiet",
+        "build-storybook": "storybook build",
+        "test": "yarn test:integration",
+        "test:integration": "PORT=3000 CYPRESS_BASE_URL=http://localhost:3000 npx start-server-and-test 'vite --port 3000' http-get://localhost:3000 cy:run",
+        "start:dev": "APP_CONFIG_TYPE='file:dev' vite"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@mui/icons-material": "^7.3.6",
+        "@mui/lab": "^7.0.1-beta.20",
+        "@mui/material": "^7.3.6",
+        "@wisemapping/editor": "workspace:^",
+        "axios": "^1.13.2",
+        "dayjs": "^1.11.19",
+        "react": "^19.2.1",
+        "react-dom": "^19.2.3",
+        "react-ga4": "^2.1.0",
+        "react-google-recaptcha": "^3.1.0",
+        "react-helmet-async": "^2.0.5",
+        "react-intl": "^7.1.14",
+        "react-query": "^3.39.3",
+        "react-router-dom": "^7.10.1",
+        "styled-components": "^6.1.19",
+        "universal-cookie": "^8.0.1",
+        "update-browserslist-db": "^1.2.2"
+    },
+    "devDependencies": {
+        "@formatjs/cli": "^6.10.0",
+        "@mdx-js/react": "^3.1.1",
+        "@storybook/addon-docs": "^10.1.11",
+        "@storybook/addon-links": "^10.1.11",
+        "@storybook/react-vite": "^10.1.11",
+        "@testing-library/cypress": "^10.1.0",
+        "@welldone-software/why-did-you-render": "^10.0.1",
+        "cypress": "^15.8.2",
+        "cypress-image-snapshot": "^4.0.1",
+        "eslint": "^9.39.2",
+        "eslint-plugin-storybook": "^0.11.6",
+        "storybook": "^10.1.5",
+        "vite": "^7.3.1"
+    },
+    "publishConfig": {
+        "registry": "https://registry.npmjs.com"
+    }
+}

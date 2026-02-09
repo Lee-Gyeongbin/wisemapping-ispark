@@ -1,0 +1,31 @@
+{
+  "name": "WiseMapping - Free & Open-Source Mind Mapping",
+  "short_name": "WiseMapping",
+  "description": "Visual thinking and mind mapping application",
+  "start_url": "/c/login?redirect=/c/maps/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
+

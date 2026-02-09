@@ -1,0 +1,54 @@
+{
+  "name": "@wisemapping/web2d",
+  "version": "6.0.1",
+  "description": "WiseMapping - Web2D Render Library",
+  "homepage": "https://www.wisemapping.com/opensource/",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wisemapping/wisemapping-frontend.git"
+  },
+  "author": "Paulo Veiga <pveiga@wisemapping.com>",
+  "license": "MIT",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "build-storybook": "storybook build",
+    "clean": "rm -rf dist node_modules/.cache storybook-static cypress/screenshots cypress/videos debug-storybook.log .eslintcache",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "dev": "vite build --watch",
+    "lint": "npx eslint src --ext js,ts",
+    "storybook": "storybook dev -p ${PORT:-6006} --quiet",
+    "test": "yarn test:integration",
+    "test:integration": "PORT=6006 CYPRESS_BASE_URL=http://localhost:6006 npx start-server-and-test 'storybook dev -p 6006 --no-open --quiet' http-get://localhost:6006 cy:run"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.28.5",
+    "@mdx-js/react": "^3.1.1",
+    "@storybook/addon-docs": "^10.1.11",
+    "@storybook/addon-links": "^10.1.11",
+    "@storybook/html-vite": "^10.1.11",
+    "@storybook/testing-library": "^0.2.2",
+    "cypress": "^15.8.2",
+    "cypress-image-snapshot": "^4.0.1",
+    "eslint-plugin-storybook": "^0.11.6",
+    "storybook": "^10.1.5",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.com"
+  }
+}

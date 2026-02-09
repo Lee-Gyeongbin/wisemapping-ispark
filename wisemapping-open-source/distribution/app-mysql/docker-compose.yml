@@ -1,0 +1,35 @@
+# =============================================================================
+# WiseMapping 전체 (Frontend + Backend) Docker 실행 (MySQL 사용)
+# ERP 시스템과 연동하기 위한 구성
+# =============================================================================
+#
+# 사용 전 (wisemapping-open-source 루트에서):
+#   docker build -f distribution/app/Dockerfile -t wisemapping-app .
+#
+# 실행: 이 디렉터리에서
+#   docker-compose up -d
+#
+# Frontend + Backend: http://localhost:3000
+# =============================================================================
+
+services:
+  wisemapping-app:
+    build:
+      context: ../..
+      dockerfile: distribution/app/Dockerfile
+    image: wisemapping-app
+    container_name: wisemapping-app
+    ports:
+      - "${APP_PORT:-3000}:80"
+    volumes:
+      - ./app.yml:/app/config/application.yml:ro
+    environment:
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx1024m -Xms512m}
+    networks:
+      - wisemapping-network
+    restart: unless-stopped
+
+networks:
+  wisemapping-network:
+    driver: bridge
+
