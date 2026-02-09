@@ -44,7 +44,6 @@ import AddCircleTwoTone from '@mui/icons-material/AddCircleTwoTone';
 import ClearIcon from '@mui/icons-material/Clear';
 import LabelTwoTone from '@mui/icons-material/LabelTwoTone';
 import PersonOutlineTwoTone from '@mui/icons-material/PersonOutlineTwoTone';
-import PublicTwoTone from '@mui/icons-material/PublicTwoTone';
 import ScatterPlotTwoTone from '@mui/icons-material/ScatterPlotTwoTone';
 import ShareTwoTone from '@mui/icons-material/ShareTwoTone';
 import StarTwoTone from '@mui/icons-material/StarTwoTone';
@@ -194,16 +193,6 @@ const MapsPage = (): ReactElement => {
       label: intl.formatMessage({ id: 'maps.nav-shared', defaultMessage: 'Shared with me' }),
       icon: (
         <ShareTwoTone htmlColor={getIconColor()} color={getIconColor() ? undefined : 'secondary'} />
-      ),
-    },
-    {
-      filter: { type: 'public' },
-      label: intl.formatMessage({ id: 'maps.nav-public', defaultMessage: 'Public' }),
-      icon: (
-        <PublicTwoTone
-          htmlColor={getIconColor()}
-          color={getIconColor() ? undefined : 'secondary'}
-        />
       ),
     },
   ];
@@ -488,7 +477,7 @@ const MapsPage = (): ReactElement => {
         </main>
 
         {/* Floating Help Button */}
-        <Box
+        {/* <Box
           sx={{
             position: 'fixed',
             bottom: '24px',
@@ -498,7 +487,7 @@ const MapsPage = (): ReactElement => {
           }}
         >
           <HelpMenu />
-        </Box>
+        </Box> */}
       </div>
       {label && labelToDelete != null && (
         <LabelDeleteConfirm

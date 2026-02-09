@@ -1346,13 +1346,13 @@
   "maps.nav-all": [
     {
       "type": 0,
-      "value": "All"
+      "value": "모든 맵"
     }
   ],
   "maps.nav-onwned": [
     {
       "type": 0,
-      "value": "Owned"
+      "value": "나의 맵"
     }
   ],
   "maps.nav-public": [
@@ -1364,13 +1364,13 @@
   "maps.nav-shared": [
     {
       "type": 0,
-      "value": "Shared with me"
+      "value": "공유된 맵"
     }
   ],
   "maps.nav-starred": [
     {
       "type": 0,
-      "value": "Starred"
+      "value": "즐겨찾기"
     }
   ],
   "maps.page-title": [

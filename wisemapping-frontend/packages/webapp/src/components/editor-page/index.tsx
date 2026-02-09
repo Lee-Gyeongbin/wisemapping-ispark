@@ -92,7 +92,6 @@ type ActionType =
   | undefined;
 
 const ActionDispatcher = React.lazy(() => import('../maps-page/action-dispatcher'));
-const AccountMenu = React.lazy(() => import('../maps-page/account-menu'));
 
 const EditorPage = ({ mapId, pageMode, zoom, hid }: EditorPropsType): React.ReactElement => {
   const [activeDialog, setActiveDialog] = useState<ActionType | null>(null);
@@ -237,21 +236,7 @@ const EditorPage = ({ mapId, pageMode, zoom, hid }: EditorPropsType): React.Reac
         onAction={setActiveDialog}
         theme={theme}
         themeVariantStorage={createThemeVariantStorage()}
-        accountConfiguration={
-          // Prevent load on non-authenticated.
-          editorOptions.mode !== 'showcase' ? (
-            <Suspense fallback={<></>}>
-              <IntlProvider
-                locale={userLocale.code}
-                messages={userLocale.message as Record<string, string>}
-              >
-                <AccountMenu />
-              </IntlProvider>
-            </Suspense>
-          ) : (
-            <></>
-          )
-        }
+        accountConfiguration={<></>}
       />
       {activeDialog && (
         <Suspense fallback={<></>}>
