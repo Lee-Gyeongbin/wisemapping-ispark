@@ -159,6 +159,7 @@ logging:
     root: INFO
     com:
       wisemapping:
+        listener: INFO
         scheduler:
           SpamDetectionScheduler: DEBUG
         rest:
@@ -345,6 +346,7 @@ app:
 
 # Behind reverse proxy configuration
 server:
+  port: 8081
   tomcat:
     remoteip:
       remote-ip-header: x-forwarded-for
@@ -360,6 +362,13 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  health:
+    # Disable LDAP health check when LDAP is not enabled or server is unavailable
+    ldap:
+      enabled: false
+    # Disable Mail health check when mail is not enabled or server is unavailable
+    mail:
+      enabled: false
   metrics:
     tags:
       application: wise-api-prod
