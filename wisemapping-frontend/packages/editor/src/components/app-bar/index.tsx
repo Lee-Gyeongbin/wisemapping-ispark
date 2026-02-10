@@ -358,50 +358,55 @@ const AppBar = ({
       ),
       visible: !capability.isHidden('appbar-title'),
     },
-    undefined,
-    {
-      render: () => (
-        <UndoAndRedo
-          configuration={{
-            icon: <UndoOutlinedIcon />,
-            tooltip: keyTooltip(
-              intl.formatMessage({ id: 'appbar.tooltip-undo', defaultMessage: 'Undo' }),
-              'Z',
+    // 수정 권한 있음: 구분선 | Undo | Redo | 구분선 | Save  /  없음: 구분선 | Save (구분선 1개만)
+    ...((!capability.isHidden('undo-changes') || !capability.isHidden('redo-changes'))
+      ? [
+          undefined,
+          {
+            render: () => (
+              <UndoAndRedo
+                configuration={{
+                  icon: <UndoOutlinedIcon />,
+                  tooltip: keyTooltip(
+                    intl.formatMessage({ id: 'appbar.tooltip-undo', defaultMessage: 'Undo' }),
+                    'Z',
+                  ),
+                  onClick: () => {
+                    trackAppBarAction('undo');
+                    model!.getDesigner().undo();
+                  },
+                }}
+                disabledCondition={(event) => event.undoSteps > 0}
+                model={model}
+              />
             ),
-            onClick: () => {
-              trackAppBarAction('undo');
-              model!.getDesigner().undo();
-            },
-          }}
-          disabledCondition={(event) => event.undoSteps > 0}
-          model={model}
-        />
-      ),
-      visible: !capability.isHidden('undo-changes'),
-      disabled: () => !model?.isMapLoadded(),
-    },
-    {
-      render: () => (
-        <UndoAndRedo
-          configuration={{
-            icon: <RedoOutlinedIcon />,
-            tooltip: keyTooltip(
-              intl.formatMessage({ id: 'appbar.tooltip-redo', defaultMessage: 'Redo' }),
-              'Shift + Z',
+            visible: !capability.isHidden('undo-changes'),
+            disabled: () => !model?.isMapLoadded(),
+          },
+          {
+            render: () => (
+              <UndoAndRedo
+                configuration={{
+                  icon: <RedoOutlinedIcon />,
+                  tooltip: keyTooltip(
+                    intl.formatMessage({ id: 'appbar.tooltip-redo', defaultMessage: 'Redo' }),
+                    'Shift + Z',
+                  ),
+                  onClick: () => {
+                    trackAppBarAction('redo');
+                    model!.getDesigner().redo();
+                  },
+                }}
+                disabledCondition={(event) => event.redoSteps > 0}
+                model={model}
+              />
             ),
-            onClick: () => {
-              trackAppBarAction('redo');
-              model!.getDesigner().redo();
-            },
-          }}
-          disabledCondition={(event) => event.redoSteps > 0}
-          model={model}
-        />
-      ),
-      visible: !capability.isHidden('redo-changes'),
-      disabled: () => !model?.isMapLoadded(),
-    },
-    undefined,
+            visible: !capability.isHidden('redo-changes'),
+            disabled: () => !model?.isMapLoadded(),
+          },
+          undefined,
+        ]
+      : [undefined]),
     {
       icon: <SaveOutlinedIcon />,
       onClick: handleDebouncedSave,
