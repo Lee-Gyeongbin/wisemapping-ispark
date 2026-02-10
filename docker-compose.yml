@@ -19,12 +19,12 @@ services:
     networks:
       - wisemapping-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/restful/app/config || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 90s
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8080/api/restful/app/config || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 90s
 
   # Frontend (Nginx)
   frontend:
@@ -36,7 +36,7 @@ services:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
     networks:
       - wisemapping-network
     restart: unless-stopped
