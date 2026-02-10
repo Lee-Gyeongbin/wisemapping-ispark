@@ -126,29 +126,6 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
       </MenuItem>
       <Divider />
 
-      <MenuItem onClick={handleOnClose('export')}>
-        <ListItemIcon>
-          <CloudDownloadOutlinedIcon />
-        </ListItemIcon>
-        <FormattedMessage id="action.export" defaultMessage="Export" />
-      </MenuItem>
-
-      <MenuItem onClick={handleOnClose('print')}>
-        <ListItemIcon>
-          <PrintOutlinedIcon />
-        </ListItemIcon>
-        <FormattedMessage id="action.print" defaultMessage="Print" />
-      </MenuItem>
-
-      {role == 'owner' && (
-        <MenuItem onClick={handleOnClose('publish')}>
-          <ListItemIcon>
-            <PublicOutlinedIcon />
-          </ListItemIcon>
-          <FormattedMessage id="action.publish" defaultMessage="Publish" />
-        </MenuItem>
-      )}
-
       {role == 'owner' && (
         <MenuItem onClick={handleOnClose('share')}>
           <ListItemIcon>

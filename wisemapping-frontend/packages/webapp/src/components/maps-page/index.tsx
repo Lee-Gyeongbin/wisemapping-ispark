@@ -28,7 +28,6 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Label } from '../../classes/client';
 import ActionDispatcher from './action-dispatcher';
 import { ActionType } from './action-chooser';
-import HelpMenu from './help-menu';
 import ThemeToggleButton from '../common/theme-toggle-button';
 import AppI18n, { Locales } from '../../classes/app-i18n';
 import { useFetchAccount } from '../../classes/middleware';
@@ -218,11 +217,11 @@ const MapsPage = (): ReactElement => {
         }}
         key="logo"
       >
-        <img
+        {/* <img
           src={mode === 'dark' ? logoIconWhite : logoIconBlack}
           alt="logo"
           style={{ height: '32px', width: 'auto' }}
-        />
+        /> */}
       </div>
 
       {/* User Info Box */}
