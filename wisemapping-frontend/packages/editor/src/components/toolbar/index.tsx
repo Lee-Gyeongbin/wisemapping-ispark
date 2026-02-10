@@ -44,6 +44,7 @@ export const ToolbarButtonOption = (props: { configuration: ActionConfig }): Rea
     >
       <Box component="span" my="auto">
         <IconButton
+          size="small"
           onClick={props.configuration.onClick}
           disabled={props.configuration.disabled && props.configuration.disabled()}
           aria-pressed={selected}

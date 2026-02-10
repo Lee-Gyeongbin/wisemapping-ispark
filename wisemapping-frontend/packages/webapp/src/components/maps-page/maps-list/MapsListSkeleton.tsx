@@ -132,94 +132,10 @@ export const MapsPageLoading = (): React.ReactElement => {
 
   return (
     <Box css={classes.loadingContainer}>
-      {/* Left Drawer Skeleton */}
-      <Box css={classes.loadingDrawer}>
-        {/* Logo */}
-        <Box css={classes.loadingDrawerLogo}>
-          <Skeleton
-            animation="wave"
-            variant="rectangular"
-            width={40}
-            height={40}
-            css={classes.skeletonDrawer}
-          />
-        </Box>
-
-        {/* Navigation Items */}
-        <Box css={classes.loadingDrawerList}>
-          {[...Array(5)].map((_, i) => (
-            <Box key={i} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Skeleton
-                animation="wave"
-                variant="circular"
-                width={24}
-                height={24}
-                css={classes.skeletonDrawer}
-              />
-              <Skeleton
-                animation="wave"
-                variant="text"
-                width={180}
-                height={20}
-                css={classes.skeletonDrawer}
-              />
-            </Box>
-          ))}
-        </Box>
-
-        {/* Divider */}
-        <Skeleton
-          animation="wave"
-          variant="rectangular"
-          width="100%"
-          height={1}
-          css={classes.skeletonDrawer}
-          style={{ marginTop: 16, marginBottom: 16 }}
-        />
-
-        {/* Label Items */}
-        <Box css={classes.loadingDrawerList}>
-          {[...Array(3)].map((_, i) => (
-            <Box key={i} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Skeleton
-                animation="wave"
-                variant="circular"
-                width={24}
-                height={24}
-                css={classes.skeletonDrawer}
-              />
-              <Skeleton
-                animation="wave"
-                variant="text"
-                width={140}
-                height={20}
-                css={classes.skeletonDrawer}
-              />
-            </Box>
-          ))}
-        </Box>
-
-        {/* Footer - Powered by */}
-        <Box css={classes.loadingDrawerFooter}>
-          <Skeleton
-            animation="wave"
-            variant="rectangular"
-            width={120}
-            height={24}
-            css={classes.skeletonDrawer}
-          />
-        </Box>
-      </Box>
-
-      {/* Main Content Area */}
+      {/* Main Content Area - full width (no left drawer) */}
       <Box css={classes.loadingMainContent}>
         {/* Header AppBar with skeleton toolbar */}
-        <AppBar
-          position="fixed"
-          elevation={0}
-          css={classes.loadingAppBar}
-          style={{ marginLeft: 240, width: 'calc(100% - 240px)' }}
-        >
+        <AppBar position="fixed" elevation={0} css={classes.loadingAppBar} style={{ width: '100%' }}>
           <Toolbar>
             <Skeleton
               animation="wave"

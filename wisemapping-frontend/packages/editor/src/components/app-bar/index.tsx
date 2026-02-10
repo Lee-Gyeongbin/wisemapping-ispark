@@ -27,10 +27,8 @@ import UndoOutlinedIcon from '@mui/icons-material/UndoOutlined';
 import RedoOutlinedIcon from '@mui/icons-material/RedoOutlined';
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
-import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded';
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
@@ -40,8 +38,6 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import Typography from '@mui/material/Typography';
 import UndoAndRedo from '../action-widget/button/undo-and-redo';
 import Button from '@mui/material/Button';
-import LogoTextBlackSvg from '../../../images/logo-text-black.svg';
-import LogoTextOrangeSvg from '../../../images/logo-text-orange.svg';
 import IconButton from '@mui/material/IconButton';
 import { ToolbarActionType } from '../toolbar/ToolbarActionType';
 import MapInfo from '../../classes/model/map-info';
@@ -54,6 +50,7 @@ import { $notify } from '@wisemapping/mindplot';
 import { useTheme } from '../../contexts/ThemeContext';
 import { trackAppBarAction } from '../../utils/analytics';
 import debounce from 'lodash/debounce';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 interface AppBarProps {
   model: Editor | undefined;
@@ -97,6 +94,7 @@ const AppBar = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const intl = useIntl();
   const { mode, toggleMode } = useTheme();
+  const muiTheme = useMuiTheme();
 
   const handleStarredOnClick = () => {
     const newStatus = !isStarred;
@@ -318,18 +316,6 @@ const AppBar = ({
     },
     {
       render: () => (
-        <img
-          src={mode === 'light' ? LogoTextBlackSvg : LogoTextOrangeSvg}
-          aria-label={intl.formatMessage({
-            id: 'appbar.logo-aria-label',
-            defaultMessage: 'WiseMapping',
-          })}
-        />
-      ),
-      visible: !capability.isHidden('appbar-title'),
-    },
-    {
-      render: () => (
         <div
           style={{
             marginLeft: '1.5rem',
@@ -507,15 +493,6 @@ const AppBar = ({
       disabled: () => !isMapLoaded,
     },
     {
-      icon: <PrintOutlinedIcon />,
-      onClick: () => {
-        trackAppBarAction('print');
-        onAction('print');
-      },
-      tooltip: intl.formatMessage({ id: 'appbar.tooltip-print', defaultMessage: 'Print' }),
-      visible: !capability.isHidden('print'),
-    },
-    {
       icon: <FileDownloadOutlinedIcon />,
       onClick: () => {
         trackAppBarAction('export');
@@ -524,15 +501,6 @@ const AppBar = ({
       tooltip: intl.formatMessage({ id: 'appbar.tooltip-export', defaultMessage: 'Export' }),
       visible: !capability.isHidden('export'),
       disabled: () => !isMapLoaded,
-    },
-    {
-      icon: <CloudUploadOutlinedIcon />,
-      onClick: () => {
-        trackAppBarAction('publish');
-        onAction('publish');
-      },
-      tooltip: intl.formatMessage({ id: 'appbar.tooltip-publish', defaultMessage: 'Publish' }),
-      visible: !capability.isHidden('publish'),
     },
     {
       icon: mode === 'dark' ? <Brightness7 /> : <Brightness4 />,
@@ -554,7 +522,10 @@ const AppBar = ({
           })}
         >
           <Button
-            variant="contained"
+            size="medium"
+            variant="outlined"
+            color="primary"
+            disableElevation
             onClick={() => {
               trackAppBarAction('share');
               onAction('share');
@@ -576,7 +547,10 @@ const AppBar = ({
           title={intl.formatMessage({ id: 'appbar.tooltip-signup', defaultMessage: 'Sign Up' })}
         >
           <Button
-            variant="contained"
+            size="medium"
+            variant="outlined"
+            color="primary"
+            disableElevation
             onClick={() => {
               trackAppBarAction('sign_up');
               window.location.href = '/c/registration';
@@ -596,14 +570,52 @@ const AppBar = ({
         role="menubar"
         position="absolute"
         color="default"
+        elevation={0}
         className="material-menubar"
         sx={{
+          width: '100%',
+          backgroundColor: muiTheme.palette.background.paper,
+          color: muiTheme.palette.text.primary,
+          borderBottom: `1px solid ${muiTheme.palette.divider}`,
           '& MuiButtonBase-root': {
-            marginX: '1rem',
+            marginX: '0.25rem',
           },
         }}
       >
-        <MaterialToolbar>
+        <MaterialToolbar
+          sx={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: muiTheme.spacing(1),
+            minHeight: 56,
+            // 목록 상단 툴바와 동일: 아이콘 버튼을 토글 그룹 스타일로
+            '& .MuiIconButton-root': {
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              backgroundColor: muiTheme.palette.background.paper,
+              padding: muiTheme.spacing(0.75),
+              '&:hover': {
+                backgroundColor: muiTheme.palette.action.hover,
+              },
+              '&.Mui-disabled': {
+                borderColor: 'divider',
+                backgroundColor: muiTheme.palette.action.disabledBackground,
+              },
+            },
+            '& .MuiIconButton-root[aria-pressed="true"]': {
+              backgroundColor: muiTheme.palette.action.selected,
+              '&:hover': {
+                backgroundColor: muiTheme.palette.action.selected,
+              },
+            },
+            '& .MuiDivider-root': {
+              margin: `0 ${muiTheme.spacing(0.5)}`,
+            },
+          }}
+        >
           {config.map((c, i) => {
             return <ToolbarMenuItem key={i} configuration={c} />;
           })}

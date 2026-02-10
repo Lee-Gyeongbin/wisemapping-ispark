@@ -16,28 +16,26 @@
  *   limitations under the License.
  */
 import React, { ErrorInfo, ReactElement, useContext, useEffect } from 'react';
-import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
 import IconButton from '@mui/material/IconButton';
 import { useStyles } from './style';
 import { MapsList } from './maps-list';
 import { createIntl, createIntlCache, FormattedMessage, IntlProvider, useIntl } from 'react-intl';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { Label } from '../../classes/client';
 import ActionDispatcher from './action-dispatcher';
 import { ActionType } from './action-chooser';
 import ThemeToggleButton from '../common/theme-toggle-button';
 import AppI18n, { Locales } from '../../classes/app-i18n';
-import { useFetchAccount } from '../../classes/middleware';
 
-import ListItemIcon from '@mui/material/ListItemIcon';
-import MenuIcon from '@mui/icons-material/Menu';
-import ArrowRight from '@mui/icons-material/NavigateNext';
-import ArrowLeft from '@mui/icons-material/NavigateBefore';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 
 import AddCircleTwoTone from '@mui/icons-material/AddCircleTwoTone';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -46,23 +44,15 @@ import PersonOutlineTwoTone from '@mui/icons-material/PersonOutlineTwoTone';
 import ScatterPlotTwoTone from '@mui/icons-material/ScatterPlotTwoTone';
 import ShareTwoTone from '@mui/icons-material/ShareTwoTone';
 import StarTwoTone from '@mui/icons-material/StarTwoTone';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
-
-import logoIconBlack from '../../../images/logo-and-text-black.svg';
-import logoIconWhite from '../../../images/logo-and-text-white.svg';
 import LabelDeleteConfirm from './maps-list/label-delete-confirm';
 import { trackPageView } from '../../utils/analytics';
-import { CSSObject, Interpolation, Theme } from '@emotion/react';
-import { alpha } from '@mui/material/styles';
-import withEmotionStyles from '../HOCs/withEmotionStyles';
+import { Interpolation, Theme } from '@emotion/react';
 import { ClientContext } from '../../classes/provider/client-context';
 import { SEOHead } from '../seo';
-import { useTheme } from '../../contexts/ThemeContext';
 
 export type Filter = GenericFilter | LabelFilter;
 
@@ -75,39 +65,16 @@ export interface LabelFilter {
   label: Label;
 }
 
-interface ToolbarButtonInfo {
-  filter: GenericFilter | LabelFilter;
-  label: string;
-  icon: React.ReactElement;
-}
-
 const MapsPage = (): ReactElement => {
   const [filter, setFilter] = React.useState<Filter>({ type: 'all' });
   const client = useContext(ClientContext);
   const queryClient = useQueryClient();
   const [activeDialog, setActiveDialog] = React.useState<ActionType | undefined>(undefined);
   const [labelToDelete, setLabelToDelete] = React.useState<number | null>(null);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = React.useState(false);
-  const [desktopDrawerOpen, setDesktopDrawerOpen] = React.useState(
-    localStorage.getItem('desktopDrawerOpen') === 'true',
-  );
-  const classes = useStyles(desktopDrawerOpen);
-  const { mode } = useTheme();
+  const [labelsMenuAnchor, setLabelsMenuAnchor] = React.useState<null | HTMLElement>(null);
+  const classes = useStyles();
 
-  // Get theme-appropriate icon color - match text color
-  const getIconColor = () => {
-    return undefined; // Use default which matches text color
-  };
-
-  const handleMobileDrawerToggle = () => {
-    setMobileDrawerOpen(!mobileDrawerOpen);
-  };
-
-  const handleDesktopDrawerToggle = () => {
-    if (!desktopDrawerOpen) localStorage.setItem('desktopDrawerOpen', 'true');
-    else localStorage.removeItem('desktopDrawerOpen');
-    setDesktopDrawerOpen(!desktopDrawerOpen);
-  };
+  const getIconColor = () => undefined;
 
   // Reload based on user preference ...
   const userLocale = AppI18n.getUserLocale();
@@ -144,9 +111,7 @@ const MapsPage = (): ReactElement => {
   const handleMenuClick = (filter: Filter) => {
     queryClient.invalidateQueries('maps');
     setFilter(filter);
-    if (mobileDrawerOpen) {
-      setMobileDrawerOpen(false);
-    }
+    setLabelsMenuAnchor(null);
   };
 
   const handleLabelDelete = (id: number) => {
@@ -157,138 +122,11 @@ const MapsPage = (): ReactElement => {
     return client.fetchLabels();
   });
 
-  const account = useFetchAccount();
   const labels: Label[] = data ? data : [];
-  const filterButtons: ToolbarButtonInfo[] = [
-    {
-      filter: { type: 'all' },
-      label: intl.formatMessage({ id: 'maps.nav-all', defaultMessage: 'All' }),
-      icon: (
-        <ScatterPlotTwoTone
-          htmlColor={getIconColor()}
-          color={getIconColor() ? undefined : 'secondary'}
-        />
-      ),
-    },
-    {
-      filter: { type: 'owned' },
-      label: intl.formatMessage({ id: 'maps.nav-onwned', defaultMessage: 'My Maps' }),
-      icon: (
-        <PersonOutlineTwoTone
-          htmlColor={getIconColor()}
-          color={getIconColor() ? undefined : 'secondary'}
-        />
-      ),
-    },
-    {
-      filter: { type: 'starred' },
-      label: intl.formatMessage({ id: 'maps.nav-starred', defaultMessage: 'Starred' }),
-      icon: (
-        <StarTwoTone htmlColor={getIconColor()} color={getIconColor() ? undefined : 'secondary'} />
-      ),
-    },
-    {
-      filter: { type: 'shared' },
-      label: intl.formatMessage({ id: 'maps.nav-shared', defaultMessage: 'Shared with me' }),
-      icon: (
-        <ShareTwoTone htmlColor={getIconColor()} color={getIconColor() ? undefined : 'secondary'} />
-      ),
-    },
-  ];
 
-  labels.forEach((l) =>
-    filterButtons.push({
-      filter: { type: 'label', label: l },
-      label: l.title,
-      icon: <LabelTwoTone style={{ color: l.color ? l.color : 'inherit' }} />,
-    }),
-  );
-
-  const drawerItemsList = (
-    <>
-      <div
-        style={{
-          padding: '24px 16px 20px 16px',
-          marginBottom: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 0,
-        }}
-        key="logo"
-      >
-        {/* <img
-          src={mode === 'dark' ? logoIconWhite : logoIconBlack}
-          alt="logo"
-          style={{ height: '32px', width: 'auto' }}
-        /> */}
-      </div>
-
-      {/* User Info Box */}
-      {account && (desktopDrawerOpen || mobileDrawerOpen) && (
-        <Box
-          sx={{
-            padding: '16px',
-            margin: '0 8px 16px 8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-          }}
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.primary',
-                fontSize: '16px',
-                fontWeight: 500,
-                fontFamily: 'Figtree, "Noto Sans JP", Helvetica, "system-ui", Arial, sans-serif',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {account.firstname && account.lastname
-                ? `${account.firstname} ${account.lastname}`
-                : account.email}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-                fontSize: '14px',
-                fontFamily: 'Figtree, "Noto Sans JP", Helvetica, "system-ui", Arial, sans-serif',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                display: 'block',
-              }}
-            >
-              {account.email}
-            </Typography>
-          </Box>
-        </Box>
-      )}
-
-      <List component="nav">
-        {filterButtons.map((buttonInfo) => {
-          return (
-            <StyleListItem
-              icon={buttonInfo.icon}
-              label={buttonInfo.label}
-              filter={buttonInfo.filter}
-              active={filter}
-              onClick={handleMenuClick}
-              onDelete={setLabelToDelete}
-              key={`${buttonInfo.filter.type}:${buttonInfo.label}`}
-            />
-          );
-        })}
-      </List>
-    </>
-  );
-
-  const container = document !== undefined ? () => document.body : undefined;
+  const mainFilterValue =
+    filter.type === 'label' ? null : (filter.type as 'all' | 'owned' | 'starred' | 'shared');
+  const labelsMenuOpen = Boolean(labelsMenuAnchor);
   const label: Label | undefined = labels.find((l) => l.id === labelToDelete);
   return (
     <IntlProvider
@@ -325,38 +163,133 @@ const MapsPage = (): ReactElement => {
           elevation={0}
           component="header"
         >
-          <Toolbar role="banner">
-            <IconButton
-              aria-label={intl.formatMessage({
-                id: 'common.open-drawer',
-                defaultMessage: 'Open drawer',
-              })}
-              edge="start"
-              onClick={handleMobileDrawerToggle}
-              sx={{ mr: 2, display: { sm: 'none' }, zIndex: 1300, position: 'relative' }}
-              id="open-main-drawer"
-            >
-              <MenuIcon />
-            </IconButton>
-            <IconButton
-              aria-label={intl.formatMessage({
-                id: 'common.open-drawer',
-                defaultMessage: 'Open drawer',
-              })}
-              edge="start"
-              onClick={handleDesktopDrawerToggle}
-              sx={{
-                p: 0,
-                mr: 2,
-                display: { xs: 'none', sm: 'inherit' },
-                zIndex: 1300,
-                position: 'relative',
+          <Toolbar role="banner" css={classes.toolbarContent}>
+            {/* Filter: All, My Maps, Starred, Shared */}
+            <ToggleButtonGroup
+              value={mainFilterValue}
+              exclusive
+              onChange={(_e, value: 'all' | 'owned' | 'starred' | 'shared' | null) => {
+                if (value != null) handleMenuClick({ type: value });
               }}
-              id="open-desktop-drawer"
+              aria-label="map filter"
+              css={classes.filterButtonGroup}
+              size="small"
             >
-              {!desktopDrawerOpen && <ArrowRight />}
-              {desktopDrawerOpen && <ArrowLeft />}
-            </IconButton>
+              <ToggleButton value="all" aria-label="All maps">
+                <Tooltip title={intl.formatMessage({ id: 'maps.nav-all', defaultMessage: 'All' })}>
+                  <ScatterPlotTwoTone
+                    htmlColor={getIconColor()}
+                    color={getIconColor() ? undefined : 'secondary'}
+                  />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="owned" aria-label="My maps">
+                <Tooltip
+                  title={intl.formatMessage({ id: 'maps.nav-onwned', defaultMessage: 'My Maps' })}
+                >
+                  <PersonOutlineTwoTone
+                    htmlColor={getIconColor()}
+                    color={getIconColor() ? undefined : 'secondary'}
+                  />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="starred" aria-label="Starred">
+                <Tooltip
+                  title={intl.formatMessage({ id: 'maps.nav-starred', defaultMessage: 'Starred' })}
+                >
+                  <StarTwoTone
+                    htmlColor={getIconColor()}
+                    color={getIconColor() ? undefined : 'secondary'}
+                  />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="shared" aria-label="Shared with me">
+                <Tooltip
+                  title={intl.formatMessage({
+                    id: 'maps.nav-shared',
+                    defaultMessage: 'Shared with me',
+                  })}
+                >
+                  <ShareTwoTone
+                    htmlColor={getIconColor()}
+                    color={getIconColor() ? undefined : 'secondary'}
+                  />
+                </Tooltip>
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            {/* Labels dropdown */}
+            <Button
+              id="labels-button"
+              size="small"
+              variant={filter.type === 'label' ? 'contained' : 'outlined'}
+              onClick={(e) => setLabelsMenuAnchor(e.currentTarget)}
+              endIcon={<ExpandMoreIcon />}
+              startIcon={<LabelTwoTone />}
+              css={classes.labelsButton}
+              aria-controls={labelsMenuOpen ? 'labels-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={labelsMenuOpen ? 'true' : undefined}
+            >
+              {filter.type === 'label'
+                ? (filter as LabelFilter).label.title
+                : intl.formatMessage({ id: 'maps.nav-labels', defaultMessage: 'Labels' })}
+            </Button>
+            <Menu
+              id="labels-menu"
+              anchorEl={labelsMenuAnchor}
+              open={labelsMenuOpen}
+              onClose={() => setLabelsMenuAnchor(null)}
+              MenuListProps={{ 'aria-labelledby': 'labels-button' }}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              slotProps={{ paper: { sx: { maxHeight: 320 } } }}
+            >
+              {labels.length === 0 ? (
+                <MenuItem disabled>
+                  <ListItemText
+                    primary={intl.formatMessage({
+                      id: 'maps.no-labels',
+                      defaultMessage: 'No labels',
+                    })}
+                  />
+                </MenuItem>
+              ) : (
+                labels.map((l) => (
+                  <MenuItem
+                    key={l.id}
+                    selected={filter.type === 'label' && (filter as LabelFilter).label.id === l.id}
+                    onClick={() => handleMenuClick({ type: 'label', label: l })}
+                    sx={{ pr: 6 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <LabelTwoTone style={{ color: l.color ? l.color : 'inherit' }} />
+                    </ListItemIcon>
+                    <ListItemText primary={l.title} />
+                    <IconButton
+                      size="small"
+                      aria-label={intl.formatMessage({ id: 'common.delete', defaultMessage: 'Delete' })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLabelToDelete(l.id);
+                        setLabelsMenuAnchor(null);
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </MenuItem>
+                ))
+              )}
+            </Menu>
+
+            <Box component="span" css={classes.toolbarSpacer} />
+
             <Tooltip
               arrow={true}
               title={intl.formatMessage({
@@ -444,28 +377,6 @@ const MapsPage = (): ReactElement => {
             </div>
           </Toolbar>
         </AppBar>
-        <Drawer
-          container={container}
-          variant={'temporary'}
-          open={mobileDrawerOpen}
-          onClose={handleMobileDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          css={[classes.mobileDrawer, { '& .MuiPaper-root': classes.drawerOpen }]}
-        >
-          {drawerItemsList}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          css={[
-            classes.drawer as CSSObject,
-            classes.drawerOpen,
-            { '& .MuiPaper-root': classes.drawerOpen },
-          ]}
-        >
-          {drawerItemsList}
-        </Drawer>
         <main css={classes.content} role="main">
           <div css={classes.toolbar} />
           <section
@@ -499,130 +410,6 @@ const MapsPage = (): ReactElement => {
         />
       )}
     </IntlProvider>
-  );
-};
-
-interface ListItemProps {
-  icon: React.ReactElement;
-  label: string;
-  filter: Filter;
-  active?: Filter;
-  onClick: (filter: Filter) => void;
-  onDelete?: (id: number) => void;
-}
-
-// https://stackoverflow.com/questions/61486061/how-to-set-selected-and-hover-color-of-listitem-in-mui
-const CustomListItem = withEmotionStyles((theme) => ({
-  position: 'relative',
-  '&.Mui-selected': {
-    backgroundColor:
-      theme.palette.mode === 'light'
-        ? alpha(theme.palette.common.white, 0.2)
-        : theme.palette.grey[800],
-    color:
-      theme.palette.mode === 'light'
-        ? theme.palette.primary.contrastText
-        : theme.palette.text.primary,
-    '& .MuiListItemIcon-root': {
-      color:
-        theme.palette.mode === 'light'
-          ? theme.palette.primary.contrastText
-          : theme.palette.text.primary,
-    },
-  },
-  '&.Mui-selected:hover': {
-    backgroundColor:
-      theme.palette.mode === 'light'
-        ? alpha(theme.palette.common.white, 0.25)
-        : theme.palette.grey[700],
-    color:
-      theme.palette.mode === 'light'
-        ? theme.palette.primary.contrastText
-        : theme.palette.text.primary,
-    '& .MuiListItemIcon-root': {
-      color:
-        theme.palette.mode === 'light'
-          ? theme.palette.primary.contrastText
-          : theme.palette.text.primary,
-    },
-  },
-  '&:hover ~ .MuiListItemSecondaryAction-root .label-delete-button': {
-    opacity: '1 !important',
-  },
-}))(ListItemButton);
-
-const StyleListItem = (props: ListItemProps) => {
-  const intl = useIntl();
-  const icon = props.icon;
-  const label = props.label;
-  const filter = props.filter;
-  const activeFilter = props.active;
-  const onClick = props.onClick;
-  const onDeleteLabel = props.onDelete;
-  const isSelected =
-    activeFilter &&
-    activeFilter.type == filter.type &&
-    (activeFilter.type != 'label' ||
-      (activeFilter as LabelFilter).label == (filter as LabelFilter).label);
-  const handleOnClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, filter: Filter) => {
-    event.stopPropagation();
-    onClick(filter);
-  };
-
-  const handleOnDelete = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    filter: Filter,
-  ) => {
-    event.stopPropagation();
-    if (!onDeleteLabel) {
-      throw 'Illegal state exeption';
-    }
-    onDeleteLabel((filter as LabelFilter).label.id);
-  };
-
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-        '&:hover .label-delete-button': {
-          opacity: '1 !important',
-        },
-      }}
-    >
-      <CustomListItem selected={isSelected} onClick={(e) => handleOnClick(e, filter)}>
-        <Tooltip title={label} disableInteractive>
-          <ListItemIcon>{icon}</ListItemIcon>
-        </Tooltip>
-        <ListItemText primary={label} />
-        {filter.type == 'label' && (
-          <ListItemSecondaryAction>
-            <IconButton
-              edge="end"
-              aria-label={intl.formatMessage({ id: 'common.delete', defaultMessage: 'Delete' })}
-              onClick={(e) => handleOnDelete(e, filter)}
-              size="small"
-              className="label-delete-button"
-              sx={{
-                opacity: 0,
-                transition: 'opacity 0.2s ease',
-                padding: '4px',
-                '&:hover': {
-                  opacity: 1,
-                },
-              }}
-            >
-              <ClearIcon
-                sx={{
-                  fontSize: '1rem',
-                  color: 'rgba(255, 255, 255, 0.95)',
-                  filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))',
-                }}
-              />
-            </IconButton>
-          </ListItemSecondaryAction>
-        )}
-      </CustomListItem>
-    </Box>
   );
 };
 
