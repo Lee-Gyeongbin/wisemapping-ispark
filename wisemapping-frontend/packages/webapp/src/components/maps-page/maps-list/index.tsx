@@ -45,8 +45,6 @@ import Button from '@mui/material/Button';
 import InputBase from '@mui/material/InputBase';
 import Link from '@mui/material/Link';
 
-import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
-
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded';
@@ -84,6 +82,7 @@ import {
 } from '../../../theme/ui-input-styles';
 import {
   uiButtonTypeLineSecondarySizeMd,
+  uiButtonTypeSecondarySizeMd,
   uiButtonIconOnlyLineSecondary,
 } from '../../../theme/ui-button-styles';
 import { uiSelectSizeMd } from '../../../theme/ui-select-styles';
@@ -617,7 +616,17 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               disableElevation
               onClick={(e) => setLabelsMenuAnchor(e.currentTarget)}
               endIcon={<ExpandMoreIcon sx={{ color: '#464c53', ml: 0 }} />}
-              startIcon={<LabelTwoTone sx={{ color: 'inherit', mr: 0.5 }} />}
+              startIcon={
+                <LabelTwoTone
+                  sx={{
+                    color:
+                      filter.type === 'label'
+                        ? (filter as LabelFilter).label.color || 'inherit'
+                        : 'inherit',
+                    mr: 0.5,
+                  }}
+                />
+              }
               css={classes.labelsButton}
               sx={[
                 uiSelectSizeMd,
@@ -635,7 +644,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
             >
               {filter.type === 'label'
                 ? (filter as LabelFilter).label.title
-                : intl.formatMessage({ id: 'maps.nav-labels', defaultMessage: 'Labels' })}
+                : intl.formatMessage({ id: 'maps.nav-all', defaultMessage: 'All' })}
             </Button>
             <Menu
               id="labels-menu"
@@ -647,6 +656,17 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               transformOrigin={{ vertical: 'top', horizontal: 'left' }}
               slotProps={{ paper: { sx: { maxHeight: 320, minWidth: 240 } } }}
             >
+              <MenuItem
+                selected={filter.type !== 'label'}
+                onClick={() => handleMenuClick({ type: 'all' })}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  <LabelTwoTone color="secondary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary={intl.formatMessage({ id: 'maps.nav-all', defaultMessage: 'All' })}
+                />
+              </MenuItem>
               {labels.length === 0 ? (
                 <MenuItem disabled>
                   <ListItemText
@@ -711,65 +731,12 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               />
             </Box>
 
-            <div css={classes.toolbarActions}>
-            {selected.length > 0 && (
-              <Tooltip
-                arrow={true}
-                title={intl.formatMessage({
-                  id: 'map.delete-selected',
-                  defaultMessage: 'Delete selected',
-                })}
-              >
-                <Button
-                  color="primary"
-                  size="medium"
-                  variant="outlined"
-                  type="button"
-                  disableElevation={true}
-                  onClick={handleDeleteClick}
-                  startIcon={<DeleteOutlined />}
-                >
-                  <span className="button-text">
-                    <FormattedMessage id="action.delete" defaultMessage="Delete" />
-                  </span>
-                </Button>
-              </Tooltip>
-            )}
-
-            {selected.length > 0 && (
-              <Tooltip
-                arrow={true}
-                title={intl.formatMessage({
-                  id: 'map.tooltip-add',
-                  defaultMessage: 'Add label to selected',
-                })}
-              >
-                <Button
-                  color="primary"
-                  size="medium"
-                  variant="outlined"
-                  type="button"
-                  style={{ marginLeft: '10px' }}
-                  disableElevation={true}
-                  startIcon={<LabelTwoTone />}
-                  onClick={handleAddLabelClick}
-                >
-                  <span className="button-text">
-                    <FormattedMessage id="action.label" defaultMessage="Add Label" />
-                  </span>
-                </Button>
-              </Tooltip>
-            )}
-          </div>
           </Box>
 
           <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 1 }}>
             <Tooltip
               arrow={true}
-              title={intl.formatMessage({
-                id: 'maps.create-tooltip',
-                defaultMessage: 'Create a new mindmap',
-              })}
+              title={'신규 맵 생성'}
             >
               <Button
                 data-testid="create"
@@ -784,7 +751,42 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                 </span>
               </Button>
             </Tooltip>
-            {/* ?? ???? ?? */}
+            <Tooltip
+              arrow={true}
+              title={'선택된 맵에 라벨 추가'}
+            >
+              <Button
+                variant="outlined"
+                type="button"
+                disableElevation={true}
+                sx={uiButtonTypeLineSecondarySizeMd}
+                disabled={selected.length === 0}
+                onClick={handleAddLabelClick}
+              >
+                <span className="button-text">
+                  라벨 추가
+                </span>
+              </Button>
+            </Tooltip>
+            <Tooltip
+              arrow={true}
+              title={'선택된 맵 삭제'}
+            >
+              <span>
+                <Button
+                  variant="contained"
+                  type="button"
+                  disableElevation={true}
+                  disabled={selected.length === 0}
+                  sx={uiButtonTypeSecondarySizeMd}
+                  onClick={handleDeleteClick}
+                >
+                  <span className="button-text">
+                    삭제
+                  </span>
+                </Button>
+              </span>
+            </Tooltip>
             {/* <ThemeToggleButton /> */}
             {/* Pagination on desktop */}
             {filteredMaps.length > rowsPerPage && (

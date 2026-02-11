@@ -64,6 +64,24 @@ export const uiButtonTypeLineSecondarySizeMd = {
   },
 };
 
+/** ui-button type-secondary size-md - BSC_CMB 삭제 버튼 스타일 (진한 회색 배경) */
+export const uiButtonTypeSecondarySizeMd = {
+  ...uiButtonSizeMd,
+  backgroundColor: '#586166',
+  color: '#fff',
+  border: '1px solid #586166',
+  '&:hover': {
+    backgroundColor: '#4a5158',
+    borderColor: '#4a5158',
+    color: '#fff',
+  },
+  '&:active': {
+    backgroundColor: '#3c4347',
+    borderColor: '#3c4347',
+    color: '#fff',
+  },
+};
+
 /** ui-button type-info size-md - 하늘색 배경 (아이콘 포함용) */
 export const uiButtonTypeInfoSizeMd = {
   ...uiButtonSizeMdWithIcon,

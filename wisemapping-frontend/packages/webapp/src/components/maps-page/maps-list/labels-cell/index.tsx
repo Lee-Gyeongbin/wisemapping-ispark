@@ -33,18 +33,16 @@ type Props = {
 const LabelsCellComponent: React.FC<Props> = ({ labels, onDelete }) => {
   const intl = useIntl();
 
-  // Keep original label colors in both light and dark mode
-  const getIconColor = (label: Label) => {
-    return label.color;
-  };
-
   return (
     <>
       {labels.map((label) => (
         <LabelContainer key={label.id} color={label.color}>
           <LabelTwoTone
-            htmlColor={getIconColor(label)}
-            style={{ height: '0.6em', width: '0.6em' }}
+            style={{
+              height: '0.6em',
+              width: '0.6em',
+              color: label.color ? label.color : 'inherit',
+            }}
           />
           <LabelText>{label.title}</LabelText>
           <IconButton
