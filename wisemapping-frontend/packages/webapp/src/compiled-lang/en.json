@@ -1373,6 +1373,12 @@
       "value": "즐겨찾기"
     }
   ],
+  "maps.page-header": [
+    {
+      "type": 0,
+      "value": "마인드맵"
+    }
+  ],
   "maps.page-title": [
     {
       "type": 0,

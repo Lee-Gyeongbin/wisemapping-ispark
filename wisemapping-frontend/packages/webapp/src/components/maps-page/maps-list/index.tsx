@@ -87,6 +87,12 @@ import {
   uiButtonIconOnlyLineSecondary,
 } from '../../../theme/ui-button-styles';
 import { uiSelectSizeMd } from '../../../theme/ui-select-styles';
+import {
+  uiPageHeader,
+  uiPageHeaderTop,
+  uiPageHeaderTitle,
+  uiPageHeaderStarIcon,
+} from '../../../theme/ui-page-header-styles';
 
 dayjs.extend(LocalizedFormat);
 dayjs.extend(relativeTime);
@@ -553,6 +559,15 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
       )}
 
       <Paper css={classes.paper} elevation={0}>
+        <Box sx={uiPageHeader}>
+          <Box sx={uiPageHeaderTop}>
+            <Box component="h1" sx={uiPageHeaderTitle}>
+              <Box component="span" sx={uiPageHeaderStarIcon} aria-hidden />
+              <FormattedMessage id="maps.page-header" defaultMessage="Mind map name" />
+            </Box>
+            <Box sx={{ flexShrink: 0 }} />
+          </Box>
+        </Box>
         <Box sx={filterBar} css={classes.filterBarWrapper}>
           <Box sx={filterBarFilters} css={classes.searchContainer as Interpolation<Theme>}>
             <ToggleButtonGroup
@@ -769,7 +784,8 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                 </span>
               </Button>
             </Tooltip>
-            <ThemeToggleButton />
+            {/* ?? ???? ?? */}
+            {/* <ThemeToggleButton /> */}
             {/* Pagination on desktop */}
             {filteredMaps.length > rowsPerPage && (
               <Box css={classes.paginationDesktop as Interpolation<Theme>}>

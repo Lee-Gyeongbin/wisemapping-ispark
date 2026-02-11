@@ -425,6 +425,9 @@
   "maps.nav-starred": {
     "defaultMessage": "Starred"
   },
+  "maps.page-header": {
+    "defaultMessage": "마인드맵"
+  },
   "maps.page-title": {
     "defaultMessage": "My Maps | WiseMapping"
   },
