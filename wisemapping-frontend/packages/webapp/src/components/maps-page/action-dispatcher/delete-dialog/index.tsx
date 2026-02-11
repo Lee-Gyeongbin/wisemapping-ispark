@@ -17,18 +17,17 @@
  */
 
 import React, { useContext } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { ErrorInfo } from '../../../../classes/client';
 import { SimpleDialogProps, handleOnMutationSuccess } from '..';
 import BaseDialog from '../base-dialog';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
+import { bscCmbAlertModalPaper } from '../../../../theme/ui-input-styles';
 import { useFetchMapMetadata } from '../../../../classes/middleware';
 import { ClientContext } from '../../../../classes/provider/client-context';
 
 const DeleteDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement => {
-  const intl = useIntl();
   const client = useContext(ClientContext);
   const queryClient = useQueryClient();
   const [error, setError] = React.useState<ErrorInfo>();
@@ -49,30 +48,45 @@ const DeleteDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement
   };
 
   const { data: mapMetadata } = useFetchMapMetadata(mapId);
-  const alertTitle = `${intl.formatMessage({
-    id: 'action.delete-title',
-    defaultMessage: 'Delete',
-  })} ${mapMetadata?.title ?? ''}`;
+  const mapTitle = mapMetadata?.title ?? '';
+
   return (
     <div>
       <BaseDialog
         error={error}
         onClose={handleOnClose}
         onSubmit={handleOnSubmit}
-        title={intl.formatMessage({ id: 'action.delete-title', defaultMessage: 'Delete' })}
-        submitButton={intl.formatMessage({
-          id: 'action.delete-title',
-          defaultMessage: 'Delete',
-        })}
+        title={'맵 삭제 확인'}
+        useBscCmbTitle={true}
+        papercss={bscCmbAlertModalPaper}
+        submitButton={'삭제'}
         isLoading={mutation.isLoading}
       >
-        <Alert severity="warning">
-          <AlertTitle>{alertTitle}</AlertTitle>
-          <FormattedMessage
-            id="action.delete-description"
-            defaultMessage="Deleted mindmap can not be recovered. Do you want to continue ?."
-          />
-        </Alert>
+        <Box
+          sx={{
+            padding: '40px 30px',
+            textAlign: 'left',
+            fontFamily: '"Pretendard", sans-serif',
+            fontSize: 15,
+            color: '#333',
+            lineHeight: 1.6,
+            '& .MuiTypography-root': {
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              color: 'inherit',
+            },
+          }}
+        >
+          {mapTitle && (
+            <>
+              <Typography fontWeight="bold" component="span">
+                {mapTitle}{' '}
+              </Typography>
+            </>
+          )}
+          {'맵이 삭제되며 복구할 수 없습니다.'}
+          <br/>{'계속하시겠습니까?'}
+        </Box>
       </BaseDialog>
     </div>
   );

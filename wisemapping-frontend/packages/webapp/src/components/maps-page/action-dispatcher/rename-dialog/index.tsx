@@ -23,6 +23,7 @@ import { ErrorInfo } from '../../../../classes/client';
 import { SimpleDialogProps, handleOnMutationSuccess } from '..';
 import Input from '../../../form/input';
 import BaseDialog from '../base-dialog';
+import { bscCmbOutlinedInputSx } from '../../../../theme/ui-input-styles';
 import FormControl from '@mui/material/FormControl';
 import { useFetchMapById } from '../../../../classes/middleware';
 import { ClientContext } from '../../../../classes/provider/client-context';
@@ -49,7 +50,8 @@ const RenameDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement
       return client.renameMap(id, rest).then(() => model);
     },
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        queryClient.invalidateQueries(`maps-metadata-${data.id}`);
         handleOnMutationSuccess(onClose, queryClient);
       },
       onError: (error) => {
@@ -138,38 +140,33 @@ const RenameDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement
         onSubmit={handleOnSubmit}
         error={error}
         isLoading={mutation.isLoading}
-        title={intl.formatMessage({ id: 'rename.title', defaultMessage: 'Rename' })}
-        description={intl.formatMessage({
-          id: 'rename.description',
-          defaultMessage: 'Please, fill the new map name and description.',
-        })}
-        submitButton={intl.formatMessage({ id: 'rename.title', defaultMessage: 'Rename' })}
+        title={'이름 변경'}
+        useBscCmbTitle={true}
+        submitButton={'저장'}
       >
         <FormControl fullWidth={true}>
           <Input
             name="title"
             type="text"
-            label={intl.formatMessage({
-              id: 'action.rename-name-placeholder',
-              defaultMessage: 'Name',
-            })}
+            label={'마인드맵명'}
             value={model.title}
             onChange={handleOnChange}
             error={error}
             fullWidth={true}
+            maxLength={60}
+            sx={[bscCmbOutlinedInputSx, { marginTop: 4 }]}
           />
 
           <Input
             name="description"
             type="text"
-            label={intl.formatMessage({
-              id: 'action.rename-description-placeholder',
-              defaultMessage: 'Description',
-            })}
-            value={model.description}
+            label={'설명'}
+            value={model.description || ''}
             onChange={handleOnChange}
             required={false}
             fullWidth={true}
+            rows={3}
+            sx={bscCmbOutlinedInputSx}
           />
         </FormControl>
       </BaseDialog>

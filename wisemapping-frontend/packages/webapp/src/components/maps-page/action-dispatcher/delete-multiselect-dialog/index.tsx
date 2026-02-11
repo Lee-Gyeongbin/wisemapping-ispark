@@ -17,16 +17,14 @@
  */
 
 import React, { useContext } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
+import Box from '@mui/material/Box';
 import { handleOnMutationSuccess, MultiDialogProps } from '..';
 import BaseDialog from '../base-dialog';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
+import { bscCmbAlertModalPaper } from '../../../../theme/ui-input-styles';
 import { ClientContext } from '../../../../classes/provider/client-context';
 
 const DeleteMultiselectDialog = ({ onClose, mapsId }: MultiDialogProps): React.ReactElement => {
-  const intl = useIntl();
   const client = useContext(ClientContext);
   const queryClient = useQueryClient();
 
@@ -50,25 +48,30 @@ const DeleteMultiselectDialog = ({ onClose, mapsId }: MultiDialogProps): React.R
       <BaseDialog
         onClose={handleOnClose}
         onSubmit={handleOnSubmit}
-        title={intl.formatMessage({ id: 'action.delete-title', defaultMessage: 'Delete' })}
-        submitButton={intl.formatMessage({
-          id: 'action.delete-title',
-          defaultMessage: 'Delete',
-        })}
+        title={'선택된 맵 삭제 확인'}
+        useBscCmbTitle={true}
+        papercss={bscCmbAlertModalPaper}
+        submitButton={'삭제'}
         isLoading={mutation.isLoading}
       >
-        <Alert severity="warning">
-          <AlertTitle>
-            <FormattedMessage
-              id="deletem.title"
-              defaultMessage="All selected maps will be deleted"
-            />
-          </AlertTitle>
-          <FormattedMessage
-            id="action.delete-description"
-            defaultMessage="Deleted mindmap can not be recovered. Do you want to continue ?."
-          />
-        </Alert>
+        <Box
+          sx={{
+            padding: '40px 30px',
+            textAlign: 'left',
+            fontFamily: '"Pretendard", sans-serif',
+            fontSize: 15,
+            color: '#333',
+            lineHeight: 1.6,
+            '& .MuiTypography-root': {
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              color: 'inherit',
+            },
+          }}
+        >
+          {'선택된 모든 맵이 삭제되며 복구할 수 없습니다.'} 
+          <br/>{'계속하시겠습니까?'}
+        </Box>
       </BaseDialog>
     </div>
   );

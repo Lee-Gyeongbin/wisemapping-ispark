@@ -138,10 +138,6 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
                 type="submit"
                 disableElevation={true}
                 isLoading={isLoading}
-                loadingText={intl.formatMessage({
-                  id: 'common.wait',
-                  defaultMessage: 'Please wait ...',
-                })}
                 sx={bscCmbTypeInfoButtonSx}
               >
                 {props.submitButton}

@@ -51,6 +51,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { trackAppBarAction } from '../../utils/analytics';
 import debounce from 'lodash/debounce';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
+import { bscCmbOutlinedInputSx } from '../../../../webapp/src/theme/ui-input-styles';
+import { uiButtonTypeLineSecondarySizeMd } from '../../../../webapp/src/theme/ui-button-styles';
 
 interface AppBarProps {
   model: Editor | undefined;
@@ -220,26 +222,15 @@ const AppBar = ({
       InputProps={{ readOnly: true }}
       onClick={canRename ? handleTitleClick : undefined}
       data-testid="app-bar-title"
-      sx={{
-        cursor: canRename ? 'pointer' : 'default',
-        '& .MuiOutlinedInput-root': {
-          fontSize: '1rem',
-          height: '32px',
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'transparent',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: canRename ? (theme) => theme.palette.primary.main : 'transparent',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'transparent',
-          },
-        },
-        '& .MuiOutlinedInput-input': {
-          padding: '6px 8px',
+      sx={[
+        bscCmbOutlinedInputSx,
+        {
           cursor: canRename ? 'pointer' : 'default',
+          '& .MuiOutlinedInput-input': {
+            cursor: canRename ? 'pointer' : 'default',
+          },
         },
-      }}
+      ]}
     />
   );
 
@@ -335,20 +326,7 @@ const AppBar = ({
               variant="outlined"
               size="small"
               data-testid="app-bar-title"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  fontSize: '1rem',
-                  height: '32px',
-                  outline: (theme) => `2px solid ${theme.palette.primary.main}`,
-                  borderRadius: '4px',
-                  '& fieldset': {
-                    border: 'none',
-                  },
-                },
-                '& .MuiOutlinedInput-input': {
-                  padding: '6px 8px',
-                },
-              }}
+              sx={bscCmbOutlinedInputSx}
               disabled={isSaving}
             />
           ) : (
@@ -507,36 +485,37 @@ const AppBar = ({
       visible: !capability.isHidden('export'),
       disabled: () => !isMapLoaded,
     },
-    {
-      icon: mode === 'dark' ? <Brightness7 /> : <Brightness4 />,
-      tooltip: intl.formatMessage({
-        id: 'appbar.tooltip-theme-toggle',
-        defaultMessage: 'Toggle Theme',
-      }),
-      onClick: () => {
-        trackAppBarAction('theme_toggle');
-        toggleMode();
-      },
-    },
+    // 테마 토글 삭제 
+    // {
+    //   icon: mode === 'dark' ? <Brightness7 /> : <Brightness4 />,
+    //   tooltip: intl.formatMessage({
+    //     id: 'appbar.tooltip-theme-toggle',
+    //     defaultMessage: 'Toggle Theme',
+    //   }),
+    //   onClick: () => {
+    //     trackAppBarAction('theme_toggle');
+    //     toggleMode();
+    //   },
+    // },
     {
       render: () => (
         <Tooltip
-          title={intl.formatMessage({
-            id: 'appbar.tooltip-shared',
-            defaultMessage: 'Share for Collaboration',
-          })}
+          title={'다른 사용자와 공유하기'}
         >
           <Button
-            size="medium"
             variant="outlined"
-            color="primary"
             disableElevation
+            sx={{
+              ...uiButtonTypeLineSecondarySizeMd,
+              height: 36,
+              minHeight: 36,
+            }}
             onClick={() => {
               trackAppBarAction('share');
               onAction('share');
             }}
           >
-            {intl.formatMessage({ id: 'appbar.shared-button', defaultMessage: 'Share' })}
+            {'공유하기'}
           </Button>
         </Tooltip>
       ),

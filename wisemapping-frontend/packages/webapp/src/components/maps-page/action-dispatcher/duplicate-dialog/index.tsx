@@ -25,6 +25,7 @@ import { BasicMapInfo, ErrorInfo } from '../../../../classes/client';
 import Input from '../../../form/input';
 import { SimpleDialogProps } from '..';
 import BaseDialog from '../base-dialog';
+import { bscCmbOutlinedInputSx } from '../../../../theme/ui-input-styles';
 import { useFetchMapById } from '../../../../classes/middleware';
 import { ClientContext } from '../../../../classes/provider/client-context';
 
@@ -128,6 +129,7 @@ const DuplicateDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElem
   };
 
   const { data: map } = useFetchMapById(mapId);
+  const initializedMapIdRef = React.useRef<number | null>(null);
 
   // Validate mapId - show error if invalid (0 is a valid ID)
   useEffect(() => {
@@ -142,35 +144,36 @@ const DuplicateDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElem
     }
   }, [mapId, intl]);
 
+  // 맵 데이터가 로드되면 초기값 설정 (한 번만 실행 - 이후 사용자 수정이 덮어쓰이지 않도록)
   useEffect(() => {
-    if (map) {
-      // Validate that map.title exists and is not empty
-      if (!map.title || map.title.trim().length === 0) {
-        setError({
-          msg: intl.formatMessage({
-            id: 'error.map-title-required',
-            defaultMessage: 'Map title is required and cannot be empty',
-          }),
-        });
-        return;
-      }
+    if (!map || mapId == null || Number.isNaN(mapId)) return;
+    if (initializedMapIdRef.current === mapId) return;
+    initializedMapIdRef.current = mapId;
 
-      // Clear any previous errors when model is successfully initialized
-      setError(undefined);
-
-      // Add translated "Copy of " prefix to the title
-      const copyPrefix = intl.formatMessage({
-        id: 'duplicate.copy-prefix',
-        defaultMessage: 'Copy of ',
+    // Validate that map.title exists and is not empty
+    if (!map.title || map.title.trim().length === 0) {
+      setError({
+        msg: intl.formatMessage({
+          id: 'error.map-title-required',
+          defaultMessage: 'Map title is required and cannot be empty',
+        }),
       });
-      const copyTitle = `${copyPrefix}${map.title.trim()}`;
-
-      setModel({
-        title: copyTitle,
-        description: map.description ?? '',
-        id: mapId,
-      });
+      return;
     }
+
+    setError(undefined);
+
+    const copyPrefix = intl.formatMessage({
+      id: 'duplicate.copy-prefix',
+      defaultMessage: 'Copy of ',
+    });
+    const copyTitle = `${copyPrefix}${map.title.trim()}`;
+
+    setModel({
+      title: copyTitle,
+      description: map.description ?? '',
+      id: mapId,
+    });
   }, [map, mapId, intl]);
 
   return (
@@ -180,44 +183,36 @@ const DuplicateDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElem
         onSubmit={handleOnSubmit}
         error={error}
         isLoading={mutation.isLoading}
-        title={intl.formatMessage({ id: 'duplicate.title', defaultMessage: 'Duplicate' })}
-        description={intl.formatMessage({
-          id: 'rename.description',
-          defaultMessage: 'Please, fill the new map name and description.',
-        })}
-        submitButton={intl.formatMessage({
-          id: 'duplicate.title',
-          defaultMessage: 'Duplicate',
-        })}
+        title={'맵 복사'}
+        useBscCmbTitle={true}
+        submitButton={'저장'}
       >
         <FormControl fullWidth={true}>
           <Input
             name="title"
             type="text"
-            label={intl.formatMessage({
-              id: 'action.rename-name-placeholder',
-              defaultMessage: 'Name',
-            })}
+            label={'마인드맵명'}
             value={model.title}
             onChange={handleOnChange}
             error={error}
             fullWidth={true}
             required={true}
             minLength={1}
+            maxLength={60}
+            sx={[bscCmbOutlinedInputSx, { marginTop: 4 }]}
           />
 
           <Input
             name="description"
             type="text"
-            label={intl.formatMessage({
-              id: 'action.rename-description-placeholder',
-              defaultMessage: 'Description',
-            })}
+            label={'설명'}
             value={model.description || ''}
             onChange={handleOnChange}
             error={error}
             required={false}
             fullWidth={true}
+            rows={3}
+            sx={bscCmbOutlinedInputSx}
           />
         </FormControl>
       </BaseDialog>
