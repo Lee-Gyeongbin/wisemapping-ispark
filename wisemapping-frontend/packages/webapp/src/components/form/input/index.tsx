@@ -19,6 +19,7 @@
 import TextField from '@mui/material/TextField';
 import React, { ChangeEvent } from 'react';
 import { ErrorInfo } from '../../../classes/client';
+import { SxProps, Theme } from '@mui/material/styles';
 
 type InputProps = {
   name: string;
@@ -34,6 +35,7 @@ type InputProps = {
   minLength?: number;
   maxLength?: number;
   rows?: number;
+  sx?: SxProps<Theme>;
 };
 
 const Input = ({
@@ -49,6 +51,8 @@ const Input = ({
   disabled = false,
   minLength,
   maxLength = 254,
+  rows,
+  sx,
 }: InputProps): React.ReactElement => {
   const fieldError = error?.fields?.[name];
   return (
@@ -61,12 +65,16 @@ const Input = ({
       error={Boolean(fieldError)}
       helperText={fieldError}
       variant="outlined"
+      size="small"
       required={required}
       fullWidth={fullWidth}
       margin="dense"
       disabled={disabled}
       autoComplete={autoComplete}
       inputProps={{ minLength: minLength, maxLength: maxLength }}
+      rows={rows}
+      multiline={Boolean(rows)}
+      sx={sx}
     />
   );
 };

@@ -18,15 +18,31 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import AddIcon from '@mui/icons-material/Add';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 
 import { Label } from '../../../../classes/client';
 import { NewLabelColor } from './styled';
 import Tooltip from '@mui/material/Tooltip';
+import { bscCmbOutlinedInputSx, bscCmbTypeInfoButtonSx } from '../../../../theme/ui-input-styles';
+
+/** BSC_CMB icon-plus (analycluster.jsp와 동일) */
+const IconPlus = () => (
+  <Box
+    component="span"
+    sx={{
+      width: 13,
+      height: 13,
+      flexShrink: 0,
+      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 13 13' fill='none'%3E%3Crect x='5.59961' width='1.6' height='12.8' rx='0.8' fill='white'/%3E%3Crect y='7.2002' width='1.6' height='12.8' rx='0.8' transform='rotate(-90 0 7.2002)' fill='white'/%3E%3C/svg%3E")`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      backgroundSize: 'contain',
+    }}
+  />
+);
 
 const labelColors = [
   '#00b327',
@@ -70,11 +86,14 @@ const AddLabelDialog = ({ onAdd }: AddLabelFormProps): React.ReactElement => {
   return (
     <Box
       sx={{
+        marginTop: 2,
         paddingTop: '16px',
-        paddingBottom: '8px',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
+        paddingBottom: '16px',
+        paddingX: '12px',
         marginBottom: '16px',
+        border: '1px solid #cdd1d5',
+        borderRadius: 1,
+        backgroundColor: '#f8f9fa',
       }}
     >
       <Box
@@ -110,10 +129,7 @@ const AddLabelDialog = ({ onAdd }: AddLabelFormProps): React.ReactElement => {
         <TextField
           variant="outlined"
           size="small"
-          label={intl.formatMessage({
-            id: 'label.add-placeholder',
-            defaultMessage: 'Label title',
-          })}
+          label="라벨 이름"
           onChange={(e) => setNewLabelTitle(e.target.value)}
           onKeyPress={(e) => {
             if (e.key === 'Enter' && newLabelTitle.length) {
@@ -122,44 +138,20 @@ const AddLabelDialog = ({ onAdd }: AddLabelFormProps): React.ReactElement => {
           }}
           value={newLabelTitle}
           fullWidth
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
+          sx={bscCmbOutlinedInputSx}
         />
-        <Tooltip
-          arrow={true}
-          title={intl.formatMessage({
+        <Button
+          variant="contained"
+          endIcon={<IconPlus />}
+          onClick={() => handleSubmitNew()}
+          disabled={!newLabelTitle.length}
+          aria-label={intl.formatMessage({
             id: 'label.add-button',
             defaultMessage: 'Add label',
           })}
-        >
-          <span>
-            <IconButton
-              color="primary"
-              onClick={() => handleSubmitNew()}
-              disabled={!newLabelTitle.length}
-              aria-label={intl.formatMessage({
-                id: 'label.add-button',
-                defaultMessage: 'Add label',
-              })}
-              sx={{
-                backgroundColor: 'primary.main',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'primary.dark',
-                },
-                '&:disabled': {
-                  backgroundColor: 'action.disabledBackground',
-                  color: 'action.disabled',
-                },
-              }}
-            >
-              <AddIcon />
-            </IconButton>
-          </span>
-        </Tooltip>
+          sx={bscCmbTypeInfoButtonSx}
+        >{'신규'}
+        </Button>
       </Box>
 
       <Box sx={{ mt: 2, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>

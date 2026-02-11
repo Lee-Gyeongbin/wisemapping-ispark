@@ -20,9 +20,21 @@ import FormGroup from '@mui/material/FormGroup';
 import styled from 'styled-components';
 
 export const LabelListContainer = styled(FormGroup)`
-  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  height: 180px;
+  max-height: 180px;
+  min-height: 0;
   flex-wrap: nowrap;
   overflow-y: auto;
+  flex-shrink: 0;
+  gap: 0;
+  row-gap: 2px;
+
+  & .MuiFormControlLabel-root {
+    height: 50px;
+    max-height: 50px;
+  }
 
   &::-webkit-scrollbar {
     width: 8px;

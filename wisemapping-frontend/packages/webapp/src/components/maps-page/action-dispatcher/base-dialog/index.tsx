@@ -18,6 +18,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
+import Box from '@mui/material/Box';
 import { ErrorInfo } from '../../../../classes/client';
 import { StyledDialog, StyledDialogActions, StyledDialogContent, StyledDialogTitle } from './style';
 import GlobalError from '../../../form/global-error';
@@ -26,6 +27,8 @@ import Button from '@mui/material/Button';
 import { CSSObject } from '@emotion/react';
 import { KeyboardContext } from '../../../../classes/provider/keyboard-context';
 import AsyncButton from '../../../form/async-button';
+import { bscCmbTypeSecondaryButtonSx, bscCmbTypeInfoButtonSx } from '../../../../theme/ui-input-styles';
+import { uiPageHeaderTitle, uiPageHeaderStarIcon } from '../../../../theme/ui-page-header-styles';
 
 export type DialogProps = {
   onClose: () => void;
@@ -34,6 +37,10 @@ export type DialogProps = {
   error?: ErrorInfo;
 
   title: string;
+  /** BSC_CMB ui-page-header 스타일 사용 시 true, titleStartIcon과 함께 사용 */
+  useBscCmbTitle?: boolean;
+  /** BSC_CMB 스타일 사용 시 제목 앞 아이콘 (기본: icon-star) */
+  titleStartIcon?: React.ReactNode;
   description?: string;
 
   submitButton?: string;
@@ -53,7 +60,7 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
       setHotkeyEnabled(true);
     };
   }, []);
-  const { onClose, onSubmit, maxWidth = 'sm', papercss, isLoading = false } = props;
+  const { onClose, onSubmit, maxWidth = 'sm', papercss, isLoading = false, useBscCmbTitle, titleStartIcon } = props;
 
   const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -75,7 +82,33 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
         PaperProps={papercss ? { css: papercss } : undefined}
       >
         <form autoComplete="off" onSubmit={handleOnSubmit}>
-          <StyledDialogTitle>{props.title}</StyledDialogTitle>
+          <StyledDialogTitle
+            sx={
+              useBscCmbTitle
+                ? [
+                    uiPageHeaderTitle,
+                    {
+                      padding: '20px 32px 16px 32px !important',
+                      marginBottom: 0,
+                    },
+                  ]
+                : undefined
+            }
+          >
+            {useBscCmbTitle ? (
+              <>
+                {titleStartIcon ?? (
+                  <Box
+                    component="span"
+                    sx={uiPageHeaderStarIcon}
+                  />
+                )}
+                {props.title}
+              </>
+            ) : (
+              props.title
+            )}
+          </StyledDialogTitle>
 
           <StyledDialogContent>
             <>
@@ -88,21 +121,19 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
           <StyledDialogActions>
             <Button
               type="button"
-              color="primary"
-              size="medium"
+              variant="contained"
               onClick={onClose}
               disabled={isLoading}
+              sx={bscCmbTypeSecondaryButtonSx}
             >
               {onSubmit ? (
-                <FormattedMessage id="action.cancel-button" defaultMessage="Cancel" />
+                '취소'
               ) : (
-                <FormattedMessage id="action.close-button" defaultMessage="Close" />
+                '닫기'
               )}
             </Button>
             {onSubmit && (
               <AsyncButton
-                color="primary"
-                size="medium"
                 variant="contained"
                 type="submit"
                 disableElevation={true}
@@ -111,6 +142,7 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
                   id: 'common.wait',
                   defaultMessage: 'Please wait ...',
                 })}
+                sx={bscCmbTypeInfoButtonSx}
               >
                 {props.submitButton}
               </AsyncButton>

@@ -67,35 +67,13 @@ const LabelDialog = ({ mapsId, onClose }: MultiDialogProps): React.ReactElement 
     <div>
       <BaseDialog
         onClose={onClose}
-        title={intl.formatMessage({
-          id: 'label.title',
-          defaultMessage: 'Add a label',
-        })}
-        description={intl.formatMessage({
-          id: 'label.description',
-          defaultMessage: 'Use labels to organize your maps.',
-        })}
+        title={ maps && maps.length > 1 ? `${maps.length}개의 마인드맵 라벨 추가` : maps.map((m) => m.title).join(', ')  + ' 라벨 추가'}
+        useBscCmbTitle={true}
         papercss={classes.paper}
         error={error}
       >
         {maps && (
           <>
-            <Typography
-              variant="body2"
-              marginTop="10px"
-              css={classes.title as Interpolation<Theme>}
-            >
-              <FormattedMessage id="label.add-for" defaultMessage="Editing labels for " />
-              {maps && maps.length > 1 ? (
-                <FormattedMessage
-                  id="label.maps-count"
-                  defaultMessage="{count} maps"
-                  values={{ count: maps.length }}
-                />
-              ) : (
-                maps.map((m) => m.title).join(', ')
-              )}
-            </Typography>
             <LabelSelector onChange={handleChangesInLabels} maps={maps} />
           </>
         )}

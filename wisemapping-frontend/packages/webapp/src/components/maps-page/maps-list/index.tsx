@@ -675,10 +675,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               {labels.length === 0 ? (
                 <MenuItem disabled>
                   <ListItemText
-                    primary={intl.formatMessage({
-                      id: 'maps.no-labels',
-                      defaultMessage: 'No labels',
-                    })}
+                    primary={'라벨이 없습니다.'}
                   />
                 </MenuItem>
               ) : (
