@@ -175,6 +175,13 @@ const createAppTheme = (mode: PaletteMode): Theme => {
           }),
         },
       },
+      MuiBackdrop: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'rgba(0, 0, 0, 0.3) !important',
+          },
+        },
+      },
     },
     typography: {
       fontFamily: '"Pretendard", sans-serif',

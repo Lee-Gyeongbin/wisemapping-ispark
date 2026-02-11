@@ -36,6 +36,9 @@ export const StyledDialogActions = withEmotionStyles({
 
 export const StyledDialog = withEmotionStyles((theme) => ({
   borderRadius: '9px',
+  '& .MuiBackdrop-root': {
+    backgroundColor: 'rgba(0, 0, 0, 0.3) !important',
+  },
   '& .MuiPaper-root': {
     border: '2px solid #ffa800',
     // Ensure theme background is preserved
