@@ -131,7 +131,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
           <ListItemIcon>
             <ShareOutlinedIcon />
           </ListItemIcon>
-          공유하기
+          협업하기
         </MenuItem>
       )}
       <Divider />

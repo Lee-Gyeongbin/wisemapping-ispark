@@ -123,6 +123,7 @@ export type AccountInfo = {
 
 export type Permission = {
   name?: string;
+  deptNm?: string;
   email: string;
   role: Role;
 };
@@ -132,6 +133,7 @@ export type UserSearchResult = {
   firstname: string;
   lastname: string;
   fullName: string;
+  deptNm?: string;
   collaborating: boolean;
 };
 

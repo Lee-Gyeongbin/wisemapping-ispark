@@ -32,6 +32,7 @@ public class RestUserSearchResult {
     private String firstname;
     private String lastname;
     private String fullName;
+    private String deptNm;
     private boolean isCollaborating;
 
     public RestUserSearchResult() {
@@ -98,5 +99,13 @@ public class RestUserSearchResult {
 
     public void setCollaborating(boolean collaborating) {
         isCollaborating = collaborating;
+    }
+
+    public String getDeptNm() {
+        return deptNm;
+    }
+
+    public void setDeptNm(String deptNm) {
+        this.deptNm = deptNm;
     }
 }

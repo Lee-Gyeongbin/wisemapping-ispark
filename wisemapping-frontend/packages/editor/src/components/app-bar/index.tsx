@@ -500,7 +500,7 @@ const AppBar = ({
     {
       render: () => (
         <Tooltip
-          title={'다른 사용자와 공유하기'}
+          title={'다른 사용자와 협업하기'}
         >
           <Button
             variant="outlined"
@@ -515,7 +515,7 @@ const AppBar = ({
               onAction('share');
             }}
           >
-            {'공유하기'}
+            {'협업하기'}
           </Button>
         </Tooltip>
       ),

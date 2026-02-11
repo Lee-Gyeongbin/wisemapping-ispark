@@ -32,6 +32,8 @@ public class RestCollaboration {
 
     private int id;
     private String email;
+    private String name;
+    private String deptNm;
     private String role;
 
     public RestCollaboration(@NotNull Collaboration collaboration) {
@@ -72,5 +74,21 @@ public class RestCollaboration {
 
     public void setEmail(@NotNull String email) {
         this.email = email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDeptNm() {
+        return deptNm;
+    }
+
+    public void setDeptNm(String deptNm) {
+        this.deptNm = deptNm;
     }
 }

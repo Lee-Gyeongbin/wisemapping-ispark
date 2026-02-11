@@ -200,6 +200,7 @@ export default class RestClient implements Client {
               id: p.id,
               email: p.email,
               name: p.name,
+              deptNm: p.deptNm,
               role: p.role,
             };
           });
@@ -234,6 +235,7 @@ export default class RestClient implements Client {
             firstname: u.firstname,
             lastname: u.lastname,
             fullName: u.fullName,
+            deptNm: u.deptNm,
             collaborating: u.collaborating || false,
           }));
           success(users);

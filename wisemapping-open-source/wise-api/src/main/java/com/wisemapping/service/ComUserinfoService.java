@@ -23,4 +23,12 @@ public interface ComUserinfoService {
      * @return USER_NM, 없으면 empty
      */
     Optional<String> findUserNmByUserId(@Nullable String userId);
+
+    /**
+     * USER_ID로 com_userinfo.DEPT_ID → com_deptinfo 조인하여 DEPT_NM 조회.
+     *
+     * @param userId com_userinfo.USER_ID (Account.firstname과 매핑)
+     * @return DEPT_NM, 없으면 empty
+     */
+    Optional<String> findDeptNmByUserId(@Nullable String userId);
 }

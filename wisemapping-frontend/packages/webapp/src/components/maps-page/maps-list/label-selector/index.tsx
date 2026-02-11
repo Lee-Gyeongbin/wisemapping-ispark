@@ -17,21 +17,27 @@
  */
 
 import React, { useContext, useMemo } from 'react';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 import LabelComponent from '../label';
 import { Label, ErrorInfo, MapInfo } from '../../../../classes/client';
 import { useQuery } from 'react-query';
 import AddLabelDialog from '../../action-dispatcher/add-label-dialog';
-import { LabelListContainer } from './styled';
 import { ClientContext } from '../../../../classes/provider/client-context';
+import { useStyles } from '../styled';
 import {
   BscCheckboxUncheckedIcon,
   BscCheckboxCheckedIcon,
+  BscCheckboxIndeterminateIcon,
   checkboxBscCmbSx,
 } from '../../../../theme/ui-checkbox-styles';
+import { CSSObject } from '@emotion/react';
 
 export type LabelSelectorProps = {
   maps: MapInfo[];
@@ -40,6 +46,7 @@ export type LabelSelectorProps = {
 
 export function LabelSelector({ onChange, maps }: LabelSelectorProps): React.ReactElement {
   const client = useContext(ClientContext);
+  const classes = useStyles();
   const { data: labels = [] } = useQuery<unknown, ErrorInfo, Label[]>('labels', async () =>
     client.fetchLabels(),
   );
@@ -50,63 +57,75 @@ export function LabelSelector({ onChange, maps }: LabelSelectorProps): React.Rea
       .filter((labelId) => maps.every((m) => m.labels.find((l) => l.id === labelId)));
   }, [labels, maps]);
 
+  const numChecked = checkedLabelIds.length;
+  const rowCount = labels.length;
+  const isAllChecked = rowCount > 0 && numChecked === rowCount;
+  const isIndeterminate = numChecked > 0 && numChecked < rowCount;
+
+  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    labels.forEach((label) => onChange(label, checked));
+  };
+
   return (
     <Box>
       <AddLabelDialog onAdd={(label) => onChange(label, true)} />
-      <Box sx={{ mt: 1 }}>
-        <Box
-          sx={{
-            padding: '6px 0',
-          }}
-        >
-          <Typography
-            component="span"
-            sx={{
-              fontSize: 14,
-              fontWeight: 700,
-              color: '#333',
-              fontFamily: '"Pretendard", sans-serif',
-            }}
-          >
-            라벨 목록
-          </Typography>
-        </Box>
-        <Box sx={{ padding: '4px 0', height: 200, minHeight: 200, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <LabelListContainer>
-          {labels.map(({ id, title, color }) => (
-            <FormControlLabel
-              key={id}
-              control={
-                <Checkbox
-                  id={`${id}`}
-                  checked={checkedLabelIds.includes(id)}
-                  onChange={(e) => {
-                    onChange({ id, title, color }, e.target.checked);
-                  }}
-                  name={title}
-                  icon={<BscCheckboxUncheckedIcon />}
-                  checkedIcon={<BscCheckboxCheckedIcon />}
-                  sx={checkboxBscCmbSx}
-                />
-              }
-              label={<LabelComponent label={{ id, title, color }} size="small" />}
-              sx={{
-                margin: 0,
-                marginLeft: 0,
-                marginRight: 0,
-                padding: 0,
-                height: 50,
-                maxHeight: 50,
-                minHeight: 50,
-                alignItems: 'center',
-                '& .MuiFormControlLabel-label': {
-                  marginLeft: '8px',
-                },
-              }}
-            />
-          ))}
-          </LabelListContainer>
-        </Box>
+      <Box
+        sx={{
+          mt: 1,
+          marginBottom: '16px',
+          paddingBottom: '16px',
+        }}
+      >
+        <TableContainer sx={{ minHeight: 150, maxHeight: 150, overflowY: 'auto' }}>
+          <Table size="small" stickyHeader sx={{ minWidth: 200 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  padding="checkbox"
+                  style={{ width: '3%', whiteSpace: 'nowrap' }}
+                  css={classes.headerCell}
+                >
+                  <Checkbox
+                    indeterminate={isIndeterminate}
+                    checked={isAllChecked}
+                    onChange={handleSelectAllClick}
+                    icon={<BscCheckboxUncheckedIcon />}
+                    checkedIcon={<BscCheckboxCheckedIcon />}
+                    indeterminateIcon={<BscCheckboxIndeterminateIcon />}
+                    inputProps={{ 'aria-label': '전체 선택' }}
+                    disableRipple
+                    sx={checkboxBscCmbSx}
+                  />
+                </TableCell>
+                <TableCell css={classes.headerCell} style={{ width: '97%' }}>
+                  {'라벨'}
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {labels.map(({ id, title, color }) => (
+                <TableRow key={id} hover>
+                  <TableCell padding="checkbox" css={classes.bodyCell} style={{ width: '3%' }}>
+                    <Checkbox
+                      id={`label-checkbox-${id}`}
+                      checked={checkedLabelIds.includes(id)}
+                      onChange={(e) => onChange({ id, title, color }, e.target.checked)}
+                      name={title}
+                      disableRipple
+                      icon={<BscCheckboxUncheckedIcon />}
+                      checkedIcon={<BscCheckboxCheckedIcon />}
+                      sx={checkboxBscCmbSx}
+                    />
+                  </TableCell>
+                  <TableCell css={[classes.bodyCell]}>
+                    <LabelComponent label={{ id, title, color }} size="small" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     </Box>
   );

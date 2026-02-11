@@ -59,4 +59,28 @@ public class ComUserinfoServiceImpl implements ComUserinfoService {
         }
         return Optional.empty();
     }
+
+    @Override
+    public Optional<String> findDeptNmByUserId(@Nullable String userId) {
+        if (userId == null || userId.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            final String deptTable = "com_deptinfo";
+            final String sql = "SELECT d.DEPT_NM FROM " + tableName + " u "
+                    + "LEFT JOIN " + deptTable + " d ON u.DEPT_ID = d.DEPT_ID "
+                    + "WHERE LOWER(u." + userIdColumn + ") = LOWER(:userId)";
+            final Object result = entityManager.createNativeQuery(sql)
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+            if (result != null && !result.toString().trim().isEmpty()) {
+                return Optional.of(result.toString().trim());
+            }
+        } catch (NoResultException e) {
+            // USER_ID에 해당하는 행이 없음
+        } catch (Exception e) {
+            logger.warn("ComUserinfo: failed to lookup DEPT_NM for USER_ID={}: {}", userId, e.getMessage());
+        }
+        return Optional.empty();
+    }
 }

@@ -44,20 +44,28 @@ import Tooltip from '@mui/material/Tooltip';
 import { Interpolation, Theme } from '@emotion/react';
 import { ClientContext } from '../../../../classes/provider/client-context';
 import AsyncButton from '../../../form/async-button';
+import {
+  filterBarItem,
+  filterBarLabel,
+  bscCmbOutlinedInputSx,
+} from '../../../../theme/ui-input-styles';
+import {
+  BscCheckboxUncheckedIcon,
+  BscCheckboxCheckedIcon,
+  checkboxBscCmbSx,
+} from '../../../../theme/ui-checkbox-styles';
 
 type ShareModel = {
   selectedUsers: UserSearchResult[];
   canEdit: boolean;
-  message: string;
 };
 
-const defaultModel: ShareModel = { selectedUsers: [], canEdit: true, message: '' };
+const defaultModel: ShareModel = { selectedUsers: [], canEdit: true };
 const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement => {
   const intl = useIntl();
   const client = useContext(ClientContext);
   const queryClient = useQueryClient();
   const classes = useStyles();
-  const [showMessage, setShowMessage] = React.useState<boolean>(false);
   const [model, setModel] = React.useState<ShareModel>(defaultModel);
   const [error, setError] = React.useState<ErrorInfo>();
   const [searchInput, setSearchInput] = useState<string>('');
@@ -91,7 +99,7 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
       const permissions = model.selectedUsers.map((user) => {
         return { email: user.email, role: model.canEdit ? ('editor' as const) : ('viewer' as const) };
       });
-      return client.addMapPermissions(mapId, model.message, permissions);
+      return client.addMapPermissions(mapId, '', permissions);
     },
     {
       onSuccess: () => {
@@ -153,7 +161,8 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
   );
 
   const formatName = (perm: Permission): string => {
-    return perm.name ? `${perm.name}<${perm.email}>` : perm.email;
+    const name = perm.name || perm.email;
+    return perm.deptNm ? `${name} <${perm.deptNm}>` : name;
   };
 
   // 선택된 사용자가 있는지 확인
@@ -163,71 +172,63 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
     <div>
       <BaseDialog
         onClose={handleOnClose}
-        title={intl.formatMessage({
-          id: 'share.delete-title',
-          defaultMessage: '협업자 설정',
-        })}
-        description={intl.formatMessage({
-          id: 'share.delete-description',
-          defaultMessage:
-            'Invite people to collaborate with you in the creation of your mindmap. They will be notified by email. ',
-        })}
+        title={'협업자 설정'}
+        useBscCmbTitle={true}
         maxWidth="md"
         papercss={classes.paper}
         error={error}
       >
         <div css={classes.actionContainer as Interpolation<Theme>}>
-          <Autocomplete
-            multiple
-            id="user-search"
-            size="small"
-            options={allUsers}
-            getOptionLabel={(option) => option.fullName || option.email}
-            value={model.selectedUsers}
-            onChange={handleUserSelectionChange}
-            inputValue={searchInput}
-            onInputChange={(_event, newInputValue) => {
-              setSearchInput(newInputValue);
-            }}
-            loading={isSearching}
-            disabled={addMutation.isLoading}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="outlined"
-                placeholder={intl.formatMessage({
-                  id: 'share.search-users-placeholder',
-                  defaultMessage: 'Search users by name or email...',
-                })}
-                label={intl.formatMessage({
-                  id: 'share.select-users',
-                  defaultMessage: 'Select users',
-                })}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {isSearching ? <CircularProgress color="inherit" size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                }}
-                css={[classes.fullWidthInMobile, classes.email]}
-              />
-            )}
-            renderOption={(props, option) => (
-              <Box component="li" {...props} key={option.email}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                  <Typography variant="body2">{option.fullName || option.email}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {option.email}
-                  </Typography>
+          <Box sx={[filterBarItem, { minWidth: 0, flex: 1 }]} css={[classes.fullWidthInMobile, classes.email]}>
+            <Box component="label" sx={filterBarLabel}>
+            </Box>
+            <Autocomplete
+              multiple
+              id="user-search"
+              size="small"
+              options={allUsers}
+              getOptionLabel={(option) => option.fullName || option.email}
+              value={model.selectedUsers}
+              onChange={handleUserSelectionChange}
+              inputValue={searchInput}
+              onInputChange={(_event, newInputValue) => {
+                setSearchInput(newInputValue);
+              }}
+              loading={isSearching}
+              disabled={addMutation.isLoading}
+              disableClearable
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  placeholder={searchInput || model.selectedUsers.length ? '' : '협업자 검색'}
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {isSearching ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                  sx={[bscCmbOutlinedInputSx, { minWidth: 200, flex: 1 }]}
+                />
+              )}
+              renderOption={(props, option) => (
+                <Box component="li" {...props} key={option.email}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    <Typography variant="body2">{option.fullName || option.email}</Typography>
+                    {option.deptNm && (
+                      <Typography variant="caption" color="text.secondary">
+                        {option.deptNm}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            )}
-            css={[classes.fullWidthInMobile, classes.email]}
-            sx={{ flex: '1 1 200px', minWidth: '180px', maxWidth: '300px' }}
-          />
+              )}
+              sx={{ minWidth: 200, flex: 1 }}
+            />
+          </Box>
 
           <FormControlLabel
             control={
@@ -235,8 +236,11 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
                 checked={model.canEdit}
                 onChange={handleOnChange}
                 name="canEdit"
-                color="primary"
                 disabled={addMutation.isLoading}
+                disableRipple
+                icon={<BscCheckboxUncheckedIcon />}
+                checkedIcon={<BscCheckboxCheckedIcon />}
+                sx={checkboxBscCmbSx}
               />
             }
             label={
@@ -245,22 +249,6 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
               </Typography>
             }
             css={classes.role}
-          />
-
-          <FormControlLabel
-            value="start"
-            onChange={(event, value) => {
-              setShowMessage(value);
-            }}
-            style={{ fontSize: '5px' }}
-            control={<Checkbox color="primary" disabled={addMutation.isLoading} />}
-            label={
-              <Typography variant="subtitle2">
-                <FormattedMessage id="share.add-message" defaultMessage="Customize share message" />
-              </Typography>
-            }
-            labelPlacement="end"
-            css={classes.checkbox}
           />
 
           <AsyncButton
@@ -280,23 +268,6 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
             {intl.formatMessage({ id: 'share.add-button', defaultMessage: 'Share' })}
           </AsyncButton>
 
-          {showMessage && (
-            <TextField
-              multiline
-              rows={3}
-              maxRows={3}
-              css={classes.textArea}
-              variant="filled"
-              name="message"
-              onChange={handleOnChange}
-              value={model.message}
-              disabled={addMutation.isLoading}
-              label={intl.formatMessage({
-                id: 'share.message',
-                defaultMessage: 'Message',
-              })}
-            />
-          )}
         </div>
 
         {!isLoading && permissions && permissions.length > 0 && (

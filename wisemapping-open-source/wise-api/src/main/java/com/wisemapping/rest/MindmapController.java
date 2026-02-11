@@ -522,7 +522,16 @@ public class MindmapController {
         final Set<Collaboration> collaborations = mindMap.getCollaborations();
         final List<RestCollaboration> collabs = new ArrayList<>();
         for (Collaboration collaboration : collaborations) {
-            collabs.add(new RestCollaboration(collaboration));
+            RestCollaboration restCollab = new RestCollaboration(collaboration);
+            // com_userinfo.USER_NM으로 name 치환, com_deptinfo.DEPT_NM 치환 (Account.firstname = USER_ID)
+            if (comUserinfoService != null && collaboration.getCollaborator() instanceof Account) {
+                final String userId = ((Account) collaboration.getCollaborator()).getFirstname();
+                if (userId != null) {
+                    comUserinfoService.findUserNmByUserId(userId).ifPresent(restCollab::setName);
+                    comUserinfoService.findDeptNmByUserId(userId).ifPresent(restCollab::setDeptNm);
+                }
+            }
+            collabs.add(restCollab);
         }
 
         final RestCollaborationList result = new RestCollaborationList();
@@ -575,7 +584,13 @@ public class MindmapController {
             }
 
             // Account의 활성/정지 상태와 상관없이 모두 포함
-            results.add(new RestUserSearchResult(user, false));
+            RestUserSearchResult result = new RestUserSearchResult(user, false);
+            // com_userinfo.USER_NM으로 fullName 치환, com_deptinfo.DEPT_NM 치환 (Account.firstname = USER_ID)
+            if (comUserinfoService != null && user.getFirstname() != null) {
+                comUserinfoService.findUserNmByUserId(user.getFirstname()).ifPresent(result::setFullName);
+                comUserinfoService.findDeptNmByUserId(user.getFirstname()).ifPresent(result::setDeptNm);
+            }
+            results.add(result);
             
             // limit만큼만 반환
             if (results.size() >= safeLimit) {
