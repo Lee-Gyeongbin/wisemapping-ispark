@@ -136,9 +136,10 @@ const createAppTheme = (mode: PaletteMode): Theme => {
       },
       MuiCssBaseline: {
         styleOverrides: {
-          body: {
+          body: ({ theme }) => ({
+            backgroundColor: theme.palette.background.paper,
             transition: 'background-color 0.3s ease-in-out, color 0.3s ease-in-out',
-          },
+          }),
         },
       },
       MuiDialog: {

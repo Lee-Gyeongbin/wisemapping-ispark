@@ -36,6 +36,7 @@ import { QueryClientProvider } from 'react-query';
 import { createAppTheme } from './theme';
 import AppI18n, { Locales } from './classes/app-i18n';
 import CssBaseline from '@mui/material/CssBaseline';
+import GlobalStyles from '@mui/material/GlobalStyles';
 import { ThemeProvider as MuiThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import RegistrationSuccessPage from './components/registration-success-page';
 import ActivationPage from './components/activation-page';
@@ -365,6 +366,13 @@ const AppWithTheme = (): ReactElement => {
             <MuiThemeProvider theme={theme}>
               <ThemeProvider theme={theme}>
                 <CssBaseline />
+                <GlobalStyles
+                  styles={{
+                    '.mindplot-div-container': {
+                      backgroundColor: `${theme.palette.background.paper} !important`,
+                    },
+                  }}
+                />
                 <KeyboardContext.Provider value={{ hotkeyEnabled, setHotkeyEnabled }}>
                   <RouterProvider router={router} />
                 </KeyboardContext.Provider>

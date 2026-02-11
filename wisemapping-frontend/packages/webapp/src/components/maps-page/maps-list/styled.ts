@@ -30,15 +30,13 @@ export const useStyles = () => {
       width: '100%',
     },
     paper: {
-      marginTop: '30px',
+      marginTop: 0,
       marginBottom: theme.spacing(2),
       backgroundColor: 'transparent',
-      marginLeft: '96px',
-      marginRight: '96px',
+      marginLeft: 0,
+      marginRight: 0,
       [smMediaQuery]: {
-        marginTop: '0px',
-        marginLeft: '0px',
-        marginRight: '0px',
+        marginTop: 0,
       },
     },
     cards: {
@@ -52,7 +50,7 @@ export const useStyles = () => {
         display: 'none',
       },
       minWidth: 750,
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.background.paper,
       '& tbody tr': {
         background: 'transparent',
         borderBottom: `1px solid ${theme.palette.divider}`,
@@ -65,7 +63,7 @@ export const useStyles = () => {
       },
     },
     headerCell: {
-      background: theme.palette.background.default,
+      background: theme.palette.background.paper,
       fontWeight: 'bold',
       color: theme.palette.text.secondary,
       borderBottom: `1px solid ${theme.palette.divider}`,
@@ -104,7 +102,7 @@ export const useStyles = () => {
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '0',
-      paddingTop: '30px',
+      paddingTop: '16px',
       paddingBottom: '30px',
       marging: '0',
       boxShadow: 'none',
@@ -145,7 +143,7 @@ export const useStyles = () => {
       },
     },
     tableContainer: {
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.background.paper,
       border: '1px solid rgba(128, 128, 128, 0.2)',
       borderRadius: '12px',
       overflow: 'hidden',
@@ -301,7 +299,7 @@ export const useStyles = () => {
     loadingContainer: {
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.background.paper,
     },
     loadingDrawer: {
       width: 240,
@@ -348,8 +346,8 @@ export const useStyles = () => {
     loadingTableContainer: {
       marginTop: theme.spacing(10),
       marginBottom: theme.spacing(4),
-      marginLeft: '96px',
-      marginRight: '96px',
+      marginLeft: 0,
+      marginRight: 0,
       padding: '0 !important',
     },
     loadingSearchToolbar: {
@@ -361,7 +359,7 @@ export const useStyles = () => {
       paddingBottom: '30px',
       margin: '0',
       boxShadow: 'none',
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.background.paper,
     },
     loadingToolbarLeft: {
       flex: '1 1 0',

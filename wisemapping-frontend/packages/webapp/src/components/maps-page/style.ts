@@ -118,8 +118,9 @@ export function useStyles(_drawerOpen?: boolean) {
     },
     content: {
       flexGrow: 1,
-      padding: '24px 0px',
+      padding: '0px 0px',
       width: '100%',
+      backgroundColor: theme.palette.background.paper,
     },
   });
 }
