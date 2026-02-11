@@ -66,14 +66,17 @@ export function useStyles(_drawerOpen?: boolean) {
     },
     labelsButton: {
       marginRight: theme.spacing(1),
-      minWidth: 100,
-      maxWidth: 180,
+      minWidth: 240,
+      width: 240,
+      maxWidth: 280,
+      position: 'relative',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       [smMediaQuery]: {
-        minWidth: 'auto',
-        maxWidth: 120,
+        minWidth: 180,
+        width: 'auto',
+        maxWidth: 200,
         '& .MuiButton-endIcon': { marginLeft: 0 },
       },
     },
@@ -88,7 +91,7 @@ export function useStyles(_drawerOpen?: boolean) {
     },
     newMapButton: {
       marginRight: 10,
-      minWidth: '130px',
+      minWidth: 56, // size-md
       [smMediaQuery]: mobileAppbarButton,
     },
     importButton: {

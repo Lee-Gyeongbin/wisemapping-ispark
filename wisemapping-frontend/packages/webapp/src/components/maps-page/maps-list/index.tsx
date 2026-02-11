@@ -23,8 +23,9 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import Client, { ErrorInfo, Label, MapInfo } from '../../../classes/client';
 import ActionChooser, { ActionType } from '../action-chooser';
 import ActionDispatcher from '../action-dispatcher';
+import ThemeToggleButton from '../../common/theme-toggle-button';
+import LabelDeleteConfirm from './label-delete-confirm';
 import dayjs from 'dayjs';
-import { Filter, LabelFilter } from '..';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { trackToolbarAction } from '../../../utils/analytics';
 
@@ -36,7 +37,6 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
@@ -50,20 +50,43 @@ import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded';
-import SearchIcon from '@mui/icons-material/Search';
 
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { LabelsCell } from './labels-cell';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import AppI18n from '../../../classes/app-i18n';
 import LabelTwoTone from '@mui/icons-material/LabelTwoTone';
+import ScatterPlotTwoTone from '@mui/icons-material/ScatterPlotTwoTone';
+import PersonOutlineTwoTone from '@mui/icons-material/PersonOutlineTwoTone';
+import ShareTwoTone from '@mui/icons-material/ShareTwoTone';
+import StarTwoTone from '@mui/icons-material/StarTwoTone';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ClearIcon from '@mui/icons-material/Clear';
 import { CSSObject, Interpolation, Theme } from '@emotion/react';
 import Box from '@mui/material/Box';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import CardHeader from '@mui/material/CardHeader';
 import { ClientContext } from '../../../classes/provider/client-context';
+import {
+  uiInputSizeMd,
+  filterBar,
+  filterBarItem,
+  filterBarLabel,
+  filterBarFilters,
+} from '../../../theme/ui-input-styles';
+import {
+  uiButtonTypeLineSecondarySizeMd,
+  uiButtonIconOnlyLineSecondary,
+} from '../../../theme/ui-button-styles';
+import { uiSelectSizeMd } from '../../../theme/ui-select-styles';
 
 dayjs.extend(LocalizedFormat);
 dayjs.extend(relativeTime);
@@ -227,9 +250,18 @@ type ActionPanelState = {
   mapId: number;
 };
 
-interface MapsListProps {
-  filter: Filter;
+export type Filter = GenericFilter | LabelFilter;
+
+export interface GenericFilter {
+  type: 'public' | 'all' | 'starred' | 'shared' | 'label' | 'owned';
 }
+
+export interface LabelFilter {
+  type: 'label';
+  label: Label;
+}
+
+interface MapsListProps {}
 
 const isLabelFilter = (filter: Filter): filter is LabelFilter => filter.type === 'label';
 
@@ -289,10 +321,12 @@ export const getChangeLabelMutationFunction =
     return Promise.resolve();
   };
 
-export const MapsList = (props: MapsListProps): React.ReactElement => {
+export const MapsList = (_props: MapsListProps): React.ReactElement => {
   const classes = useStyles();
   const [order, setOrder] = React.useState<Order>('desc');
   const [filter, setFilter] = React.useState<Filter>({ type: 'all' });
+  const [labelToDelete, setLabelToDelete] = React.useState<number | null>(null);
+  const [labelsMenuAnchor, setLabelsMenuAnchor] = React.useState<null | HTMLElement>(null);
 
   const [orderBy, setOrderBy] = React.useState<keyof MapInfo>('lastModificationTime');
   const [selected, setSelected] = React.useState<number[]>([]);
@@ -304,32 +338,36 @@ export const MapsList = (props: MapsListProps): React.ReactElement => {
   const intl = useIntl();
   const queryClient = useQueryClient();
 
+  const { data: labelsData = [] } = useQuery<unknown, ErrorInfo, Label[]>('labels', () =>
+    client.fetchLabels(),
+  );
+  const labels: Label[] = labelsData;
+  const deleteLabelMutation = useMutation((id: number) => client.deleteLabel(id), {
+    onSuccess: () => {
+      queryClient.invalidateQueries('labels');
+      queryClient.invalidateQueries('maps');
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+  const handleMenuClick = (newFilter: Filter) => {
+    queryClient.invalidateQueries('maps');
+    setFilter(newFilter);
+    setLabelsMenuAnchor(null);
+  };
+  const handleLabelDelete = (id: number) => {
+    deleteLabelMutation.mutate(id);
+  };
+  const mainFilterValue =
+    filter.type === 'label' ? null : (filter.type as 'all' | 'owned' | 'starred' | 'shared');
+  const labelsMenuOpen = Boolean(labelsMenuAnchor);
+  const labelToDeleteObj = labels.find((l) => l.id === labelToDelete);
+
   const userLocale = AppI18n.getUserLocale();
   useEffect(() => {
     dayjs.locale(userLocale.code);
   }, [userLocale.code]);
-
-  const filterLabelId = isLabelFilter(props.filter) ? props.filter.label.id : undefined;
-
-  useEffect(() => {
-    setSelected([]);
-    setPage(0);
-    setFilter((prevFilter) => {
-      const nextFilter = props.filter;
-
-      if (prevFilter.type === nextFilter.type) {
-        if (isLabelFilter(nextFilter) && isLabelFilter(prevFilter)) {
-          if (prevFilter.label.id === nextFilter.label.id) {
-            return prevFilter;
-          }
-        } else {
-          return prevFilter;
-        }
-      }
-
-      return nextFilter;
-    });
-  }, [props.filter.type, filterLabelId]);
 
   const { data: mapsData = [] } = useQuery<unknown, ErrorInfo, MapInfo[]>(
     'maps',
@@ -515,8 +553,150 @@ export const MapsList = (props: MapsListProps): React.ReactElement => {
       )}
 
       <Paper css={classes.paper} elevation={0}>
-        <Toolbar css={classes.toolbar} variant="dense" sx={{ backgroundColor: 'transparent' }}>
-          <div css={classes.toolbarActions}>
+        <Box sx={filterBar} css={classes.filterBarWrapper}>
+          <Box sx={filterBarFilters} css={classes.searchContainer as Interpolation<Theme>}>
+            <ToggleButtonGroup
+              value={mainFilterValue}
+              exclusive
+              onChange={(_e, value: 'all' | 'owned' | 'starred' | 'shared' | null) => {
+                if (value != null) handleMenuClick({ type: value });
+              }}
+              aria-label="map filter"
+              sx={classes.filterButtonGroup}
+              size="small"
+            >
+              <ToggleButton value="all" aria-label="All maps">
+                <Tooltip title={intl.formatMessage({ id: 'maps.nav-all', defaultMessage: 'All' })}>
+                  <ScatterPlotTwoTone color="secondary" />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="owned" aria-label="My maps">
+                <Tooltip
+                  title={intl.formatMessage({ id: 'maps.nav-onwned', defaultMessage: 'My Maps' })}
+                >
+                  <PersonOutlineTwoTone color="secondary" />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="starred" aria-label="Starred">
+                <Tooltip
+                  title={intl.formatMessage({ id: 'maps.nav-starred', defaultMessage: 'Starred' })}
+                >
+                  <StarTwoTone color="secondary" />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="shared" aria-label="Shared with me">
+                <Tooltip
+                  title={intl.formatMessage({
+                    id: 'maps.nav-shared',
+                    defaultMessage: 'Shared with me',
+                  })}
+                >
+                  <ShareTwoTone color="secondary" />
+                </Tooltip>
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            <Button
+              id="labels-button"
+              variant="text"
+              disableElevation
+              onClick={(e) => setLabelsMenuAnchor(e.currentTarget)}
+              endIcon={<ExpandMoreIcon sx={{ color: '#464c53', ml: 0 }} />}
+              startIcon={<LabelTwoTone sx={{ color: 'inherit', mr: 0.5 }} />}
+              css={classes.labelsButton}
+              sx={[
+                uiSelectSizeMd,
+                {
+                  '& .MuiButton-endIcon': {
+                    position: 'absolute',
+                    right: 10,
+                    marginLeft: 0,
+                  },
+                },
+              ]}
+              aria-controls={labelsMenuOpen ? 'labels-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={labelsMenuOpen ? 'true' : undefined}
+            >
+              {filter.type === 'label'
+                ? (filter as LabelFilter).label.title
+                : intl.formatMessage({ id: 'maps.nav-labels', defaultMessage: 'Labels' })}
+            </Button>
+            <Menu
+              id="labels-menu"
+              anchorEl={labelsMenuAnchor}
+              open={labelsMenuOpen}
+              onClose={() => setLabelsMenuAnchor(null)}
+              MenuListProps={{ 'aria-labelledby': 'labels-button' }}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              slotProps={{ paper: { sx: { maxHeight: 320, minWidth: 240 } } }}
+            >
+              {labels.length === 0 ? (
+                <MenuItem disabled>
+                  <ListItemText
+                    primary={intl.formatMessage({
+                      id: 'maps.no-labels',
+                      defaultMessage: 'No labels',
+                    })}
+                  />
+                </MenuItem>
+              ) : (
+                labels.map((l) => (
+                  <MenuItem
+                    key={l.id}
+                    selected={filter.type === 'label' && (filter as LabelFilter).label.id === l.id}
+                    onClick={() => handleMenuClick({ type: 'label', label: l })}
+                    sx={{ pr: 6 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <LabelTwoTone style={{ color: l.color ? l.color : 'inherit' }} />
+                    </ListItemIcon>
+                    <ListItemText primary={l.title} />
+                    <IconButton
+                      size="small"
+                      aria-label={intl.formatMessage({
+                        id: 'common.delete',
+                        defaultMessage: 'Delete',
+                      })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLabelToDelete(l.id);
+                        setLabelsMenuAnchor(null);
+                      }}
+                      sx={[
+                        uiButtonIconOnlyLineSecondary,
+                        {
+                          position: 'absolute',
+                          right: 8,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                        },
+                      ]}
+                    >
+                      <ClearIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </MenuItem>
+                ))
+              )}
+            </Menu>
+
+            <Box className="search-item" sx={[filterBarItem, { minWidth: 0 }]}>
+              <Box component="label" sx={filterBarLabel}>
+                <FormattedMessage id="maps.search-label" defaultMessage="Mind map name" />
+              </Box>
+              <InputBase
+                placeholder={intl.formatMessage({
+                  id: 'maps.search-action',
+                  defaultMessage: 'Search ...',
+                })}
+                sx={[uiInputSizeMd, { minWidth: 200, flex: 1 }]}
+                inputProps={{ 'aria-label': 'search' }}
+                onChange={handleOnSearchChange}
+              />
+            </Box>
+
+            <div css={classes.toolbarActions}>
             {selected.length > 0 && (
               <Tooltip
                 arrow={true}
@@ -566,26 +746,30 @@ export const MapsList = (props: MapsListProps): React.ReactElement => {
               </Tooltip>
             )}
           </div>
+          </Box>
 
-          <div css={classes.searchContainer as Interpolation<Theme>}>
-            <div css={classes.search as Interpolation<Theme>}>
-              <div css={classes.searchIcon as Interpolation<Theme>}>
-                <SearchIcon />
-              </div>
-              <InputBase
-                placeholder={intl.formatMessage({
-                  id: 'maps.search-action',
-                  defaultMessage: 'Search ...',
-                })}
-                css={[classes.searchInputRoot, classes.searchInputInput]}
-                inputProps={{ 'aria-label': 'search' }}
-                onChange={handleOnSearchChange}
-                // startAdornment={<SearchIcon />}
-              />
-            </div>
-          </div>
-
-          <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Tooltip
+              arrow={true}
+              title={intl.formatMessage({
+                id: 'maps.create-tooltip',
+                defaultMessage: 'Create a new mindmap',
+              })}
+            >
+              <Button
+                data-testid="create"
+                variant="outlined"
+                type="button"
+                disableElevation={true}
+                sx={uiButtonTypeLineSecondarySizeMd}
+                onClick={() => setActiveDialog({ actionType: 'create', mapsId: [] })}
+              >
+                <span className="message">
+                  <FormattedMessage id="action.new" defaultMessage="???" />
+                </span>
+              </Button>
+            </Tooltip>
+            <ThemeToggleButton />
             {/* Pagination on desktop */}
             {filteredMaps.length > rowsPerPage && (
               <Box css={classes.paginationDesktop as Interpolation<Theme>}>
@@ -601,8 +785,9 @@ export const MapsList = (props: MapsListProps): React.ReactElement => {
                 />
               </Box>
             )}
-          </div>
-        </Toolbar>
+          </Box>
+        </Box>
+
 
         <TableContainer css={classes.tableContainer as Interpolation<Theme>}>
           <Box css={classes.cards}>
@@ -919,14 +1104,23 @@ export const MapsList = (props: MapsListProps): React.ReactElement => {
         action={activeDialog?.actionType}
         onClose={(success) => {
           setActiveDialog(undefined);
-
-          // If it was a success action, reset the selection list ...
           if (success) {
             setSelected([]);
           }
         }}
         mapsId={activeDialog ? activeDialog.mapsId : []}
+        fromEditor
       />
+      {labelToDeleteObj && labelToDelete != null && (
+        <LabelDeleteConfirm
+          onClose={() => setLabelToDelete(null)}
+          onConfirm={() => {
+            handleLabelDelete(labelToDelete);
+            setLabelToDelete(null);
+          }}
+          label={labelToDeleteObj}
+        />
+      )}
     </div>
   );
 };

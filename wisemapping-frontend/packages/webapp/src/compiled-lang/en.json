@@ -194,7 +194,7 @@
   "action.new": [
     {
       "type": 0,
-      "value": "New map"
+      "value": "신규"
     }
   ],
   "action.open": [
@@ -1388,7 +1388,13 @@
   "maps.search-action": [
     {
       "type": 0,
-      "value": "Search ..."
+      "value": "마인드맵명 입력"
+    }
+  ],
+  "maps.search-label": [
+    {
+      "type": 0,
+      "value": "마인드맵명"
     }
   ],
   "maps.tooltip-open": [

@@ -60,7 +60,7 @@
     "defaultMessage": "Add Label"
   },
   "action.new": {
-    "defaultMessage": "New map"
+    "defaultMessage": "신규"
   },
   "action.open": {
     "defaultMessage": "Open"
@@ -432,7 +432,10 @@
     "defaultMessage": "Revert"
   },
   "maps.search-action": {
-    "defaultMessage": "Search ..."
+    "defaultMessage": "마인드맵명 입력"
+  },
+  "maps.search-label": {
+    "defaultMessage": "마인드맵명"
   },
   "maps.tooltip-open": {
     "defaultMessage": "Open for edition"

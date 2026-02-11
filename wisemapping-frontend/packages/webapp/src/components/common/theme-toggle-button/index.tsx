@@ -19,6 +19,7 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import { uiButtonTypeInfoSizeMd } from '../../../theme/ui-button-styles';
 import Brightness4 from '@mui/icons-material/Brightness4';
 import Brightness7 from '@mui/icons-material/Brightness7';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -39,10 +40,8 @@ const ThemeToggleButton: React.FC = () => {
       })}
     >
       <Button
-        size="small"
-        variant="outlined"
+        variant="contained"
         disableElevation={true}
-        color="primary"
         onClick={toggleMode}
         startIcon={
           !isDark ? (
@@ -51,6 +50,7 @@ const ThemeToggleButton: React.FC = () => {
             <Brightness4 style={{ color: 'inherit' }} />
           )
         }
+        sx={uiButtonTypeInfoSizeMd}
       >
         <span className="message">
           {isDark

@@ -116,6 +116,34 @@ export const useStyles = () => {
         paddingRight: '8px',
       },
     },
+    filterBarWrapper: {
+      width: '100%',
+      [smMediaQuery]: {
+        padding: '8px',
+      },
+    },
+    filterButtonGroup: {
+      marginRight: theme.spacing(1),
+      '& .MuiToggleButtonGroup-grouped': {
+        padding: theme.spacing(0.75, 1),
+      },
+    },
+    labelsButton: {
+      marginRight: theme.spacing(1),
+      minWidth: 240,
+      width: 240,
+      maxWidth: 280,
+      position: 'relative',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      [smMediaQuery]: {
+        minWidth: 180,
+        width: 'auto',
+        maxWidth: 200,
+        '& .MuiButton-endIcon': { marginLeft: 0 },
+      },
+    },
     tableContainer: {
       backgroundColor: theme.palette.background.default,
       border: '1px solid rgba(128, 128, 128, 0.2)',
@@ -145,12 +173,10 @@ export const useStyles = () => {
       },
     },
     searchContainer: {
-      flex: '1 1 0',
-      display: 'flex',
-      justifyContent: 'center',
-      minWidth: 0,
       [smMediaQuery]: {
-        display: 'none',
+        '& .search-item': {
+          display: 'none',
+        },
       },
     },
     search: {
