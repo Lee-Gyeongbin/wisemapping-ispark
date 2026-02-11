@@ -22,6 +22,7 @@ import com.wisemapping.exceptions.*;
 import com.wisemapping.model.*;
 import com.wisemapping.rest.model.*;
 import com.wisemapping.security.Utils;
+import com.wisemapping.service.ComUserinfoService;
 import com.wisemapping.service.*;
 import com.wisemapping.service.SpamDetectionService;
 import com.wisemapping.service.spam.SpamContentExtractor;
@@ -78,6 +79,8 @@ public class MindmapController {
     @Autowired
     private SpamContentExtractor spamContentExtractor;
 
+    @Autowired(required = false)
+    private ComUserinfoService comUserinfoService;
 
     @Autowired
     private MetricsService metricsService;
@@ -138,6 +141,12 @@ public class MindmapController {
             metadata.setXml(xmlStr);
         }
 
+        // com_userinfo.USER_NM으로 createdBy 치환 (Account.firstname = USER_ID)
+        if (comUserinfoService != null && mindmap.getCreator() != null && mindmap.getCreator().getFirstname() != null) {
+            comUserinfoService.findUserNmByUserId(mindmap.getCreator().getFirstname())
+                    .ifPresent(metadata::setCreatedBy);
+        }
+
         return metadata;
     }
 
@@ -184,6 +193,16 @@ public class MindmapController {
 
         stepStart = System.currentTimeMillis();
         final RestMindmapList response = new RestMindmapList(mindmaps, user, collaborationsByMap);
+        // com_userinfo.USER_NM으로 creator 표시명 치환 (Account.firstname = USER_ID)
+        if (comUserinfoService != null) {
+            for (RestMindmapInfo info : response.getMindmapsInfo()) {
+                final Account creator = info.getDelegated().getCreator();
+                if (creator != null && creator.getFirstname() != null) {
+                    comUserinfoService.findUserNmByUserId(creator.getFirstname())
+                            .ifPresent(info::setCreator);
+                }
+            }
+        }
         if (logger.isTraceEnabled()) {
             logger.trace("retrieveList: RestMindmapList creation completed in {}ms",
                     System.currentTimeMillis() - stepStart);

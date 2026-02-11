@@ -57,8 +57,7 @@ export const filterBarItem = {
 
 /** filter-bar__label - 필터 라벨 (한글 지원 시스템 폰트 사용) */
 export const filterBarLabel = {
-  fontFamily:
-    '"Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Pretendard", sans-serif',
+  fontFamily: '"Pretendard", sans-serif',
   fontSize: 16,
   fontWeight: 700,
   lineHeight: 1.4,

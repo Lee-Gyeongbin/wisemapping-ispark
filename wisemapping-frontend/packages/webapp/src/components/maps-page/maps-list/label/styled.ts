@@ -25,7 +25,7 @@ export const LabelContainer = styled.div`
   padding: 4px;
   align-items: center;
   font-size: 0.96rem;
-  font-family: 'Figtree', 'Noto Sans JP', 'Helvetica', 'system-ui', 'Arial', 'sans-serif';
+  font-family: "Pretendard", sans-serif;
 
   .delete-button {
     opacity: 0;
@@ -40,5 +40,5 @@ export const LabelContainer = styled.div`
 export const LabelText = styled.span`
   margin-left: 4px;
   margin-right: 0px;
-  font-family: 'Figtree', 'Noto Sans JP', 'Helvetica', 'system-ui', 'Arial', 'sans-serif';
+  font-family: "Pretendard", sans-serif;
 `;

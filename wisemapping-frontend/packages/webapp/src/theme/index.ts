@@ -138,6 +138,7 @@ const createAppTheme = (mode: PaletteMode): Theme => {
         styleOverrides: {
           body: ({ theme }) => ({
             backgroundColor: theme.palette.background.paper,
+            fontFamily: '"Pretendard", sans-serif',
             transition: 'background-color 0.3s ease-in-out, color 0.3s ease-in-out',
           }),
         },
@@ -176,9 +177,7 @@ const createAppTheme = (mode: PaletteMode): Theme => {
       },
     },
     typography: {
-      fontFamily: ['Figtree', 'Noto Sans JP', 'Helvetica', 'system-ui', 'Arial', 'sans-serif'].join(
-        ',',
-      ),
+      fontFamily: '"Pretendard", sans-serif',
       h4: {
         color: isLight ? '#ffa800' : '#cc8500',
         fontWeight: 600,

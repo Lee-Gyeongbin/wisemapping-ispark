@@ -368,6 +368,9 @@ const AppWithTheme = (): ReactElement => {
                 <CssBaseline />
                 <GlobalStyles
                   styles={{
+                    'html, body, #root, .mindplot-div-container': {
+                      fontFamily: '"Pretendard", sans-serif !important',
+                    },
                     '.mindplot-div-container': {
                       backgroundColor: `${theme.palette.background.paper} !important`,
                     },

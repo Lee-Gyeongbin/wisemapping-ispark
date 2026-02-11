@@ -153,8 +153,8 @@ public class RestMindmapInfo {
         return creator != null ? creator.getFullName() : null;
     }
 
-    public void setCreator(String email) {
-
+    public void setCreator(String displayName) {
+        this.cachedCreatorName = displayName;
     }
 
     public void setCreator() {

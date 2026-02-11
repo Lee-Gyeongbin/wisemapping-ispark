@@ -50,34 +50,83 @@ export const useStyles = () => {
         display: 'none',
       },
       minWidth: 750,
-      backgroundColor: theme.palette.background.paper,
-      '& tbody tr': {
-        background: 'transparent',
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        '&:hover': {
-          backgroundColor:
-            theme.palette.mode === 'light'
-              ? alpha(theme.palette.action.hover, 0.04)
-              : alpha(theme.palette.action.hover, 0.08),
+      width: '100%',
+      borderCollapse: 'collapse',
+      fontFamily: '"Pretendard", sans-serif',
+      '& thead': {
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: 3,
+          borderTop: '1px solid #586166',
+          backgroundColor: '#e6e8ea',
+          zIndex: -1,
         },
+      },
+      '& tbody tr': {
+        backgroundColor: '#fff',
+        transition: 'background-color 0.2s ease',
+        '&:hover': {
+          backgroundColor: '#f1f3f5',
+        },
+        '&.Mui-selected': {
+          backgroundColor: '#ecedf8',
+        },
+        '&:last-child td': {
+          borderBottom: 'none',
+        },
+      },
+      '& th, & td': {
+        height: 34,
+        padding: '4px 8px',
+        verticalAlign: 'middle',
+        border: '1px solid #cdd1d5',
+        fontSize: 14,
+        fontWeight: 500,
+        lineHeight: 1.2,
+        letterSpacing: '-0.5px',
       },
     },
     headerCell: {
-      background: theme.palette.background.paper,
-      fontWeight: 'bold',
-      color: theme.palette.text.secondary,
-      borderBottom: `1px solid ${theme.palette.divider}`,
-      borderTop: 0,
-      borderLeft: 0,
-      borderRight: 0,
-      fontSize: '0.96rem',
-      fontFamily: theme.typography.fontFamily,
-      padding: '8px 12px',
+      backgroundColor: '#e6e8ea',
+      color: '#1e2124',
+      fontWeight: 700,
+      fontSize: 14,
+      textAlign: 'center',
+      fontFamily: '"Pretendard", sans-serif',
+      border: '1px solid #cdd1d5',
+      padding: '4px 8px',
+      height: 34,
+      '& .MuiTableSortLabel-root': {
+        fontWeight: 700,
+      },
+    },
+    headerCellLeft: {
+      textAlign: 'left',
     },
     bodyCell: {
-      fontSize: '0.96rem',
-      fontFamily: theme.typography.fontFamily,
-      padding: '8px 12px',
+      fontSize: 14,
+      fontWeight: 500,
+      color: '#464c53',
+      textAlign: 'center',
+      fontFamily: '"Pretendard", sans-serif',
+      padding: '4px 8px',
+      height: 34,
+      border: '1px solid #cdd1d5',
+      '& a': {
+        color: '#464c53',
+        textDecoration: 'underline',
+        letterSpacing: '-0.5px',
+        '&:hover': {
+          color: '#5d5dc4',
+        },
+      },
     },
     labelsCell: {
       maxWidth: '300px',
@@ -85,6 +134,9 @@ export const useStyles = () => {
       textAlign: 'right',
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
+    },
+    bodyCellLeft: {
+      textAlign: 'left',
     },
     visuallyHidden: {
       border: 0,
@@ -143,13 +195,13 @@ export const useStyles = () => {
       },
     },
     tableContainer: {
+      width: '100%',
       backgroundColor: theme.palette.background.paper,
-      border: '1px solid rgba(128, 128, 128, 0.2)',
-      borderRadius: '12px',
-      overflow: 'hidden',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      borderBottom: '1px solid #cdd1d5',
       [smMediaQuery]: {
-        border: 'none',
-        borderRadius: '0',
+        borderBottom: 'none',
       },
     },
     toolbarActions: {
@@ -270,7 +322,7 @@ export const useStyles = () => {
     cardTitle: {
       maxWidth: '70vw',
       fontSize: '0.875rem',
-      fontFamily: theme.typography.fontFamily,
+      fontFamily: '"Pretendard", sans-serif',
     },
     // Skeleton styles
     skeletonBase: {

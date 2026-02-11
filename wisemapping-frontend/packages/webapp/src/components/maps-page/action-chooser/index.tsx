@@ -90,7 +90,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
         <ListItemIcon>
           <DescriptionOutlinedIcon />
         </ListItemIcon>
-        <FormattedMessage id="action.open" defaultMessage="Open" />
+        열기
       </MenuItem>
 
       <Divider />
@@ -99,7 +99,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
         <ListItemIcon>
           <FileCopyOutlinedIcon />
         </ListItemIcon>
-        <FormattedMessage id="action.duplicate" defaultMessage="Duplicate" />
+        맵 복사하기
       </MenuItem>
 
       {role == 'owner' && (
@@ -107,7 +107,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
           <ListItemIcon>
             <EditOutlinedIcon />
           </ListItemIcon>
-          <FormattedMessage id="action.rename" defaultMessage="Rename" />
+          이름 변경
         </MenuItem>
       )}
 
@@ -115,14 +115,14 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
         <ListItemIcon>
           <LabelOutlined />
         </ListItemIcon>
-        <FormattedMessage id="action.label" defaultMessage="Add Label" />
+        라벨 추가
       </MenuItem>
 
       <MenuItem onClick={handleOnClose('delete')}>
         <ListItemIcon>
           <DeleteOutlinedIcon />
         </ListItemIcon>
-        <FormattedMessage id="action.delete" defaultMessage="Delete" />
+        삭제
       </MenuItem>
       <Divider />
 
@@ -131,7 +131,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
           <ListItemIcon>
             <ShareOutlinedIcon />
           </ListItemIcon>
-          <FormattedMessage id="action.share" defaultMessage="Share" />
+          공유하기
         </MenuItem>
       )}
       <Divider />
@@ -140,7 +140,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
         <ListItemIcon>
           <InfoOutlinedIcon />
         </ListItemIcon>
-        <FormattedMessage id="action.info" defaultMessage="Info" />
+        맵 정보
       </MenuItem>
 
       {role != 'viewer' && (
@@ -148,7 +148,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
           <ListItemIcon>
             <HistoryOutlined />
           </ListItemIcon>
-          <FormattedMessage id="action.history" defaultMessage="History" />
+          수정내역
         </MenuItem>
       )}
     </Menu>

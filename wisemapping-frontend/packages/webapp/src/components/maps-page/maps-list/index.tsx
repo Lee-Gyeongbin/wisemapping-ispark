@@ -52,6 +52,7 @@ import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { LabelsCell } from './labels-cell';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/ko';
 import AppI18n from '../../../classes/app-i18n';
 import LabelTwoTone from '@mui/icons-material/LabelTwoTone';
 import ScatterPlotTwoTone from '@mui/icons-material/ScatterPlotTwoTone';
@@ -92,6 +93,12 @@ import {
   uiPageHeaderTitle,
   uiPageHeaderStarIcon,
 } from '../../../theme/ui-page-header-styles';
+import {
+  BscCheckboxUncheckedIcon,
+  BscCheckboxCheckedIcon,
+  BscCheckboxIndeterminateIcon,
+  checkboxBscCmbSx,
+} from '../../../theme/ui-checkbox-styles';
 
 dayjs.extend(LocalizedFormat);
 dayjs.extend(relativeTime);
@@ -162,23 +169,26 @@ function EnhancedTableHead(props: EnhancedTableProps) {
       {
         id: 'title',
         numeric: false,
-        label: intl.formatMessage({ id: 'map.name', defaultMessage: 'Name' }),
+        label: '마인드맵 명',
+        style: { width: '35%', whiteSpace: 'nowrap' },
       },
       {
         id: 'labels',
         numeric: false,
+        label: '라벨',
+        style: { width: '15%', whiteSpace: 'nowrap' },
       },
       {
         id: 'createdBy',
         numeric: false,
-        label: intl.formatMessage({ id: 'map.creator', defaultMessage: 'Creator' }),
-        style: { width: '150px', whiteSpace: 'nowrap' },
+        label: '생성자',
+        style: { width: '10%', whiteSpace: 'nowrap' },
       },
       {
         id: 'lastModificationTime',
         numeric: true,
-        label: intl.formatMessage({ id: 'map.last-update', defaultMessage: 'Last Update' }),
-        style: { width: '70px', whiteSpace: 'nowrap' },
+        label: '최종 수정',
+        style: { width: '15%', whiteSpace: 'nowrap' },
       },
     ],
     [intl],
@@ -190,31 +200,18 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         <TableCell
           padding="checkbox"
           key="select"
-          style={{ width: '20px' }}
+          style={{ width: '3%', whiteSpace: 'nowrap' }}
           css={classes.headerCell}
         >
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
-            size="small"
+            icon={<BscCheckboxUncheckedIcon />}
+            checkedIcon={<BscCheckboxCheckedIcon />}
+            indeterminateIcon={<BscCheckboxIndeterminateIcon />}
             inputProps={{ 'aria-label': 'select all desserts' }}
-            sx={(theme) => ({
-              color:
-                theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.26)',
-              '&.Mui-checked': {
-                color:
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.7)'
-                    : 'rgba(0, 0, 0, 0.54)',
-              },
-              '&.MuiCheckbox-indeterminate': {
-                color:
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.7)'
-                    : 'rgba(0, 0, 0, 0.54)',
-              },
-            })}
+            sx={checkboxBscCmbSx}
           />
         </TableCell>
 
@@ -243,8 +240,16 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           );
         })}
 
-        <TableCell padding="checkbox" key="starred" css={classes.headerCell}></TableCell>
-        <TableCell padding="checkbox" key="action" css={classes.headerCell}></TableCell>
+        <TableCell padding="checkbox" key="starred" css={classes.headerCell} style={{ width: '5%', whiteSpace: 'nowrap' }}>
+          <TableSortLabel active={false} hideSortIcon>
+            즐겨찾기
+          </TableSortLabel>
+        </TableCell>
+        <TableCell padding="checkbox" key="action" css={classes.headerCell} style={{ width: '5%', whiteSpace: 'nowrap' }}>
+        <TableSortLabel active={false} hideSortIcon>
+            더보기
+          </TableSortLabel>
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -371,7 +376,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
 
   const userLocale = AppI18n.getUserLocale();
   useEffect(() => {
-    dayjs.locale(userLocale.code);
+    dayjs.locale('ko');
   }, [userLocale.code]);
 
   const { data: mapsData = [] } = useQuery<unknown, ErrorInfo, MapInfo[]>(
@@ -876,7 +881,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             sx={{
                               fontSize: '0.96rem',
                               fontFamily:
-                                'Figtree, "Noto Sans JP", Helvetica, "system-ui", Arial, sans-serif',
+                                '"Pretendard", sans-serif',
                             }}
                           >
                             {row.title}
@@ -888,7 +893,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             sx={{
                               fontSize: '0.75rem',
                               fontFamily:
-                                'Figtree, "Noto Sans JP", Helvetica, "system-ui", Arial, sans-serif',
+                                '"Pretendard", sans-serif',
                             }}
                           >
                             {intl.formatMessage({
@@ -957,35 +962,22 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                       key={row.id}
                       selected={isItemSelected}
                     >
-                      <TableCell padding="checkbox" css={classes.bodyCell}>
+                      <TableCell padding="checkbox" css={classes.bodyCell} style={{ width: '3%' }}>
                         <Checkbox
                           checked={isItemSelected}
+                          icon={<BscCheckboxUncheckedIcon />}
+                          checkedIcon={<BscCheckboxCheckedIcon />}
                           inputProps={{
                             'aria-labelledby': String(labelId),
                           }}
-                          size="small"
-                          sx={(theme) => ({
-                            color:
-                              theme.palette.mode === 'dark'
-                                ? 'rgba(255, 255, 255, 0.3)'
-                                : 'rgba(0, 0, 0, 0.26)',
-                            '&.Mui-checked': {
-                              color:
-                                theme.palette.mode === 'dark'
-                                  ? 'rgba(255, 255, 255, 0.7)'
-                                  : 'rgba(0, 0, 0, 0.54)',
-                            },
-                          })}
+                          sx={checkboxBscCmbSx}
                         />
                       </TableCell>
 
-                      <TableCell css={classes.bodyCell}>
+                      <TableCell css={[classes.bodyCell, classes.bodyCellLeft as CSSObject]}>
                         <Tooltip
                           arrow={true}
-                          title={intl.formatMessage({
-                            id: 'maps.tooltip-open',
-                            defaultMessage: 'Open for edition',
-                          })}
+                          title={`${row.title} 맵 수정하기`}
                           placement="bottom-start"
                         >
                           <Link
@@ -996,7 +988,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             sx={{
                               fontSize: '0.96rem',
                               fontFamily:
-                                'Figtree, "Noto Sans JP", Helvetica, "system-ui", Arial, sans-serif',
+                                '"Pretendard", sans-serif',
                             }}
                           >
                             {row.title}
@@ -1019,7 +1011,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                           sx={{
                             fontSize: '0.96rem',
                             fontFamily:
-                              'Figtree, "Noto Sans JP", Helvetica, "system-ui", Arial, sans-serif',
+                              '"Pretendard", sans-serif',
                           }}
                         >
                           {row.createdBy}
@@ -1029,16 +1021,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                       <TableCell css={classes.bodyCell}>
                         <Tooltip
                           arrow={true}
-                          title={intl.formatMessage(
-                            {
-                              id: 'maps.modified-by-desc',
-                              defaultMessage: 'Modified by {by} on {on}',
-                            },
-                            {
-                              by: row.lastModificationBy,
-                              on: dayjs(row.lastModificationTime).format('lll'),
-                            },
-                          )}
+                          title={`${row.lastModificationBy}에 의해 ${dayjs(row.lastModificationTime).format('lll')}에 수정됨`}
                           placement="bottom-start"
                         >
                           <Typography
@@ -1046,7 +1029,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             sx={{
                               fontSize: '0.96rem',
                               fontFamily:
-                                'Figtree, "Noto Sans JP", Helvetica, "system-ui", Arial, sans-serif',
+                                '"Pretendard", sans-serif',
                             }}
                           >
                             {dayjs(row.lastModificationTime).fromNow()}
@@ -1057,10 +1040,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                       <TableCell padding="checkbox" css={classes.bodyCell}>
                         <Tooltip
                           arrow={true}
-                          title={intl.formatMessage({
-                            id: 'maps.tooltip-starred',
-                            defaultMessage: 'Starred',
-                          })}
+                          title={`${row.starred ? '즐겨찾기 해제' : '즐겨찾기 설정'}`}
                         >
                           <IconButton size="small" onClick={(e) => handleStarred(e, row.id)}>
                             <StarRateRoundedIcon
@@ -1076,10 +1056,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                       <TableCell css={classes.bodyCell}>
                         <Tooltip
                           arrow={true}
-                          title={intl.formatMessage({
-                            id: 'map.more-actions',
-                            defaultMessage: 'More Actions',
-                          })}
+                          title='더 많은 옵션 보기'
                         >
                           <IconButton
                             aria-label={intl.formatMessage({

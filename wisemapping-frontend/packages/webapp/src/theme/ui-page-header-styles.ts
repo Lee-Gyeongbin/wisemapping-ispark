@@ -35,8 +35,7 @@ export const uiPageHeaderTop = {
 };
 
 export const uiPageHeaderTitle = {
-  fontFamily:
-    '"Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Pretendard", sans-serif',
+  fontFamily: '"Pretendard", sans-serif',
   fontSize: 18,
   fontWeight: 'bold',
   lineHeight: 1.5,
