@@ -879,7 +879,8 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             noWrap
                             color="text.secondary"
                             sx={{
-                              fontSize: '0.96rem',
+                              fontSize: '14px',
+                              fontWeight: '500',
                               fontFamily:
                                 '"Pretendard", sans-serif',
                             }}
@@ -977,7 +978,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                       <TableCell css={[classes.bodyCell, classes.bodyCellLeft as CSSObject]}>
                         <Tooltip
                           arrow={true}
-                          title={`${row.title} 맵 수정하기`}
+                          title={`${row.title} 마인드맵 수정하기`}
                           placement="bottom-start"
                         >
                           <Link
@@ -986,7 +987,8 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             underline="always"
                             onClick={(e) => e.stopPropagation()}
                             sx={{
-                              fontSize: '0.96rem',
+                              fontSize: '14px',
+                              fontWeight: '500',
                               fontFamily:
                                 '"Pretendard", sans-serif',
                             }}
@@ -1009,7 +1011,8 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                         <Typography
                           variant="body2"
                           sx={{
-                            fontSize: '0.96rem',
+                            fontSize: '14px',
+                            fontWeight: '500',
                             fontFamily:
                               '"Pretendard", sans-serif',
                           }}
@@ -1021,13 +1024,14 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                       <TableCell css={classes.bodyCell}>
                         <Tooltip
                           arrow={true}
-                          title={`${row.lastModificationBy}에 의해 ${dayjs(row.lastModificationTime).format('lll')}에 수정됨`}
+                          title={`'${row.lastModificationBy}'님에 의해 ${dayjs(row.lastModificationTime).format('lll')}에 수정됨`}
                           placement="bottom-start"
                         >
                           <Typography
                             variant="body2"
                             sx={{
-                              fontSize: '0.96rem',
+                              fontSize: '14px',
+                              fontWeight: '500',
                               fontFamily:
                                 '"Pretendard", sans-serif',
                             }}

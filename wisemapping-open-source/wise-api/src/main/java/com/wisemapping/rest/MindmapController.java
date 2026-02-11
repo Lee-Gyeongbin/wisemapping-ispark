@@ -141,10 +141,16 @@ public class MindmapController {
             metadata.setXml(xmlStr);
         }
 
-        // com_userinfo.USER_NM으로 createdBy 치환 (Account.firstname = USER_ID)
-        if (comUserinfoService != null && mindmap.getCreator() != null && mindmap.getCreator().getFirstname() != null) {
-            comUserinfoService.findUserNmByUserId(mindmap.getCreator().getFirstname())
-                    .ifPresent(metadata::setCreatedBy);
+        // com_userinfo.USER_NM으로 createdBy, lastModificationBy 치환 (Account.firstname = USER_ID)
+        if (comUserinfoService != null) {
+            if (mindmap.getCreator() != null && mindmap.getCreator().getFirstname() != null) {
+                comUserinfoService.findUserNmByUserId(mindmap.getCreator().getFirstname())
+                        .ifPresent(metadata::setCreatedBy);
+            }
+            if (mindmap.getLastEditor() != null && mindmap.getLastEditor().getFirstname() != null) {
+                comUserinfoService.findUserNmByUserId(mindmap.getLastEditor().getFirstname())
+                        .ifPresent(metadata::setLastModificationBy);
+            }
         }
 
         return metadata;
@@ -193,13 +199,19 @@ public class MindmapController {
 
         stepStart = System.currentTimeMillis();
         final RestMindmapList response = new RestMindmapList(mindmaps, user, collaborationsByMap);
-        // com_userinfo.USER_NM으로 creator 표시명 치환 (Account.firstname = USER_ID)
+        // com_userinfo.USER_NM으로 creator, lastModifier 표시명 치환 (Account.firstname = USER_ID)
         if (comUserinfoService != null) {
             for (RestMindmapInfo info : response.getMindmapsInfo()) {
-                final Account creator = info.getDelegated().getCreator();
+                final Mindmap m = info.getDelegated();
+                final Account creator = m.getCreator();
                 if (creator != null && creator.getFirstname() != null) {
                     comUserinfoService.findUserNmByUserId(creator.getFirstname())
                             .ifPresent(info::setCreator);
+                }
+                final Account lastEditor = m.getLastEditor();
+                if (lastEditor != null && lastEditor.getFirstname() != null) {
+                    comUserinfoService.findUserNmByUserId(lastEditor.getFirstname())
+                            .ifPresent(info::setLastModifierUser);
                 }
             }
         }

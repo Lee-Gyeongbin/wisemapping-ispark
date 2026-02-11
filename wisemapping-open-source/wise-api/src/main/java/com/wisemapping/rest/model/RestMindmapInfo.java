@@ -180,7 +180,8 @@ public class RestMindmapInfo {
         return user != null ? user.getFullName() : "unknown";
     }
 
-    public void setLastModifierUser(String value) {
+    public void setLastModifierUser(String displayName) {
+        this.cachedLastModifierName = displayName;
     }
 
     public String getLastModificationTime() {
