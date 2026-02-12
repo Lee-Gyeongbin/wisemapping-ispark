@@ -573,7 +573,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               </ToggleButton>
               <ToggleButton value="shared" aria-label="Shared with me">
                 <Tooltip
-                  title={'협업중인 맵'}
+                  title={'협업 맵'}
                 >
                   <ShareTwoTone color="secondary" />
                 </Tooltip>
