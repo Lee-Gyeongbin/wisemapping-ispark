@@ -189,14 +189,14 @@ app:
       log-account-listing: true
   # This information is mainly used by the frontend to connect to the backend. It must match the deployment topology used.
   site:
-    ui-base-url: http://localhost:3000
-    api-base-url: http://localhost:8081
+    ui-base-url: ${UI_BASE_URL:https://www.cmberp.co.kr}
+    api-base-url: ${API_BASE_URL:https://www.cmberp.co.kr}
   # Enable API basic authentication.
   api:
     http-basic-enabled: false
   # CORS: 허용할 Origin (쉼표 구분). 비우면 CORS 비적용. 톰캣(8080) 등에서 API 호출 시 필요.
   security:
-    corsAllowedOrigins: http://localhost:3000,http://localhost:8080
+    corsAllowedOrigins: ${CORS_ALLOWED_ORIGINS:https://www.cmberp.co.kr,http://www.cmberp.co.kr}
     sessionUserIdBypassEnabled: false
     sessionUserIdAttribute: userId
   # ID/PW 검증: com_userinfo 테이블만 사용 (COLLABORATOR/ACCOUNT는 로그인 검증에 사용하지 않음)
