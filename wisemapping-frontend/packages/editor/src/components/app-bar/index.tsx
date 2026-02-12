@@ -32,8 +32,6 @@ import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
-import Brightness4 from '@mui/icons-material/Brightness4';
-import Brightness7 from '@mui/icons-material/Brightness7';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import Typography from '@mui/material/Typography';
 import UndoAndRedo from '../action-widget/button/undo-and-redo';
@@ -51,7 +49,10 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { trackAppBarAction } from '../../utils/analytics';
 import debounce from 'lodash/debounce';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
-import { bscCmbOutlinedInputSx } from '../../../../webapp/src/theme/ui-input-styles';
+import {
+  bscCmbOutlinedInputSx,
+  bscCmbTypeInfoButtonSx,
+} from '../../../../webapp/src/theme/ui-input-styles';
 import { uiButtonTypeLineSecondarySizeMd } from '../../../../webapp/src/theme/ui-button-styles';
 
 interface AppBarProps {
@@ -236,10 +237,7 @@ const AppBar = ({
 
   const readOnlyTitleDisplay = canRename ? (
     <Tooltip
-      title={intl.formatMessage({
-        id: 'appbar.tooltip-rename',
-        defaultMessage: 'Rename',
-      })}
+      title={'마인드맵 명 변경'}
     >
       {readOnlyTitleField}
     </Tooltip>
@@ -333,8 +331,7 @@ const AppBar = ({
       ),
       visible: !capability.isHidden('appbar-title'),
     },
-    // 수정 권한 있음: 구분선 | Undo | Redo | 구분선 | Save  /  없음: 구분선 | Save (구분선 1개만)
-    ...((!capability.isHidden('undo-changes') || !capability.isHidden('redo-changes'))
+    ...(!capability.isHidden('undo-changes') || !capability.isHidden('redo-changes')
       ? [
           undefined,
           {
@@ -343,7 +340,7 @@ const AppBar = ({
                 configuration={{
                   icon: <UndoOutlinedIcon />,
                   tooltip: keyTooltip(
-                    intl.formatMessage({ id: 'appbar.tooltip-undo', defaultMessage: 'Undo' }),
+                    '되돌리기',
                     'Z',
                   ),
                   onClick: () => {
@@ -364,7 +361,7 @@ const AppBar = ({
                 configuration={{
                   icon: <RedoOutlinedIcon />,
                   tooltip: keyTooltip(
-                    intl.formatMessage({ id: 'appbar.tooltip-redo', defaultMessage: 'Redo' }),
+                    '다시 실행',
                     'Shift + Z',
                   ),
                   onClick: () => {
@@ -386,7 +383,7 @@ const AppBar = ({
       icon: <SaveOutlinedIcon />,
       onClick: handleDebouncedSave,
       tooltip: keyTooltip(
-        intl.formatMessage({ id: 'appbar.tooltip-save', defaultMessage: 'Save' }),
+        '저장',
         'S',
       ),
       visible: !capability.isHidden('save'),
@@ -398,7 +395,7 @@ const AppBar = ({
         trackAppBarAction('info');
         onAction('info');
       },
-      tooltip: intl.formatMessage({ id: 'appbar.tooltip-info', defaultMessage: 'Information' }),
+      tooltip: '마인드맵 정보',
       visible: !capability.isHidden('info'),
     },
     {
@@ -407,16 +404,13 @@ const AppBar = ({
         trackAppBarAction('history');
         onAction('history');
       },
-      tooltip: intl.formatMessage({
-        id: 'appbar.tooltip-history',
-        defaultMessage: 'Changes History',
-      }),
+      tooltip: '변경 이력',
       visible: !capability.isHidden('history'),
     },
     {
       render: () => (
         <Tooltip
-          title={intl.formatMessage({ id: 'appbar.tooltip-starred', defaultMessage: 'Starred' })}
+          title={'즐겨찾기'}
         >
           <IconButton size="small" onClick={handleStarredOnClick}>
             <StarRateRoundedIcon
@@ -432,7 +426,7 @@ const AppBar = ({
     appBarDivisor,
     {
       icon: <PaletteOutlinedIcon />,
-      tooltip: intl.formatMessage({ id: 'appbar.tooltip-theme', defaultMessage: 'Theme' }),
+      tooltip: '맵 테마 변경',
       options: [
         {
           render: (closeModal) => {
@@ -451,7 +445,7 @@ const AppBar = ({
     },
     {
       icon: <AccountTreeIcon />,
-      tooltip: intl.formatMessage({ id: 'appbar.tooltip-change-layout', defaultMessage: 'Layout' }),
+      tooltip: '레이아웃 변경',
       options: [
         {
           render: (closeModal) => {
@@ -478,11 +472,11 @@ const AppBar = ({
         trackAppBarAction('export');
         onAction('export');
       },
-      tooltip: intl.formatMessage({ id: 'appbar.tooltip-export', defaultMessage: 'Export' }),
+      tooltip: '맵 내보내기',
       visible: !capability.isHidden('export'),
       disabled: () => !isMapLoaded,
     },
-    // 테마 토글 삭제 
+    // 테마 토글 삭제
     // {
     //   icon: mode === 'dark' ? <Brightness7 /> : <Brightness4 />,
     //   tooltip: intl.formatMessage({
@@ -496,17 +490,11 @@ const AppBar = ({
     // },
     {
       render: () => (
-        <Tooltip
-          title={'다른 사용자와 협업하기'}
-        >
+        <Tooltip title={'다른 사용자와 협업하기'}>
           <Button
             variant="outlined"
             disableElevation
-            sx={{
-              ...uiButtonTypeLineSecondarySizeMd,
-              height: 36,
-              minHeight: 36,
-            }}
+            sx={[bscCmbTypeInfoButtonSx, { minWidth: 80 }]}
             onClick={() => {
               trackAppBarAction('share');
               onAction('share');

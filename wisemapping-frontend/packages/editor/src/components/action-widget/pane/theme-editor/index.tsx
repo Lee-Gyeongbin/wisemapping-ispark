@@ -28,6 +28,8 @@ import React, { ReactElement, useState, useMemo, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import NodeProperty from '../../../../classes/model/node-property';
 import { ThemeType } from '@wisemapping/mindplot';
+import { uiPageHeaderTitle, uiPageHeaderStarIcon } from '../../../../../../webapp/src/theme/ui-page-header-styles';
+import { bscCmbTypeSecondaryButtonSx, bscCmbTypeInfoButtonSx } from '../../../../../../webapp/src/theme/ui-input-styles';
 
 const ThemeEditor = (props: {
   closeModal: () => void;
@@ -41,66 +43,38 @@ const ThemeEditor = (props: {
     () => [
       {
         id: 'prism' as ThemeType,
-        name: intl.formatMessage({ id: 'theme.summer.name', defaultMessage: 'Summer' }),
-        description: intl.formatMessage({
-          id: 'theme.summer.description',
-          defaultMessage:
-            'Bright and vibrant orange theme. Great for creative projects and energetic presentations.',
-        }),
+        name: 'Summer',
+        description: '밝고 활기찬 오렌지 테마. 창의적인 프로젝트와 활기찬 발표에 적합합니다.',
       },
       {
         id: 'aurora' as ThemeType,
-        name: intl.formatMessage({ id: 'theme.aurora.name', defaultMessage: 'Aurora' }),
-        description: intl.formatMessage({
-          id: 'theme.aurora.description',
-          defaultMessage:
-            'Neon-inspired gradient theme with glow effects, bold typography, and high-contrast connectors designed for immersive storytelling.',
-        }),
+        name: 'Aurora',
+        description: '네온 영감의 그라데이션 테마. 몰입감 있는 스토리텔링을 위한 볼드한 글꼴과 고대비 커넥터가 포함되어 있습니다.',
       },
       {
         id: 'retro' as ThemeType,
-        name: intl.formatMessage({ id: 'theme.retro.name', defaultMessage: '80s Retro Night' }),
-        description: intl.formatMessage({
-          id: 'theme.retro.description',
-          defaultMessage:
-            '80s synthwave palette with neon rims, chrome gradients, and grid-lined canvases inspired by retro night parties.',
-        }),
+        name: '80s Retro Night',
+        description: '80s 시네웨이브 팔레트. 네온 림, 크롬 그라데이션, 그리드 라인 캔버스가 포함되어 있습니다.',
       },
       {
         id: 'sunrise' as ThemeType,
-        name: intl.formatMessage({ id: 'theme.sunrise.name', defaultMessage: 'Sunrise' }),
-        description: intl.formatMessage({
-          id: 'theme.sunrise.description',
-          defaultMessage:
-            'Sunrise theme with light/dark mode variants. Enhanced colors and contrast for better readability.',
-        }),
+        name: 'Sunrise',
+        description: 'Sunrise 테마. 라이트/다크 모드 변형. 더 나은 가독성을 위한 강조된 색상과 대비.',
       },
       {
         id: 'ocean' as ThemeType,
-        name: intl.formatMessage({ id: 'theme.ocean.name', defaultMessage: 'Ocean' }),
-        description: intl.formatMessage({
-          id: 'theme.ocean.description',
-          defaultMessage:
-            'Ocean-inspired blue theme with light/dark variants. Calm and professional colors perfect for business and creative projects.',
-        }),
+        name: 'Ocean',
+        description: '바다를 모티브로 한 파란색 테마로, 라이트/다크 모드가 있습니다. 차분하고 전문적인 색감이라 비즈니스와 크리에이티브 작업 모두에 잘 어울립니다.',
       },
       {
         id: 'classic' as ThemeType,
-        name: intl.formatMessage({ id: 'theme.classic.name', defaultMessage: 'Classic' }),
-        description: intl.formatMessage({
-          id: 'theme.classic.description',
-          defaultMessage:
-            'Clean and professional design with blue accents. Perfect for business presentations and formal documents.',
-        }),
+        name: 'Classic',
+        description: '파란색 강조가 있는 깔끔하고 전문적인 디자인. 비즈니스 발표와 공식 문서에 적합합니다.',
       },
       {
         id: 'robot' as ThemeType,
-        name: intl.formatMessage({ id: 'theme.robot.name', defaultMessage: 'Robot' }),
-        description: intl.formatMessage({
-          id: 'theme.robot.description',
-          defaultMessage:
-            'Tech-inspired green theme. Perfect for technical documentation and futuristic presentations.',
-        }),
+        name: 'Robot',
+        description: '기술 영감의 녹색 테마. 기술 문서와 미래적인 발표에 적합합니다.',
       },
     ],
     [intl],
@@ -149,13 +123,21 @@ const ThemeEditor = (props: {
       PaperProps={{
         sx: {
           minHeight: '350px',
-          border: '2px solid #ffa800',
           boxShadow: 'none',
         },
       }}
     >
-      <DialogTitle>
-        <FormattedMessage id="theme-editor.title" defaultMessage="Choose Theme" />
+      <DialogTitle
+        sx={[
+          uiPageHeaderTitle,
+          {
+            padding: '20px 32px 16px 32px !important',
+            marginBottom: 0,
+          },
+        ]}
+      >
+        <Box component="span" sx={uiPageHeaderStarIcon} />
+        {'맵 테마 변경'}
       </DialogTitle>
       <DialogContent
         dividers
@@ -165,10 +147,7 @@ const ThemeEditor = (props: {
         }}
       >
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.4 }}>
-          <FormattedMessage
-            id="theme-editor.description"
-            defaultMessage="A theme defines the visual style of your mind map, including colors, fonts, and overall appearance. Choose a theme that best fits your content and audience."
-          />
+          {'테마(Theme)는 마인드맵의 시각적 스타일을 정의합니다.'}<br />{'여기에는 색상, 글꼴, 전체적인 외형이 포함됩니다.'}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {themes.map((themeOption) => (
@@ -204,12 +183,12 @@ const ThemeEditor = (props: {
           ))}
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCancel}>
-          <FormattedMessage id="theme-editor.cancel" defaultMessage="Cancel" />
+      <DialogActions sx={{ padding: '13px 13px 13px 13px' }}>
+        <Button type="button" variant="contained" onClick={handleCancel} sx={bscCmbTypeSecondaryButtonSx}>
+          {'닫기'}
         </Button>
-        <Button onClick={handleAccept} variant="contained">
-          <FormattedMessage id="theme-editor.accept" defaultMessage="Apply Theme" />
+        <Button type="button" variant="contained" onClick={handleAccept} sx={bscCmbTypeInfoButtonSx}>
+          {'테마 적용'}
         </Button>
       </DialogActions>
     </Dialog>

@@ -20,7 +20,12 @@
     "rootDirs": [
       "src",
     ],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@wisemapping/mindplot": ["../mindplot/src/index.ts"],
+      "@wisemapping/mindplot/*": ["../mindplot/src/*"]
+    }
   },
   "exclude": [
     "./node_modules",

@@ -19,7 +19,12 @@
     "noImplicitAny": false,
     "strictNullChecks": true,
     "jsxImportSource": "@emotion/react",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@wisemapping/editor": ["../editor/src/index.ts"],
+      "@wisemapping/editor/*": ["../editor/src/*"]
+    }
   },
   "exclude": [
     "./node_modules","./dist"

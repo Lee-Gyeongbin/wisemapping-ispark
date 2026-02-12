@@ -33,6 +33,11 @@ import type { LayoutType } from '@wisemapping/mindplot';
 import NodeProperty from '../../../../classes/model/node-property';
 import Model from '../../../../classes/model/editor';
 import { trackEditorInteraction } from '../../../../utils/analytics';
+import {
+  uiPageHeaderTitle,
+  uiPageHeaderStarIcon,
+} from '../../../../../../webapp/src/theme/ui-page-header-styles';
+import { bscCmbTypeInfoButtonSx, bscCmbTypeSecondaryButtonSx } from '../../../../../../webapp/src/theme/ui-input-styles';
 
 // Custom SVG icon for mindmap layout
 const MindmapIcon = (props: SvgIconProps) => (
@@ -73,23 +78,15 @@ const LayoutSelector = ({ closeModal, layoutModel, model }: LayoutSelectorProps)
   const layouts = [
     {
       id: 'mindmap' as LayoutType,
-      name: intl.formatMessage({ id: 'layout.mindmap.name', defaultMessage: 'Mindmap' }),
-      description: intl.formatMessage({
-        id: 'layout.mindmap.description',
-        defaultMessage:
-          'Horizontal layout with balanced branches on both sides. Best for traditional mind mapping and brainstorming.',
-      }),
-      icon: <MindmapIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      name: 'Mindmap',
+      description: '가로 방향의 레이아웃. 양쪽에 균형잡힌 가지가 있습니다.전통적인 마인드맵과 브레인스토밍에 적합합니다.',
+      icon: <MindmapIcon sx={{ fontSize: 40, color: '#1976d2' }} />,
     },
     {
       id: 'tree' as LayoutType,
-      name: intl.formatMessage({ id: 'layout.tree.name', defaultMessage: 'Tree' }),
-      description: intl.formatMessage({
-        id: 'layout.tree.description',
-        defaultMessage:
-          'Vertical hierarchy flowing top-to-bottom. Great for organizational charts and hierarchical structures.',
-      }),
-      icon: <AccountTreeIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      name: 'Tree',
+      description: '세로 방향의 레이아웃. 위에서 아래로 흐르는 계층 구조. 조직도와 계층 구조에 적합합니다.',
+      icon: <AccountTreeIcon sx={{ fontSize: 40, color: '#1976d2' }} />,
     },
   ];
 
@@ -155,20 +152,25 @@ const LayoutSelector = ({ closeModal, layoutModel, model }: LayoutSelectorProps)
       PaperProps={{
         sx: {
           minHeight: '300px',
-          border: '2px solid #ffa800',
           boxShadow: 'none',
         },
       }}
     >
-      <DialogTitle>
-        <FormattedMessage id="layout-selector.title" defaultMessage="Choose Layout" />
+      <DialogTitle
+        sx={[
+          uiPageHeaderTitle,
+          {
+            padding: '20px 32px 16px 32px !important',
+            marginBottom: 0,
+          },
+        ]}
+      >
+        <Box component="span" sx={uiPageHeaderStarIcon} />
+        {'레이아웃 변경'}
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.4 }}>
-          <FormattedMessage
-            id="layout-selector.description"
-            defaultMessage="A layout defines how topics are organized and connected in your mind map. Choose a layout that best fits your content structure."
-          />
+          {'레이아웃(Layout)은 마인드맵에서 주제가 어떻게 구성되고 연결되는지를 정의합니다.'}<br />{'주제의 배치와 연결 방식이 포함됩니다.'}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {layouts.map((layoutOption) => (
@@ -212,12 +214,12 @@ const LayoutSelector = ({ closeModal, layoutModel, model }: LayoutSelectorProps)
           ))}
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCancel}>
-          <FormattedMessage id="layout-selector.cancel" defaultMessage="Cancel" />
+      <DialogActions sx={{ padding: '13px 13px 13px 13px' }}>
+        <Button type="button" variant="contained" onClick={handleCancel} sx={bscCmbTypeSecondaryButtonSx}>
+          {'닫기'}
         </Button>
-        <Button onClick={handleAccept} variant="contained">
-          <FormattedMessage id="layout-selector.accept" defaultMessage="Accept" />
+        <Button type="button" variant="contained" onClick={handleAccept} sx={bscCmbTypeInfoButtonSx}>
+          {'레이아웃 적용'}
         </Button>
       </DialogActions>
     </Dialog>

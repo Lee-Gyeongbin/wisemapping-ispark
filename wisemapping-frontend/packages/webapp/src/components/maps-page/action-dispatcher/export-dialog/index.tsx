@@ -25,8 +25,9 @@ import FormControl from '@mui/material/FormControl';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
 import {
   Designer,
   TextExporterFactory,
@@ -37,10 +38,9 @@ import {
 } from '@wisemapping/editor';
 import ThemeType from '@wisemapping/mindplot/src/components/model/ThemeType';
 import { fetchMindmap } from '../../../editor-page/PersistenceManagerUtils';
-
-import Checkbox from '@mui/material/Checkbox';
 import { useFetchMapMetadata } from '../../../../classes/middleware';
 import { trackExport } from '../../../../utils/analytics';
+import { bscCmbOutlinedInputSx } from '../../../../theme/ui-input-styles';
 
 type ExportFormat = 'svg' | 'jpg' | 'png' | 'pdf' | 'txt' | 'mm' | 'mmx' | 'wxml' | 'md';
 type ExportGroup = 'image' | 'document' | 'mindmap-tool';
@@ -68,13 +68,16 @@ const ExportDialog = ({
     enableImgExport ? 'svg' : 'txt',
   );
 
-  const [zoomToFit, setZoomToFit] = React.useState<boolean>(true);
+  // Center/zoom 옵션은 이미지가 잘리는 이슈가 있어 UI 제거 + 항상 false로 export
+  const zoomToFit = false;
   const exportTheme: ThemeType = 'prism';
 
   const classes = useStyles();
 
-  const handleOnExportFormatChange = (event) => {
-    setExportFormat(event.target.value);
+  const handleOnExportFormatChange = (_event: React.SyntheticEvent, newValue: ExportFormat | null) => {
+    if (newValue) {
+      setExportFormat(newValue);
+    }
   };
 
   const handleOnGroupChange = (event) => {
@@ -102,10 +105,6 @@ const ExportDialog = ({
 
   const handleOnSubmit = (): void => {
     setSubmit(true);
-  };
-
-  const handleOnZoomToFit = (): void => {
-    setZoomToFit(!zoomToFit);
   };
 
   const exporter = async (formatType: ExportFormat): Promise<string> => {
@@ -207,20 +206,14 @@ const ExportDialog = ({
       <BaseDialog
         onClose={handleOnClose}
         onSubmit={handleOnSubmit}
-        title={intl.formatMessage({ id: 'export.title', defaultMessage: 'Export' })}
-        description={intl.formatMessage({
-          id: 'export.desc',
-          defaultMessage:
-            'Export this map in the format that you want and start using it in your presentations or sharing by email',
-        })}
-        submitButton={intl.formatMessage({ id: 'export.title', defaultMessage: 'Export' })}
+        title={'맵 내보내기'}
+        useBscCmbTitle
+        description={'원하는 형식으로 맵을 내보내고, 발표 또는 이메일로 공유하여 사용할 수 있습니다.'}
+        submitButton={'내보내기'}
       >
         {!enableImgExport && (
           <Alert severity="info">
-            <FormattedMessage
-              id="export.warning"
-              defaultMessage="Exporting to Image (SVG,PNG,JPEG,PDF) is only available  in the editor toolbar."
-            />
+            {'이미지(SVG, PNG, JPEG, PDF) 내보내기는 에디터 툴바에서만 가능합니다.'}
           </Alert>
         )}
         <FormControl component="fieldset">
@@ -230,43 +223,61 @@ const ExportDialog = ({
                 css={classes.label}
                 value="image"
                 disabled={!enableImgExport}
-                control={<Radio color="primary" />}
-                label={intl.formatMessage({
-                  id: 'export.image',
-                  defaultMessage:
-                    'Image: Get a graphic representation of your map including all colors and shapes.',
-                })}
+                control={
+                  <Radio
+                    sx={{
+                      color: '#00aaff',
+                      '&.Mui-checked': { color: '#00aaff' },
+                    }}
+                  />
+                }
+                label={'Image : 맵을 색상과 도형을 모두 포함한 이미지로 얻을 수 있습니다.'}
                 color="secondary"
                 style={{ fontSize: '9px' }}
               />
               {exportGroup == 'image' && (
                 <>
-                  <Select
-                    onChange={handleOnExportFormatChange}
-                    variant="outlined"
+                  <Autocomplete
                     value={exportFormat}
-                    css={classes.select}
-                  >
-                    <MenuItem value="svg" css={classes.menu}>
-                      Scalable Vector Graphics (SVG)
-                    </MenuItem>
-                    <MenuItem value="png" css={classes.menu}>
-                      Portable Network Graphics (PNG)
-                    </MenuItem>
-                    <MenuItem value="jpg" css={classes.menu}>
-                      JPEG Image (JPEG)
-                    </MenuItem>
-                    <MenuItem value="pdf" css={classes.menu}>
-                      Portable Document Format (PDF)
-                    </MenuItem>
-                  </Select>
-                  <FormControlLabel
-                    css={classes.select}
-                    control={<Checkbox checked={zoomToFit} onChange={handleOnZoomToFit} />}
-                    label={intl.formatMessage({
-                      id: 'export.img-center',
-                      defaultMessage: 'Center and zoom to fit',
-                    })}
+                    onChange={handleOnExportFormatChange}
+                    options={['svg', 'png', 'jpg', 'pdf'] as ExportFormat[]}
+                    getOptionLabel={(option) => {
+                      const labels: Partial<Record<ExportFormat, string>> = {
+                        svg: 'SVG',
+                        png: 'PNG',
+                        jpg: 'JPEG',
+                        pdf: 'PDF',
+                        txt: 'TXT',
+                        md: 'MD',
+                        mm: 'MM',
+                        mmx: 'MMX',
+                        wxml: 'WXML',
+                      };
+                      return labels[option] || option;
+                    }}
+                    disableClearable
+                    size="small"
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        placeholder="형식 선택"
+                        sx={[
+                          bscCmbOutlinedInputSx,
+                          {
+                            width: 300,
+                            '& .MuiOutlinedInput-root': {
+                              minHeight: 26,
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              padding: '4px 8px',
+                              fontSize: 12,
+                            },
+                          },
+                        ]}
+                      />
+                    )}
+                    sx={{ width: 300, ml: 4.5 }}
                   />
                 </>
               )}
@@ -276,39 +287,70 @@ const ExportDialog = ({
               <FormControlLabel
                 css={classes.label}
                 value="document"
-                control={<Radio color="primary" />}
-                label={intl.formatMessage({
-                  id: 'export.document-label',
-                  defaultMessage:
-                    'Document: Export your mindmap in a self-contained document ready to share',
-                })}
+                control={
+                  <Radio
+                    sx={{
+                      color: '#00aaff',
+                      '&.Mui-checked': { color: '#00aaff' },
+                    }}
+                  />
+                }
+                label={'Document : 맵을 자체적으로 준비된 문서로 내보낼 수 있습니다.'}
                 color="secondary"
               />
               {exportGroup == 'document' && (
-                <Select
-                  onChange={handleOnExportFormatChange}
-                  variant="outlined"
+                <Autocomplete
                   value={exportFormat}
-                  css={classes.select}
-                >
-                  <MenuItem css={classes.select} value="txt">
-                    Plain Text File (TXT)
-                  </MenuItem>
-                  <MenuItem css={classes.select} value="md">
-                    Markdown (MD)
-                  </MenuItem>
-                  {/* <MenuItem className={classes.select} value="xls">
-                                        Microsoft Excel (XLS)
-                                    </MenuItem> */}
-                </Select>
+                  onChange={handleOnExportFormatChange}
+                  options={['txt', 'md'] as ExportFormat[]}
+                  getOptionLabel={(option) => {
+                    const labels: Partial<Record<ExportFormat, string>> = {
+                      svg: 'SVG',
+                      png: 'PNG',
+                      jpg: 'JPEG',
+                      pdf: 'PDF',
+                    };
+                    return labels[option] || option;
+                  }}
+                  disableClearable
+                  size="small"
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      placeholder="형식 선택"
+                      sx={[
+                        bscCmbOutlinedInputSx,
+                        {
+                          width: 300,
+                          '& .MuiOutlinedInput-root': {
+                            minHeight: 26,
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            padding: '4px 8px',
+                            fontSize: 12,
+                          },
+                        },
+                      ]}
+                    />
+                  )}
+                  sx={{ width: 300, ml: 4.5 }}
+                />
               )}
             </FormControl>
 
-            <FormControl>
+            {/* <FormControl>
               <FormControlLabel
                 css={classes.label}
                 value="mindmap-tool"
-                control={<Radio color="primary" />}
+                control={
+                  <Radio
+                    sx={{
+                      color: '#00aaff',
+                      '&.Mui-checked': { color: '#00aaff' },
+                    }}
+                  />
+                }
                 label={intl.formatMessage({
                   id: 'export.document',
                   defaultMessage:
@@ -317,27 +359,45 @@ const ExportDialog = ({
                 color="secondary"
               />
               {exportGroup == 'mindmap-tool' && (
-                <Select
-                  onChange={handleOnExportFormatChange}
-                  variant="outlined"
-                  css={classes.select}
+                <Autocomplete
                   value={exportFormat}
-                >
-                  <MenuItem css={classes.select} value="wxml">
-                    WiseMapping (WXML)
-                  </MenuItem>
-                  <MenuItem css={classes.select} value="mm">
-                    Freemind 1.0.1 (MM)
-                  </MenuItem>
-                  <MenuItem css={classes.select} value="mmx">
-                    Freeplane (MMX)
-                  </MenuItem>
-                  {/* <MenuItem className={classes.select} value="mmap">
-                                        MindManager (MMAP)
-                                    </MenuItem> */}
-                </Select>
+                  onChange={handleOnExportFormatChange}
+                  options={['wxml', 'mm', 'mmx'] as ExportFormat[]}
+                  getOptionLabel={(option) => {
+                    const labels: Partial<Record<ExportFormat, string>> = {
+                      svg: 'SVG',
+                      png: 'PNG',
+                      jpg: 'JPEG',
+                      pdf: 'PDF',
+                    };
+                    return labels[option] || option;
+                  }}
+                  disableClearable
+                  size="small"
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      placeholder="형식 선택"
+                      sx={[
+                        bscCmbOutlinedInputSx,
+                        {
+                          width: 300,
+                          '& .MuiOutlinedInput-root': {
+                            minHeight: 26,
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            padding: '4px 8px',
+                            fontSize: 12,
+                          },
+                        },
+                      ]}
+                    />
+                  )}
+                  sx={{ width: 300, ml: 4.5 }}
+                />
               )}
-            </FormControl>
+            </FormControl> */}
           </RadioGroup>
         </FormControl>
       </BaseDialog>
