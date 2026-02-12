@@ -55,9 +55,23 @@ const DuplicateDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElem
     },
     {
       onSuccess: (mapId) => {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+          }
+        } catch (_) {
+          /* cross-origin 무시 */
+        }
         window.location.href = `/c/maps/${mapId}/edit`;
       },
       onError: (error) => {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'wisemapping-hide-loading' }, '*');
+          }
+        } catch (_) {
+          /* cross-origin 무시 */
+        }
         setError(error);
       },
     },
@@ -107,6 +121,13 @@ const DuplicateDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElem
       description: model.description,
     };
 
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'wisemapping-show-loading' }, '*');
+      }
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
     mutation.mutate(validatedModel);
   };
 

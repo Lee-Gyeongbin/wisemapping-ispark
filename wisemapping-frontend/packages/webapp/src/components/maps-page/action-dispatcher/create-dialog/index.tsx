@@ -49,9 +49,23 @@ const CreateDialog = ({ onClose }: CreateProps): React.ReactElement => {
     },
     {
       onSuccess: (mapId: number) => {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+          }
+        } catch (_) {
+          /* cross-origin 무시 */
+        }
         window.location.href = `/c/maps/${mapId}/edit`;
       },
       onError: (error) => {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'wisemapping-hide-loading' }, '*');
+          }
+        } catch (_) {
+          /* cross-origin 무시 */
+        }
         setError(error);
       },
     },
@@ -66,6 +80,13 @@ const CreateDialog = ({ onClose }: CreateProps): React.ReactElement => {
   const handleOnSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     setError(undefined);
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'wisemapping-show-loading' }, '*');
+      }
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
     mutation.mutate(model);
   };
 
