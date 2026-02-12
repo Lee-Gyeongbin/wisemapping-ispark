@@ -65,6 +65,9 @@ const ActionDispatcher = ({
           onClose(true);
           break;
         case 'back':
+          if (typeof window !== 'undefined' && window.parent !== window) {
+            window.parent.postMessage({ type: 'wisemapping-show-loading' }, '*');
+          }
           if (pageMode === 'try') {
             window.history.back();
           } else {

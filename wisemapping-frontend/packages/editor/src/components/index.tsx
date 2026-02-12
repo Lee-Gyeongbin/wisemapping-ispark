@@ -142,6 +142,27 @@ const EditorContent = ({
     };
   }, [designer, model, isEmbedRoute]);
 
+  // iframe 부모(BSC_CMB 등) 로딩모달 hide: 맵 로드 완료 시 postMessage
+  React.useEffect(() => {
+    if (!designer || typeof window === 'undefined' || window.self === window.top) {
+      return undefined;
+    }
+    const notifyParentLoaded = () => {
+      try {
+        window.parent.postMessage({ type: 'wisemapping-map-loaded' }, '*');
+      } catch (_) {
+        /* cross-origin 등 무시 */
+      }
+    };
+    designer.addEvent('loadSuccess', notifyParentLoaded);
+    if (model?.isMapLoadded()) {
+      notifyParentLoaded();
+    }
+    return () => {
+      designer.removeEvent('loadSuccess', notifyParentLoaded);
+    };
+  }, [designer, model]);
+
   // Initialize locale ...
   const locale = options.locale;
   // Memoize locale messages loading

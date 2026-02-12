@@ -295,10 +295,7 @@ const AppBar = ({
   const config: (ActionConfig | undefined)[] = [
     {
       icon: <ArrowBackIosNewOutlinedIcon />,
-      tooltip: intl.formatMessage({
-        id: 'appbar.back-to-map-list',
-        defaultMessage: 'Back to maps list',
-      }),
+      tooltip: '목록으로 돌아가기',
       'data-testid': 'app-bar-back-button',
       onClick: () => {
         trackAppBarAction('back_to_maps_list');

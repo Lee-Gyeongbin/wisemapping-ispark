@@ -393,6 +393,12 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
     { suspense: true },
   );
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.parent !== window) {
+      window.parent.postMessage({ type: 'wisemapping-list-loaded' }, '*');
+    }
+  }, [mapsData]);
+
   const filteredMaps: MapInfo[] = useMemo(() => {
     const predicate = mapsFilter(filter, searchCondition);
     return mapsData.filter(predicate);
@@ -417,6 +423,13 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
   };
 
   const [activeDialog, setActiveDialog] = React.useState<ActiveDialog | undefined>(undefined);
+
+  const handleEditMapClick = (e: React.MouseEvent) => {
+    if (typeof window !== 'undefined' && window.parent !== window) {
+      window.parent.postMessage({ type: 'wisemapping-show-loading' }, '*');
+    }
+  };
+
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof MapInfo) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -830,7 +843,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                     <Link
                       href={`/c/maps/${row.id}/edit`}
                       underline="none"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={handleEditMapClick}
                     >
                       <CardHeader
                         css={classes.cardHeader}
@@ -982,7 +995,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             href={`/c/maps/${row.id}/edit`}
                             color="textPrimary"
                             underline="always"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={handleEditMapClick}
                             sx={{
                               fontSize: '14px',
                               fontWeight: '500',
