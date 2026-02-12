@@ -32,6 +32,7 @@ public class RestCollaboration {
 
     private int id;
     private String email;
+    private String userId;
     private String name;
     private String deptNm;
     private String role;
@@ -90,5 +91,13 @@ public class RestCollaboration {
 
     public void setDeptNm(String deptNm) {
         this.deptNm = deptNm;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

@@ -98,8 +98,11 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
   const addMutation = useMutation(
     (model: ShareModel) => {
       const permissions = model.selectedUsers.map((user) => {
+        // firstname에 userId가 저장되어 있으므로, userId를 email 필드에 전달
+        const userId = user.firstname;
         return {
-          email: user.email,
+          email: userId || user.email, // userId를 email 필드에 전달 (collaborator의 email 컬럼에 userId가 저장됨)
+          userId: userId, // userId도 함께 전달
           role: model.canEdit ? ('editor' as const) : ('viewer' as const),
         };
       });

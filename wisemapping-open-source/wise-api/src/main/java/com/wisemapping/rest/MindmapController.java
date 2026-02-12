@@ -438,7 +438,13 @@ public class MindmapController {
         // Compare one by one if some of the elements has been changed ....
         final Set<Collaboration> collabsToRemove = new HashSet<>(mindMap.getCollaborations());
         for (RestCollaboration restCollab : restCollabs.getCollaborations()) {
-            final String email = restCollab.getEmail();
+            // 프론트엔드에서 userId를 email 필드에 전달하므로, email 필드를 그대로 사용
+            // userId가 있으면 userId를 우선 사용, 없으면 email 사용
+            String userId = restCollab.getUserId();
+            String email = restCollab.getEmail();
+            if (userId != null && !userId.trim().isEmpty()) {
+                email = userId; // userId가 있으면 userId를 email로 사용
+            }
 
             final Collaboration collaboration = mindMap.findCollaboration(email);
             // Validate role format ...
@@ -455,10 +461,11 @@ public class MindmapController {
             // Is owner ?
             final CollaborationRole role = CollaborationRole.valueOf(roleStr.toUpperCase());
             if (role != CollaborationRole.OWNER) {
-                mindmapService.addCollaboration(mindMap, restCollab.getEmail(), role, restCollabs.getMessage());
+                // userId를 email로 사용하여 collaborator에 저장
+                mindmapService.addCollaboration(mindMap, email, role, restCollabs.getMessage());
 
                 // Track mindmap sharing
-                metricsService.trackMindmapShared(mindMap, restCollab.getEmail(), role.name(), user);
+                metricsService.trackMindmapShared(mindMap, email, role.name(), user);
             }
         }
 
@@ -531,10 +538,14 @@ public class MindmapController {
         final List<RestCollaboration> collabs = new ArrayList<>();
         for (Collaboration collaboration : collaborations) {
             RestCollaboration restCollab = new RestCollaboration(collaboration);
-            // com_userinfo.USER_NM으로 name 치환, com_deptinfo.DEPT_NM 치환 (Account.firstname = USER_ID)
-            if (comUserinfoService != null && collaboration.getCollaborator() instanceof Account) {
-                final String userId = ((Account) collaboration.getCollaborator()).getFirstname();
-                if (userId != null) {
+            // com_userinfo.USER_NM으로 name 치환, com_deptinfo.DEPT_NM 치환
+            // collaborator의 email 컬럼에 userId가 저장되어 있으므로 email을 userId로 사용
+            if (comUserinfoService != null) {
+                final Collaborator collaborator = collaboration.getCollaborator();
+                // email 컬럼에 userId가 저장되어 있으므로 email을 userId로 사용
+                final String userId = collaborator.getEmail();
+                
+                if (userId != null && !userId.trim().isEmpty()) {
                     comUserinfoService.findUserNmByUserId(userId).ifPresent(restCollab::setName);
                     comUserinfoService.findDeptNmByUserId(userId).ifPresent(restCollab::setDeptNm);
                 }
