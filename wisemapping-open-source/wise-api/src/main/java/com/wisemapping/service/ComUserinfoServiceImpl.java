@@ -8,12 +8,15 @@ package com.wisemapping.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -82,5 +85,48 @@ public class ComUserinfoServiceImpl implements ComUserinfoService {
             logger.warn("ComUserinfo: failed to lookup DEPT_NM for USER_ID={}: {}", userId, e.getMessage());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public List<ComUserinfoSearchResult> searchUsers(@Nullable String searchTerm) {
+        List<ComUserinfoSearchResult> results = new ArrayList<>();
+        try {
+            final String deptTable = "com_deptinfo";
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT u.").append(userIdColumn).append(", u.USER_NM, u.EMAIL, d.DEPT_NM ");
+            sql.append("FROM ").append(tableName).append(" u ");
+            sql.append("LEFT JOIN ").append(deptTable).append(" d ON u.DEPT_ID = d.DEPT_ID ");
+            sql.append("WHERE u.DELETE_DT IS NULL ");
+            // sql.append("AND u.USER_ID NOT LIKE '%admin%' "); // 관리자 제외 TODO : 필요시 주석 해제
+            
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String search = searchTerm.trim();
+                sql.append("AND (LOWER(u.USER_NM) LIKE LOWER(:search) OR LOWER(u.EMAIL) LIKE LOWER(:search)) ");
+            }
+            
+            sql.append("ORDER BY u.USER_NM ");
+            // sql.append("LIMIT :limit");
+            
+            Query query = entityManager.createNativeQuery(sql.toString());
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                query.setParameter("search", "%" + searchTerm.trim() + "%");
+            }
+            // query.setParameter("limit", limit);
+            
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = query.getResultList();
+            
+            for (Object[] row : rows) {
+                String userId = row[0] != null ? row[0].toString() : null;
+                String userNm = row[1] != null ? row[1].toString() : null;
+                String email = row[2] != null ? row[2].toString() : null;
+                String deptNm = row[3] != null ? row[3].toString() : null;
+                
+                results.add(new ComUserinfoSearchResult(userId, userNm, email, deptNm));
+            }
+        } catch (Exception e) {
+            logger.warn("ComUserinfo: failed to search users: {}", e.getMessage());
+        }
+        return results;
     }
 }

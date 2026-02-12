@@ -26,7 +26,6 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import LabelOutlined from '@mui/icons-material/LabelOutlined';
 import HistoryOutlined from '@mui/icons-material/HistoryOutlined';
 
 import { FormattedMessage } from 'react-intl';
@@ -45,7 +44,6 @@ export type ActionType =
   | 'create'
   | 'duplicate'
   | 'export'
-  | 'label'
   | 'rename'
   | 'print'
   | 'info'
@@ -132,13 +130,6 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
           이름 변경
         </MenuItem>
       )}
-
-      <MenuItem onClick={handleOnClose('label')}>
-        <ListItemIcon>
-          <LabelOutlined />
-        </ListItemIcon>
-        라벨 추가
-      </MenuItem>
 
       <MenuItem onClick={handleOnClose('delete')}>
         <ListItemIcon>

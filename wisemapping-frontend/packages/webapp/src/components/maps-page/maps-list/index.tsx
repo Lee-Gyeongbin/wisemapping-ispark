@@ -20,11 +20,10 @@ import React, { useEffect, useMemo, CSSProperties, useContext } from 'react';
 
 import { useStyles } from './styled';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import Client, { ErrorInfo, Label, MapInfo } from '../../../classes/client';
+import Client, { ErrorInfo, MapInfo } from '../../../classes/client';
 import ActionChooser, { ActionType } from '../action-chooser';
 import ActionDispatcher from '../action-dispatcher';
 import ThemeToggleButton from '../../common/theme-toggle-button';
-import LabelDeleteConfirm from './label-delete-confirm';
 import dayjs from 'dayjs';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { trackToolbarAction } from '../../../utils/analytics';
@@ -48,25 +47,20 @@ import Link from '@mui/material/Link';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { LabelsCell } from './labels-cell';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import 'dayjs/locale/ko';
 import AppI18n from '../../../classes/app-i18n';
-import LabelTwoTone from '@mui/icons-material/LabelTwoTone';
 import ScatterPlotTwoTone from '@mui/icons-material/ScatterPlotTwoTone';
 import PersonOutlineTwoTone from '@mui/icons-material/PersonOutlineTwoTone';
 import ShareTwoTone from '@mui/icons-material/ShareTwoTone';
 import StarTwoTone from '@mui/icons-material/StarTwoTone';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ClearIcon from '@mui/icons-material/Clear';
 import { CSSObject, Interpolation, Theme } from '@emotion/react';
+import RoleIcon from '../role-icon';
 import Box from '@mui/material/Box';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Card from '@mui/material/Card';
@@ -84,9 +78,7 @@ import {
 import {
   uiButtonTypeLineSecondarySizeMd,
   uiButtonTypeSecondarySizeMd,
-  uiButtonIconOnlyLineSecondary,
 } from '../../../theme/ui-button-styles';
-import { uiSelectSizeMd } from '../../../theme/ui-select-styles';
 import {
   uiPageHeader,
   uiPageHeaderTop,
@@ -115,14 +107,10 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 type Order = 'asc' | 'desc';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getComparator<Key extends keyof any>(
+function getComparator(
   order: Order,
-  orderBy: Key,
-): (
-  a: { [key in Key]: number | string | boolean | Label[] | undefined },
-  b: { [key in Key]: number | string | Label[] | boolean },
-) => number {
+  orderBy: keyof MapInfo,
+): (a: MapInfo, b: MapInfo) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -179,12 +167,6 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         style: { width: '20%', whiteSpace: 'nowrap' },
       },
       {
-        id: 'labels',
-        numeric: false,
-        label: '라벨',
-        style: { width: '15%', whiteSpace: 'nowrap' },
-      },
-      {
         id: 'createdBy',
         numeric: false,
         label: '생성자',
@@ -221,6 +203,22 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           />
         </TableCell>
 
+        <TableCell
+          key="rowNumber"
+          style={{ width: '3%', whiteSpace: 'nowrap' }}
+          css={classes.headerCell}
+        >
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '14px',
+              fontFamily: '"Pretendard", sans-serif',
+            }}
+          >
+            {'No'}
+          </Typography>
+        </TableCell>
+
         {headCells.map((headCell) => {
           return (
             <TableCell
@@ -246,6 +244,11 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           );
         })}
 
+        <TableCell padding="checkbox" key="collaboration" css={classes.headerCell} style={{ width: '8%', whiteSpace: 'nowrap' }}>
+          <TableSortLabel active={false} hideSortIcon>
+            협업/권한
+          </TableSortLabel>
+        </TableCell>
         <TableCell padding="checkbox" key="starred" css={classes.headerCell} style={{ width: '5%', whiteSpace: 'nowrap' }}>
           <TableSortLabel active={false} hideSortIcon>
             즐겨찾기
@@ -266,24 +269,16 @@ type ActionPanelState = {
   mapId: number;
 };
 
-export type Filter = GenericFilter | LabelFilter;
+export type Filter = GenericFilter;
 
 export interface GenericFilter {
-  type: 'public' | 'all' | 'starred' | 'shared' | 'label' | 'owned';
-}
-
-export interface LabelFilter {
-  type: 'label';
-  label: Label;
+  type: 'public' | 'all' | 'starred' | 'shared' | 'owned';
 }
 
 interface MapsListProps {}
 
-const isLabelFilter = (filter: Filter): filter is LabelFilter => filter.type === 'label';
-
 const mapsFilter = (filter: Filter, search: string): ((mapInfo: MapInfo) => boolean) => {
   return (mapInfo: MapInfo) => {
-    // Check for filter condition
     let result = false;
     switch (filter.type) {
       case 'all':
@@ -298,11 +293,6 @@ const mapsFilter = (filter: Filter, search: string): ((mapInfo: MapInfo) => bool
       case 'shared':
         result = mapInfo.role != 'owner';
         break;
-      case 'label':
-        result =
-          !mapInfo.labels ||
-          mapInfo.labels.some((label) => label.id === (filter as LabelFilter).label.id);
-        break;
       case 'public':
         result = mapInfo.public;
         break;
@@ -310,7 +300,6 @@ const mapsFilter = (filter: Filter, search: string): ((mapInfo: MapInfo) => bool
         result = false;
     }
 
-    // Does it match search filter criteria...
     if (search && result) {
       result = mapInfo.title.toLowerCase().indexOf(search.toLowerCase()) != -1;
     }
@@ -319,30 +308,10 @@ const mapsFilter = (filter: Filter, search: string): ((mapInfo: MapInfo) => bool
   };
 };
 
-export type ChangeLabelMutationFunctionParam = { maps: MapInfo[]; label: Label; checked: boolean };
-
-export const getChangeLabelMutationFunction =
-  (client: Client) =>
-  async ({ maps, label, checked }: ChangeLabelMutationFunctionParam): Promise<void> => {
-    if (!label.id) {
-      label.id = await client.createLabel(label.title, label.color);
-    }
-    if (checked) {
-      const toAdd = maps.filter((m) => !m.labels.find((l) => l.id === label.id));
-      await Promise.all(toAdd.map((m) => client.addLabelToMap(label.id, m.id)));
-    } else {
-      const toRemove = maps.filter((m) => m.labels.find((l) => l.id === label.id));
-      await Promise.all(toRemove.map((m) => client.deleteLabelFromMap(label.id, m.id)));
-    }
-    return Promise.resolve();
-  };
-
 export const MapsList = (_props: MapsListProps): React.ReactElement => {
   const classes = useStyles();
   const [order, setOrder] = React.useState<Order>('desc');
   const [filter, setFilter] = React.useState<Filter>({ type: 'all' });
-  const [labelToDelete, setLabelToDelete] = React.useState<number | null>(null);
-  const [labelsMenuAnchor, setLabelsMenuAnchor] = React.useState<null | HTMLElement>(null);
 
   const [orderBy, setOrderBy] = React.useState<keyof MapInfo>('lastModificationTime');
   const [selected, setSelected] = React.useState<number[]>([]);
@@ -354,47 +323,11 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
   const intl = useIntl();
   const queryClient = useQueryClient();
 
-  const { data: labelsData = [] } = useQuery<unknown, ErrorInfo, Label[]>('labels', () =>
-    client.fetchLabels(),
-  );
-  const labels: Label[] = labelsData;
-  const deleteLabelMutation = useMutation((id: number) => client.deleteLabel(id), {
-    onSuccess: () => {
-      queryClient.invalidateQueries('labels');
-      queryClient.invalidateQueries('maps');
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
   const handleMenuClick = (newFilter: Filter) => {
     queryClient.invalidateQueries('maps');
     setFilter(newFilter);
-    setLabelsMenuAnchor(null);
   };
-  const handleLabelDelete = (id: number) => {
-    deleteLabelMutation.mutate(id);
-  };
-  const mainFilterValue =
-    filter.type === 'label' ? null : (filter.type as 'all' | 'owned' | 'starred' | 'shared');
-  const labelsMenuOpen = Boolean(labelsMenuAnchor);
-  const labelToDeleteObj = labels.find((l) => l.id === labelToDelete);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || window.self === window.top || !labelsMenuOpen) return;
-    try {
-      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
-    } catch (_) {
-      /* cross-origin 무시 */
-    }
-    return () => {
-      try {
-        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
-      } catch (_) {
-        /* cross-origin 무시 */
-      }
-    };
-  }, [labelsMenuOpen]);
+  const mainFilterValue = filter.type as 'all' | 'owned' | 'starred' | 'shared';
 
   const userLocale = AppI18n.getUserLocale();
   useEffect(() => {
@@ -424,10 +357,41 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
     return stableSort(filteredMaps, getComparator(order, orderBy));
   }, [filteredMaps, order, orderBy]);
 
+  // 최종 수정(asc) 기준으로 정렬한 목록 (번호 계산용 - 역순)
+  const sortedMapsByLastModAsc = useMemo(() => {
+    return stableSort(filteredMaps, getComparator('asc', 'lastModificationTime'));
+  }, [filteredMaps]);
+
   const pagedMaps = useMemo(() => {
     const start = page * rowsPerPage;
     return sortedMaps.slice(start, start + rowsPerPage);
   }, [sortedMaps, page, rowsPerPage]);
+
+  // 페이징 계산
+  const totalPages = Math.ceil(filteredMaps.length / rowsPerPage);
+  const pagesPerGroup = 5; // 한 그룹에 표시할 페이지 수
+  const currentGroup = Math.floor(page / pagesPerGroup);
+  const startPage = currentGroup * pagesPerGroup;
+  const endPage = Math.min(startPage + pagesPerGroup, totalPages);
+  const displayPages = Array.from({ length: endPage - startPage }, (_, i) => startPage + i + 1);
+  const prevGroupPage = startPage > 0 ? startPage : null;
+  const nextGroupPage = endPage < totalPages ? endPage + 1 : null;
+
+  const handleGoToPrevGroup = () => {
+    if (prevGroupPage !== null) {
+      setPage(prevGroupPage - 1);
+    }
+  };
+
+  const handleGoToNextGroup = () => {
+    if (nextGroupPage !== null) {
+      setPage(nextGroupPage - 1);
+    }
+  };
+
+  const handlePageClick = (newPage: number) => {
+    setPage(newPage - 1);
+  };
 
   const [activeRowAction, setActiveRowAction] = React.useState<ActionPanelState | undefined>(
     undefined,
@@ -555,37 +519,6 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
     });
   };
 
-  const handleAddLabelClick = () => {
-    trackToolbarAction('add_label_selected', `count:${selected.length}`);
-    setActiveDialog({
-      actionType: 'label',
-      mapsId: selected,
-    });
-  };
-
-  const removeLabelMultation = useMutation<
-    void,
-    ErrorInfo,
-    { mapId: number; labelId: number },
-    number
-  >(
-    ({ mapId, labelId }) => {
-      return client.deleteLabelFromMap(labelId, mapId);
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('maps');
-      },
-      onError: (error) => {
-        console.error(error);
-      },
-    },
-  );
-
-  const handleRemoveLabel = (mapId: number, labelId: number) => {
-    removeLabelMultation.mutate({ mapId, labelId });
-  };
-
   const isSelected = (id: number) => selected.indexOf(id) !== -1;
   return (
     <div css={classes.root}>
@@ -640,121 +573,12 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               </ToggleButton>
               <ToggleButton value="shared" aria-label="Shared with me">
                 <Tooltip
-                  title={intl.formatMessage({
-                    id: 'maps.nav-shared',
-                    defaultMessage: 'Shared with me',
-                  })}
+                  title={'협업중인 맵'}
                 >
                   <ShareTwoTone color="secondary" />
                 </Tooltip>
               </ToggleButton>
             </ToggleButtonGroup>
-
-            <Button
-              id="labels-button"
-              variant="text"
-              disableElevation
-              onClick={(e) => setLabelsMenuAnchor(e.currentTarget)}
-              endIcon={<ExpandMoreIcon sx={{ color: '#464c53', ml: 0 }} />}
-              startIcon={
-                <LabelTwoTone
-                  sx={{
-                    color:
-                      filter.type === 'label'
-                        ? (filter as LabelFilter).label.color || 'inherit'
-                        : 'inherit',
-                    mr: 0.5,
-                  }}
-                />
-              }
-              css={classes.labelsButton}
-              sx={[
-                uiSelectSizeMd,
-                {
-                  '& .MuiButton-endIcon': {
-                    position: 'absolute',
-                    right: 10,
-                    marginLeft: 0,
-                  },
-                },
-              ]}
-              aria-controls={labelsMenuOpen ? 'labels-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={labelsMenuOpen ? 'true' : undefined}
-            >
-              {filter.type === 'label'
-                ? (filter as LabelFilter).label.title
-                : intl.formatMessage({ id: 'maps.nav-all', defaultMessage: 'All' })}
-            </Button>
-            <Menu
-              id="labels-menu"
-              anchorEl={labelsMenuAnchor}
-              open={labelsMenuOpen}
-              onClose={() => setLabelsMenuAnchor(null)}
-              MenuListProps={{ 'aria-labelledby': 'labels-button' }}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-              slotProps={{
-                paper: { sx: { maxHeight: 320, minWidth: 240 } },
-                backdrop: { sx: { backgroundColor: 'rgba(0, 0, 0, 0.3) !important' } },
-              }}
-            >
-              <MenuItem
-                selected={filter.type !== 'label'}
-                onClick={() => handleMenuClick({ type: 'all' })}
-              >
-                <ListItemIcon sx={{ minWidth: 36 }}>
-                  <LabelTwoTone color="secondary" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={intl.formatMessage({ id: 'maps.nav-all', defaultMessage: 'All' })}
-                />
-              </MenuItem>
-              {labels.length === 0 ? (
-                <MenuItem disabled>
-                  <ListItemText
-                    primary={'라벨이 없습니다.'}
-                  />
-                </MenuItem>
-              ) : (
-                labels.map((l) => (
-                  <MenuItem
-                    key={l.id}
-                    selected={filter.type === 'label' && (filter as LabelFilter).label.id === l.id}
-                    onClick={() => handleMenuClick({ type: 'label', label: l })}
-                    sx={{ pr: 6 }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 36 }}>
-                      <LabelTwoTone style={{ color: l.color ? l.color : 'inherit' }} />
-                    </ListItemIcon>
-                    <ListItemText primary={l.title} />
-                    <IconButton
-                      size="small"
-                      aria-label={intl.formatMessage({
-                        id: 'common.delete',
-                        defaultMessage: 'Delete',
-                      })}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLabelToDelete(l.id);
-                        setLabelsMenuAnchor(null);
-                      }}
-                      sx={[
-                        uiButtonIconOnlyLineSecondary,
-                        {
-                          position: 'absolute',
-                          right: 8,
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                        },
-                      ]}
-                    >
-                      <ClearIcon sx={{ fontSize: 16 }} />
-                    </IconButton>
-                  </MenuItem>
-                ))
-              )}
-            </Menu>
 
             <Box className="search-item" sx={[filterBarItem, { minWidth: 0 }]}>
               <Box component="label" sx={filterBarLabel}>
@@ -793,23 +617,6 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
             </Tooltip>
             <Tooltip
               arrow={true}
-              title={'선택된 맵에 라벨 추가'}
-            >
-              <Button
-                variant="outlined"
-                type="button"
-                disableElevation={true}
-                sx={uiButtonTypeLineSecondarySizeMd}
-                disabled={selected.length === 0}
-                onClick={handleAddLabelClick}
-              >
-                <span className="button-text">
-                  라벨 추가
-                </span>
-              </Button>
-            </Tooltip>
-            <Tooltip
-              arrow={true}
               title={'선택된 맵 삭제'}
             >
               <span>
@@ -828,26 +635,16 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               </span>
             </Tooltip>
             {/* <ThemeToggleButton /> */}
-            {/* Pagination on desktop */}
-            {filteredMaps.length > rowsPerPage && (
-              <Box css={classes.paginationDesktop as Interpolation<Theme>}>
-                <TablePagination
-                  css={classes.tablePagination as Interpolation<Theme>}
-                  count={filteredMaps.length}
-                  rowsPerPageOptions={[]}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  component="div"
-                />
-              </Box>
-            )}
           </Box>
         </Box>
 
 
-        <TableContainer css={classes.tableContainer as Interpolation<Theme>}>
+        <Box
+          css={{
+            minHeight: '600px',
+          }}
+        >
+          <TableContainer css={classes.tableContainer as Interpolation<Theme>}>
           <Box css={classes.cards}>
             {filteredMaps.length === 0 ? (
               <Card>
@@ -879,7 +676,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                                 <StarRateRoundedIcon
                                   color="action"
                                   style={{
-                                    color: row.starred ? 'yellow' : 'gray',
+                                    color: row.starred ? '#FFB800' : 'gray',
                                   }}
                                 />
                               </IconButton>
@@ -948,7 +745,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                               )}
                               placement="bottom-start"
                             >
-                              <span>{dayjs(row.lastModificationTime).fromNow()}</span>
+                              <span>{dayjs(row.lastModificationTime).format('YYYY-MM-DD HH:mm')}</span>
                             </Tooltip>
                           </Typography>
                         }
@@ -973,14 +770,16 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
             <TableBody>
               {filteredMaps.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} style={{ textAlign: 'center' }}>
+                  <TableCell colSpan={9} style={{ textAlign: 'center' }}>
                     {'조회된 결과가 없습니다.'}
                   </TableCell>
                 </TableRow>
               ) : (
-                pagedMaps.map((row: MapInfo) => {
+                pagedMaps.map((row: MapInfo, index: number) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = row.id;
+                  // 최종 수정(asc) 기준으로 전체 정렬된 목록에서의 번호 계산 (역순)
+                  const rowNumber = sortedMapsByLastModAsc.findIndex((m) => m.id === row.id) + 1;
 
                   return (
                     <TableRow
@@ -1002,6 +801,19 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                           }}
                           sx={checkboxBscCmbSx}
                         />
+                      </TableCell>
+
+                      <TableCell css={classes.bodyCell} style={{ width: '3%' }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            fontFamily: '"Pretendard", sans-serif',
+                          }}
+                        >
+                          {rowNumber}
+                        </Typography>
                       </TableCell>
 
                       <TableCell css={[classes.bodyCell, classes.bodyCellLeft as CSSObject]}>
@@ -1043,15 +855,6 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                         </Typography>
                       </TableCell>
 
-                      <TableCell css={[classes.bodyCell, classes.labelsCell as CSSObject]}>
-                        <LabelsCell
-                          labels={row.labels}
-                          onDelete={(lbl) => {
-                            handleRemoveLabel(row.id, lbl.id);
-                          }}
-                        />
-                      </TableCell>
-
                       <TableCell css={classes.bodyCell}>
                         <Typography
                           variant="body2"
@@ -1081,9 +884,28 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                                 '"Pretendard", sans-serif',
                             }}
                           >
-                            {dayjs(row.lastModificationTime).fromNow()}
+                            {dayjs(row.lastModificationTime).format('YYYY-MM-DD HH:mm')}
                           </Typography>
                         </Tooltip>
+                      </TableCell>
+
+                      <TableCell css={classes.bodyCell} style={{ width: '8%' }}>
+                        {row.role === 'owner' ? (
+                          row.collaboratorCount && row.collaboratorCount > 0 ? (
+                            <Tooltip 
+                              arrow={true} 
+                              title={`${row.collaboratorCount}명과 공유 중`}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ShareTwoTone color="primary" />
+                              </Box>
+                            </Tooltip>
+                          ) : null
+                        ) : row.role === 'editor' || row.role === 'viewer' ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <RoleIcon role={row.role} />
+                          </Box>
+                        ) : null}
                       </TableCell>
 
                       <TableCell padding="checkbox" css={classes.bodyCell}>
@@ -1095,7 +917,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             <StarRateRoundedIcon
                               color="action"
                               style={{
-                                color: row.starred ? 'yellow' : 'gray',
+                                color: row.starred ? '#FFB800' : 'gray',
                               }}
                             />
                           </IconButton>
@@ -1126,20 +948,159 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
             </TableBody>
           </Table>
         </TableContainer>
+        </Box>
 
-        {/* Pagination on mobile only - below table */}
-        {filteredMaps.length > rowsPerPage && (
-          <Box css={classes.paginationMobile as Interpolation<Theme>}>
-            <TablePagination
-              css={classes.tablePagination as Interpolation<Theme>}
-              count={filteredMaps.length}
-              rowsPerPageOptions={[]}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              component="div"
-            />
+        {/* Pagination below table */}
+        {filteredMaps.length > rowsPerPage && totalPages > 0 && (
+          <Box
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              marginTop: '8px',
+              padding: '12px 0',
+              marginBottom: '12px',
+            }}
+          >
+            <Button
+              type="button"
+              onClick={handleGoToPrevGroup}
+              disabled={prevGroupPage === null}
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: 'auto',
+                height: '32px',
+                padding: '0 10px',
+                border: 'none',
+                borderRadius: '6px',
+                backgroundColor: 'transparent',
+                color: '#464c53',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: '"Pretendard", sans-serif',
+                fontSize: '14px',
+                fontWeight: 400,
+                lineHeight: 1.5,
+                gap: '4px',
+                paddingLeft: '4px',
+                paddingRight: '8px',
+                '&:hover:not(:disabled)': {
+                  backgroundColor: '#f0f2ff',
+                  color: '#5d5dc4',
+                },
+                '&:disabled': {
+                  backgroundColor: 'transparent',
+                  color: '#b1b8be',
+                  cursor: 'not-allowed',
+                  opacity: 0.5,
+                },
+                '& .MuiSvgIcon-root': {
+                  width: '20px',
+                  height: '20px',
+                },
+                '& span': {
+                  fontSize: '17px',
+                  fontWeight: 400,
+                  lineHeight: 1.5,
+                },
+              }}
+            >
+              <ChevronLeftIcon />
+              <span>이전</span>
+            </Button>
+
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                margin: '0 4px',
+              }}
+            >
+              {displayPages.map((pageNum) => (
+                <Button
+                  key={pageNum}
+                  type="button"
+                  onClick={() => handlePageClick(pageNum)}
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '32px',
+                    height: '32px',
+                    padding: '0 12px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    backgroundColor: page === pageNum - 1 ? '#2e3484' : 'transparent',
+                    color: page === pageNum - 1 ? '#fff' : '#464c53',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontFamily: '"Pretendard", sans-serif',
+                    fontSize: '14px',
+                    fontWeight: page === pageNum - 1 ? 700 : 400,
+                    lineHeight: 1.5,
+                    '&:hover:not(:disabled)': {
+                      backgroundColor: page === pageNum - 1 ? '#3b43aa' : '#f0f2ff',
+                      color: page === pageNum - 1 ? '#fff' : '#5d5dc4',
+                    },
+                  }}
+                >
+                  {pageNum}
+                </Button>
+              ))}
+            </Box>
+
+            <Button
+              type="button"
+              onClick={handleGoToNextGroup}
+              disabled={nextGroupPage === null}
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: 'auto',
+                height: '32px',
+                padding: '0 10px',
+                border: 'none',
+                borderRadius: '6px',
+                backgroundColor: 'transparent',
+                color: '#464c53',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: '"Pretendard", sans-serif',
+                fontSize: '14px',
+                fontWeight: 400,
+                lineHeight: 1.5,
+                gap: '4px',
+                paddingLeft: '4px',
+                paddingRight: '8px',
+                '&:hover:not(:disabled)': {
+                  backgroundColor: '#f0f2ff',
+                  color: '#5d5dc4',
+                },
+                '&:disabled': {
+                  backgroundColor: 'transparent',
+                  color: '#b1b8be',
+                  cursor: 'not-allowed',
+                  opacity: 0.5,
+                },
+                '& .MuiSvgIcon-root': {
+                  width: '20px',
+                  height: '20px',
+                },
+                '& span': {
+                  fontSize: '17px',
+                  fontWeight: 400,
+                  lineHeight: 1.5,
+                },
+              }}
+            >
+              <span>다음</span>
+              <ChevronRightIcon />
+            </Button>
           </Box>
         )}
       </Paper>
@@ -1155,16 +1116,6 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
         mapsId={activeDialog ? activeDialog.mapsId : []}
         fromEditor
       />
-      {labelToDeleteObj && labelToDelete != null && (
-        <LabelDeleteConfirm
-          onClose={() => setLabelToDelete(null)}
-          onConfirm={() => {
-            handleLabelDelete(labelToDelete);
-            setLabelToDelete(null);
-          }}
-          label={labelToDeleteObj}
-        />
-      )}
     </div>
   );
 };

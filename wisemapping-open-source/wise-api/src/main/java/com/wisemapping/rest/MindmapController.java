@@ -23,6 +23,7 @@ import com.wisemapping.model.*;
 import com.wisemapping.rest.model.*;
 import com.wisemapping.security.Utils;
 import com.wisemapping.service.ComUserinfoService;
+import com.wisemapping.service.ComUserinfoSearchResult;
 import com.wisemapping.service.*;
 import com.wisemapping.service.SpamDetectionService;
 import com.wisemapping.service.spam.SpamContentExtractor;
@@ -557,51 +558,61 @@ public class MindmapController {
         final Mindmap mindMap = findMindmapById(id);
         
         // 검색어 정규화 (빈 문자열도 허용)
-        final String normalizedSearch = (searchTerm == null || searchTerm.trim().isEmpty()) ? "" : searchTerm.trim();
-        final int safeLimit = Math.min(Math.max(limit, 1), 50); // 1~50 사이로 제한
+        final String normalizedSearch = (searchTerm == null || searchTerm.trim().isEmpty()) ? null : searchTerm.trim();
+        // final int safeLimit = Math.min(Math.max(limit, 1), 50); // 1~50 사이로 제한
         
-        // 이미 협업 중인 사용자 이메일 수집
-        final Set<String> collaboratingEmails = mindMap.getCollaborations().stream()
-                .map(collab -> collab.getCollaborator().getEmail().toLowerCase())
+        // 이미 협업 중인 사용자 USER_ID 수집 (Account.firstname = USER_ID)
+        final Set<String> collaboratingUserIds = mindMap.getCollaborations().stream()
+                .map(collab -> {
+                    Collaborator collaborator = collab.getCollaborator();
+                    if (collaborator instanceof Account) {
+                        Account account = (Account) collaborator;
+                        return account.getFirstname() != null ? account.getFirstname().toLowerCase() : null;
+                    }
+                    return null;
+                })
+                .filter(userId -> userId != null)
                 .collect(Collectors.toSet());
         
-        // 현재 사용자 이메일도 제외
+        // 현재 사용자 USER_ID도 제외
         final Account currentUser = Utils.getUser();
-        collaboratingEmails.add(currentUser.getEmail().toLowerCase());
-        
-        // ACCOUNT 테이블 검색 (활성/비활성 계정 모두 포함)
-        // 검색어가 없으면 빈 문자열로 검색하여 모든 사용자 조회
-        final List<Account> searchResults;
-        if (normalizedSearch.isEmpty()) {
-            // 검색어가 없으면 처음 limit * 2개 사용자 조회
-            searchResults = userService.getAllUsers(0, safeLimit * 2);
-        } else {
-            // 검색어가 있으면 검색 수행
-            searchResults = userService.searchUsers(normalizedSearch, 0, safeLimit * 2);
+        if (currentUser.getFirstname() != null) {
+            collaboratingUserIds.add(currentUser.getFirstname().toLowerCase());
         }
         
-        // 결과 변환 및 필터링
+        // com_userinfo 테이블에서 검색 (DELETE_DT가 NULL이 아닌 사용자만)
         final List<RestUserSearchResult> results = new ArrayList<>();
-        for (Account user : searchResults) {
-            final String userEmail = user.getEmail().toLowerCase();
+        if (comUserinfoService != null) {
+            // 검색어가 없으면 null 전달하여 전체 조회
+            final List<ComUserinfoSearchResult> searchResults = comUserinfoService.searchUsers(
+                    normalizedSearch);
             
-            // 이미 협업 중인 사용자는 제외
-            if (collaboratingEmails.contains(userEmail)) {
-                continue;
-            }
-
-            // Account의 활성/정지 상태와 상관없이 모두 포함
-            RestUserSearchResult result = new RestUserSearchResult(user, false);
-            // com_userinfo.USER_NM으로 fullName 치환, com_deptinfo.DEPT_NM 치환 (Account.firstname = USER_ID)
-            if (comUserinfoService != null && user.getFirstname() != null) {
-                comUserinfoService.findUserNmByUserId(user.getFirstname()).ifPresent(result::setFullName);
-                comUserinfoService.findDeptNmByUserId(user.getFirstname()).ifPresent(result::setDeptNm);
-            }
-            results.add(result);
-            
-            // limit만큼만 반환
-            if (results.size() >= safeLimit) {
-                break;
+            // 결과 변환 및 필터링
+            for (ComUserinfoSearchResult userInfo : searchResults) {
+                final String userId = userInfo.getUserId();
+                if (userId == null) {
+                    continue;
+                }
+                
+                // 이미 협업 중인 사용자는 제외
+                if (collaboratingUserIds.contains(userId.toLowerCase())) {
+                    continue;
+                }
+                
+                // RestUserSearchResult 생성
+                RestUserSearchResult result = new RestUserSearchResult();
+                result.setEmail(userInfo.getEmail() != null ? userInfo.getEmail() : "");
+                result.setFirstname(userId); // USER_ID를 firstname에 저장
+                result.setFullName(userInfo.getUserNm() != null ? userInfo.getUserNm() : "");
+                result.setDeptNm(userInfo.getDeptNm());
+                result.setCollaborating(false);
+                
+                results.add(result);
+                
+                // limit만큼만 반환
+                // if (results.size() >= safeLimit) {
+                //     break;
+                // }
             }
         }
         

@@ -47,8 +47,8 @@ interface LanguageStrings {
 
 const EN: LanguageStrings = {
   LOADING: 'Loading ..',
-  SAVING: 'Saving ...',
-  SAVE_COMPLETE: 'Save completed',
+  SAVING: '저장중 ...',
+  SAVE_COMPLETE: '저장되었습니다',
   ZOOM_IN_ERROR: 'Zoom too high.',
   ZOOM_ERROR: 'No more zoom can be applied.',
   ONLY_ONE_TOPIC_MUST_BE_SELECTED: 'Could not create a topic. Only one topic must be selected.',

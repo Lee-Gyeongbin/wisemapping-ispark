@@ -8,6 +8,7 @@ package com.wisemapping.service;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -31,4 +32,14 @@ public interface ComUserinfoService {
      * @return DEPT_NM, 없으면 empty
      */
     Optional<String> findDeptNmByUserId(@Nullable String userId);
+
+    /**
+     * com_userinfo 테이블에서 사용자 검색 (협업자 검색용).
+     * DELETE_DT가 NULL이 아닌 사용자만 조회하며, 부서정보도 함께 조회.
+     *
+     * @param searchTerm 검색어 (USER_NM 또는 EMAIL로 검색, null이면 전체 조회)
+     * @param limit 최대 조회 개수
+     * @return 사용자 정보 리스트 (USER_ID, USER_NM, EMAIL, DEPT_NM 포함)
+     */
+    List<ComUserinfoSearchResult> searchUsers(@Nullable String searchTerm);
 }

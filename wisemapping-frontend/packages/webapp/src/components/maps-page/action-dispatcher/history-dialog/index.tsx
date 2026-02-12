@@ -98,7 +98,7 @@ const HistoryDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElemen
                       title={dayjs(row.lastModificationTime).format('lll')}
                       placement="bottom-start"
                     >
-                      <span>{dayjs(row.lastModificationTime).fromNow()}</span>
+                      <span>{dayjs(row.lastModificationTime).format('YYYY-MM-DD HH:mm')}</span>
                     </Tooltip>
                   </TableCell>
                   <TableCell align="left">

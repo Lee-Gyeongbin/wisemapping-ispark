@@ -57,6 +57,7 @@ export type MapInfo = {
   description: string;
   public: boolean;
   role: Role;
+  collaboratorCount?: number;
 };
 
 export type MapMetadata = {

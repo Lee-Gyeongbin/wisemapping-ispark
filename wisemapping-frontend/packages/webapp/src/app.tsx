@@ -368,6 +368,10 @@ const AppWithTheme = (): ReactElement => {
                 <CssBaseline />
                 <GlobalStyles
                   styles={{
+                    'html': {
+                      overflowY: 'hidden !important',
+                      overflowX: 'hidden !important',
+                    },
                     'html, body, #root, .mindplot-div-container': {
                       fontFamily: '"Pretendard", sans-serif !important',
                     },

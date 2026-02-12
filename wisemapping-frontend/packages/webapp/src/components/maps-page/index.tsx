@@ -23,7 +23,7 @@ import AppI18n, { Locales } from '../../classes/app-i18n';
 import { trackPageView } from '../../utils/analytics';
 import { SEOHead } from '../seo';
 
-export type { Filter, LabelFilter } from './maps-list';
+export type { Filter } from './maps-list';
 
 const MapsPage = (): ReactElement => {
   const classes = useStyles();

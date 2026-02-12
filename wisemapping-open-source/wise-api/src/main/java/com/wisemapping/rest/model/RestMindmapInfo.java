@@ -66,6 +66,7 @@ public class RestMindmapInfo {
     private Boolean cachedPublic;
     private Boolean cachedSpamDetected;
     private Boolean cachedStarred;
+    private Integer cachedCollaboratorCount;
 
     public RestMindmapInfo() {
         this(new Mindmap(), null, null);
@@ -223,6 +224,17 @@ public class RestMindmapInfo {
         }
     }
 
+    public int getCollaboratorCount() {
+        if (cachedCollaboratorCount != null) {
+            return cachedCollaboratorCount;
+        }
+        return mindmap.getCollaborations() != null ? mindmap.getCollaborations().size() : 0;
+    }
+
+    public void setCollaboratorCount(int value) {
+        this.cachedCollaboratorCount = value;
+    }
+
     @JsonIgnore
     public Mindmap getDelegated() {
         return this.mindmap;
@@ -239,6 +251,7 @@ public class RestMindmapInfo {
         this.cachedPublic = mindmap.isPublic();
         this.cachedSpamDetected = mindmap.isSpamDetected();
         this.cachedStarred = resolveStarred(mindmap, collaborator, userCollaboration);
+        this.cachedCollaboratorCount = mindmap.getCollaborations() != null ? mindmap.getCollaborations().size() : 0;
     }
 
     private static String formatCalendar(Calendar calendar) {

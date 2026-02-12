@@ -31,7 +31,6 @@ import InfoDialog from './info-dialog';
 import DeleteMultiselectDialog from './delete-multiselect-dialog';
 import ExportDialog from './export-dialog';
 import ShareDialog from './share-dialog';
-import LabelDialog from './label-dialog';
 import { trackMindmapListAction } from '../../../utils/analytics';
 
 export type BasicMapInfo = {
@@ -61,6 +60,13 @@ const ActionDispatcher = ({
       // Handle immediate actions
       switch (action) {
         case 'open':
+          try {
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({ type: 'wisemapping-show-loading' }, '*');
+            }
+          } catch (_) {
+            /* cross-origin 무시 */
+          }
           window.location.href = `/c/maps/${mapsId}/edit`;
           onClose(true);
           break;
@@ -110,7 +116,6 @@ const ActionDispatcher = ({
         <ExportDialog onClose={handleOnClose} mapId={mapsId[0]} enableImgExport={fromEditor} />
       )}
       {action === 'share' && <ShareDialog onClose={handleOnClose} mapId={mapsId[0]} />}
-      {action === 'label' && <LabelDialog onClose={handleOnClose} mapsId={mapsId} />}
     </span>
   );
 };

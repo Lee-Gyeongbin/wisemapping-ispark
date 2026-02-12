@@ -128,13 +128,6 @@ export const useStyles = () => {
         },
       },
     },
-    labelsCell: {
-      maxWidth: '300px',
-      overflow: 'hidden',
-      textAlign: 'right',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis',
-    },
     descriptionCell: {
       maxWidth: '200px',
       minWidth: 0,
@@ -189,22 +182,6 @@ export const useStyles = () => {
       marginRight: theme.spacing(1),
       '& .MuiToggleButtonGroup-grouped': {
         padding: theme.spacing(0.75, 1),
-      },
-    },
-    labelsButton: {
-      marginRight: theme.spacing(1),
-      minWidth: 240,
-      width: 240,
-      maxWidth: 280,
-      position: 'relative',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      [smMediaQuery]: {
-        minWidth: 180,
-        width: 'auto',
-        maxWidth: 200,
-        '& .MuiButton-endIcon': { marginLeft: 0 },
       },
     },
     tableContainer: {
