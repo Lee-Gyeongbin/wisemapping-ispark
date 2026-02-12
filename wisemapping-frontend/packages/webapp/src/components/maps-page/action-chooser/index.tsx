@@ -148,7 +148,7 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
           <ListItemIcon>
             <HistoryOutlined />
           </ListItemIcon>
-          수정내역
+          변경 이력
         </MenuItem>
       )}
     </Menu>

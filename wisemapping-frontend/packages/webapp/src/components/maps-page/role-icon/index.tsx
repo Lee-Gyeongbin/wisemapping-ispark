@@ -34,19 +34,19 @@ const RoleIcon = ({ role }: RoleIconProps): React.ReactElement => {
   return (
     <span>
       {role == 'owner' && (
-        <Tooltip title={<FormattedMessage id="role.owner" defaultMessage="Owner" />} arrow={true}>
+        <Tooltip title={'소유자'} arrow={true}>
           <PersonSharpIcon />
         </Tooltip>
       )}
 
       {role == 'editor' && (
-        <Tooltip title={<FormattedMessage id="role.editor" defaultMessage="Editor" />} arrow={true}>
+        <Tooltip title={'수정 권한'} arrow={true}>
           <EditSharpIcon />
         </Tooltip>
       )}
 
       {role == 'viewer' && (
-        <Tooltip title={<FormattedMessage id="role.viewer" defaultMessage="Viewer" />} arrow={true}>
+        <Tooltip title={'읽기 권한'} arrow={true}>
           <VisibilitySharpIcon />
         </Tooltip>
       )}

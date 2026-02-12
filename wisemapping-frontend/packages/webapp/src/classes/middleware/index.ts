@@ -49,7 +49,7 @@ export const useFetchMapById = (id: number): MapLoadResult => {
     map = {
       id: data.id,
       title: data.title,
-      starred: data.starred ?? false,
+      starred: data.starred === false || data.starred === 'false' ? false : Boolean(data.starred),
       labels: [], // Labels not included in metadata - would need separate call if needed
       createdBy: data.createdBy ?? data.creatorFullName,
       creationTime: data.creationTime ?? '',

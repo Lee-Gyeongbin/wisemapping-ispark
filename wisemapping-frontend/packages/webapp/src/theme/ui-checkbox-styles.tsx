@@ -96,3 +96,22 @@ export const checkboxBscCmbSx = {
     color: '#555dc4',
   },
 };
+
+/** 협업자 설정 등 큰 클릭 영역이 필요할 때 사용 (체크박스 크기 + 터치/클릭 영역 확대) */
+export const checkboxBscCmbSxLarge = {
+  ...checkboxBscCmbSx,
+  padding: '12px !important' as const,
+  '& .MuiSvgIcon-root': {
+    width: 22,
+    height: 22,
+  },
+  /* 한 번 클릭으로 토글되도록 숨겨진 input이 전체 영역을 덮도록 */
+  '& .PrivateSwitchBase-input, & input': {
+    width: '100%',
+    height: '100%',
+    top: 0,
+    left: 0,
+    margin: 0,
+    cursor: 'pointer',
+  },
+};

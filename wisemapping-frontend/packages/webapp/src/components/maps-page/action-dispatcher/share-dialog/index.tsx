@@ -48,11 +48,12 @@ import {
   filterBarItem,
   filterBarLabel,
   bscCmbOutlinedInputSx,
+  bscCmbTypeInfoButtonSx,
 } from '../../../../theme/ui-input-styles';
 import {
   BscCheckboxUncheckedIcon,
   BscCheckboxCheckedIcon,
-  checkboxBscCmbSx,
+  checkboxBscCmbSxLarge,
 } from '../../../../theme/ui-checkbox-styles';
 
 type ShareModel = {
@@ -97,7 +98,10 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
   const addMutation = useMutation(
     (model: ShareModel) => {
       const permissions = model.selectedUsers.map((user) => {
-        return { email: user.email, role: model.canEdit ? ('editor' as const) : ('viewer' as const) };
+        return {
+          email: user.email,
+          role: model.canEdit ? ('editor' as const) : ('viewer' as const),
+        };
       });
       return client.addMapPermissions(mapId, '', permissions);
     },
@@ -121,18 +125,18 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
   };
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    event.preventDefault();
-
     const name = event.target.name;
     const value =
       event.target.type === 'checkbox'
         ? (event.target as HTMLInputElement).checked
         : event.target.value;
     setModel({ ...model, [name as keyof ShareModel]: value });
-    event.stopPropagation();
   };
 
-  const handleUserSelectionChange = (_event: React.SyntheticEvent, newValue: UserSearchResult[]) => {
+  const handleUserSelectionChange = (
+    _event: React.SyntheticEvent,
+    newValue: UserSearchResult[],
+  ) => {
     setModel({ ...model, selectedUsers: newValue });
   };
 
@@ -179,9 +183,11 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
         error={error}
       >
         <div css={classes.actionContainer as Interpolation<Theme>}>
-          <Box sx={[filterBarItem, { minWidth: 0, flex: 1 }]} css={[classes.fullWidthInMobile, classes.email]}>
-            <Box component="label" sx={filterBarLabel}>
-            </Box>
+          <Box
+            sx={[filterBarItem, { minWidth: 0, flex: 1 }]}
+            css={[classes.fullWidthInMobile, classes.email]}
+          >
+            <Box component="label" sx={filterBarLabel}></Box>
             <Autocomplete
               multiple
               id="user-search"
@@ -240,34 +246,26 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
                 disableRipple
                 icon={<BscCheckboxUncheckedIcon />}
                 checkedIcon={<BscCheckboxCheckedIcon />}
-                sx={checkboxBscCmbSx}
+                sx={checkboxBscCmbSxLarge}
               />
             }
-            label={
-              <Typography variant="subtitle2">
-                <FormattedMessage id="share.can-edit" defaultMessage="Can edit" />
-              </Typography>
-            }
+            label={<Typography variant="subtitle2">{'수정 권한'}</Typography>}
             css={classes.role}
           />
 
           <AsyncButton
-            color="primary"
             type="button"
             variant="contained"
             disableElevation={true}
             onClick={handleOnAddClick}
             disabled={!isValid}
             isLoading={addMutation.isLoading}
-            loadingText={intl.formatMessage({
-              id: 'share.adding-button',
-              defaultMessage: 'Sharing...',
-            })}
+            loadingText={'협업중...'}
+            sx={[bscCmbTypeInfoButtonSx, { minWidth: 80 }]}
             css={classes.shareButton}
           >
-            {intl.formatMessage({ id: 'share.add-button', defaultMessage: 'Share' })}
+            {'협업하기'}
           </AsyncButton>
-
         </div>
 
         {!isLoading && permissions && permissions.length > 0 && (
@@ -280,15 +278,9 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
             <Table size="small" aria-label="collaborators table">
               <TableHead css={classes.tableHead as Interpolation<Theme>}>
                 <TableRow>
-                  <TableCell>
-                    <FormattedMessage id="share.table.collaborator" defaultMessage="Collaborator" />
-                  </TableCell>
-                  <TableCell align="center">
-                    <FormattedMessage id="share.table.role" defaultMessage="Role" />
-                  </TableCell>
-                  <TableCell align="center">
-                    <FormattedMessage id="share.table.actions" defaultMessage="Actions" />
-                  </TableCell>
+                  <TableCell>{'협업자'}</TableCell>
+                  <TableCell align="center">{'권한'}</TableCell>
+                  <TableCell align="center">{'삭제'}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -309,14 +301,7 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
                       <RoleIcon role={permission.role} />
                     </TableCell>
                     <TableCell align="center">
-                      <Tooltip
-                        title={
-                          <FormattedMessage
-                            id="share.delete"
-                            defaultMessage="Delete collaborator"
-                          />
-                        }
-                      >
+                      <Tooltip title={'협업취소'}>
                         <span>
                           <IconButton
                             disabled={permission.role === 'owner' || deleteMutation.isLoading}

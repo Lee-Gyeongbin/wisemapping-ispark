@@ -72,6 +72,7 @@ public class RestMindmapHistory {
     }
 
     public void setCreator(String creator) {
+        this.creator = creator;
     }
 
     public void setId(int id) {

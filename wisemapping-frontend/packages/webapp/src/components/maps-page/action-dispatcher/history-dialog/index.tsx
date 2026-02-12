@@ -59,30 +59,24 @@ const HistoryDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElemen
       handleOnClose();
       window.location.reload();
     });
-    // Reload page after revert ...
   };
 
   return (
     <BaseDialog
       onClose={handleOnClose}
-      title={intl.formatMessage({
-        id: 'action.history-title',
-        defaultMessage: 'Version history',
-      })}
-      description={intl.formatMessage({
-        id: 'action.history-description',
-        defaultMessage: 'List of changes introduced in the last 90 days.',
-      })}
+      title={'변경 이력'}
+      useBscCmbTitle={true}
+      description={'최근 90일 동안 변경된 내역입니다.'}
     >
-      <StyledTableContainer>
+      <StyledTableContainer sx={{ marginTop: 2 }}>
         <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
               <StyledHeaderCell align="left">
-                <FormattedMessage id="maps.modified-by" defaultMessage="Modified By" />
+                {'수정자'}
               </StyledHeaderCell>
               <StyledHeaderCell align="left">
-                <FormattedMessage id="maps.modified" defaultMessage="Modified" />
+                {'수정일'}
               </StyledHeaderCell>
               <StyledHeaderCell align="left"></StyledHeaderCell>
               <StyledHeaderCell align="left"></StyledHeaderCell>
@@ -92,10 +86,7 @@ const HistoryDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElemen
             {changeHistory.length === 0 ? (
               <TableRow>
                 <StyledEmptyCell colSpan={4}>
-                  <FormattedMessage
-                    id="history.no-changes"
-                    defaultMessage="There is no changes available"
-                  />
+                  {'변경 이력이 없습니다.'}
                 </StyledEmptyCell>
               </TableRow>
             ) : (
@@ -111,13 +102,31 @@ const HistoryDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElemen
                     </Tooltip>
                   </TableCell>
                   <TableCell align="left">
-                    <Link href={`/c/maps/${mapId}/${row.id}/view`} target="history">
-                      <FormattedMessage id="maps.view" defaultMessage="View" />
+                    <Link
+                      href={`/c/maps/${mapId}/${row.id}/view`}
+                      target="history"
+                      sx={{
+                        color: '#5d5dc4',
+                        fontWeight: 700,
+                        textDecorationColor: '#5d5dc4',
+                        '&:hover': { color: '#555dc4', textDecorationColor: '#555dc4' },
+                      }}
+                    >
+                      {'보기'}
                     </Link>
                   </TableCell>
                   <TableCell align="left">
-                    <Link href="#" onClick={(e) => handleOnClick(e, row.id)}>
-                      <FormattedMessage id="maps.revert" defaultMessage="Revert" />
+                    <Link
+                      href="#"
+                      onClick={(e) => handleOnClick(e, row.id)}
+                      sx={{
+                        color: '#5d5dc4',
+                        fontWeight: 700,
+                        textDecorationColor: '#5d5dc4',
+                        '&:hover': { color: '#555dc4', textDecorationColor: '#555dc4' },
+                      }}
+                    >
+                      {'되돌리기'}
                     </Link>
                   </TableCell>
                 </TableRow>

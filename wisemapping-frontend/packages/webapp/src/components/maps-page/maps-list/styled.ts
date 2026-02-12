@@ -135,6 +135,19 @@ export const useStyles = () => {
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
     },
+    descriptionCell: {
+      maxWidth: '200px',
+      minWidth: 0,
+      textAlign: 'left',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+      '& .MuiTypography-root': {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      },
+    },
     bodyCellLeft: {
       textAlign: 'left',
     },

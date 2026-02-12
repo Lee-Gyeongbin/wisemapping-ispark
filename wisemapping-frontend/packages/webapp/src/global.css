@@ -6,3 +6,10 @@ fieldset {
   margin: 0;
   padding: 0;
 }
+
+/* MUI OutlinedInput은 fieldset으로 테두리를 그리므로 예외 (모달 등 첫 진입 시 테두리 누락 방지) */
+.MuiOutlinedInput-root fieldset {
+  border: 1px solid transparent;
+  margin: 0;
+  padding: 0;
+}

@@ -66,6 +66,7 @@ export const filterBarLabel = {
 };
 
 /** BSC_CMB TextField(OutlinedInput) - 플로팅 라벨 유지, ui-input 스타일 */
+/** global.css fieldset { border:none } 및 테마 MuiFormControl fieldset 제거를 덮어써서 첫 진입 시에도 테두리 표시 */
 export const bscCmbOutlinedInputSx = {
   '& .MuiOutlinedInput-root': {
     fontFamily: '"Pretendard", sans-serif',
@@ -77,6 +78,7 @@ export const bscCmbOutlinedInputSx = {
     minHeight: 36,
     outline: 'none',
     '& fieldset': {
+      border: '1px solid #6d7882 !important',
       borderColor: '#6d7882',
       borderWidth: '1px',
     },

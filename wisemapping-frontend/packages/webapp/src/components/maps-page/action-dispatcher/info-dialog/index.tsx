@@ -18,8 +18,9 @@
 
 import React from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useQueryClient } from 'react-query';
 
-import { ErrorInfo } from '../../../../classes/client';
+import { ErrorInfo, MapInfo } from '../../../../classes/client';
 import BaseDialog from '../base-dialog';
 import { SimpleDialogProps } from '..';
 import {
@@ -39,8 +40,14 @@ import { useFetchMapById } from '../../../../classes/middleware';
 dayjs.extend(LocalizedFormat);
 
 const InfoDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement => {
+  const queryClient = useQueryClient();
   const { data: map } = useFetchMapById(mapId);
   const [error, setError] = React.useState<ErrorInfo>();
+
+  // 메타데이터 API는 starred를 안 주는 경우가 있어, 맵 목록 캐시에 있으면 그걸 씀
+  const mapsList = queryClient.getQueryData<MapInfo[]>('maps');
+  const starredFromList = mapsList?.find((m) => m.id === mapId)?.starred;
+  const starred = starredFromList ?? map?.starred ?? false;
 
   const intl = useIntl();
 
@@ -53,83 +60,67 @@ const InfoDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =
     <BaseDialog
       onClose={handleOnClose}
       error={error}
-      title={intl.formatMessage({ id: 'info.title', defaultMessage: 'Info' })}
-      description={intl.formatMessage({
-        id: 'info.description-msg',
-        defaultMessage: 'By publishing the map you make it visible to everyone on the Internet.',
-      })}
-      submitButton={intl.formatMessage({ id: 'info.button', defaultMessage: 'Accept' })}
+      title={'맵 정보'}
+      useBscCmbTitle={true}
+      submitButton={'확인'}
     >
       <StyledScrollContainer>
         <InfoSection>
           <SectionTitle variant="body1">
-            <FormattedMessage id="info.basic-info" defaultMessage="Basic Info" />
+            {'기본 정보'}
           </SectionTitle>
 
           <InfoRow>
             <InfoLabel variant="caption">
-              <FormattedMessage id="info.name" defaultMessage="Name" />:
+              {'마인드맵 명'}
             </InfoLabel>
             <InfoValue variant="body2">{map?.title}</InfoValue>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel variant="caption">
-              <FormattedMessage id="info.description" defaultMessage="Description" />:
+              {'설명'}
             </InfoLabel>
             <InfoValue variant="body2">{map?.description}</InfoValue>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel variant="caption">
-              <FormattedMessage id="info.creator" defaultMessage="Creator" />:
+              {'생성자'}
             </InfoLabel>
             <InfoValue variant="body2">{map?.createdBy}</InfoValue>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel variant="caption">
-              <FormattedMessage id="info.creation-time" defaultMessage="Creation Date" />:
+              {'생성일'}
             </InfoLabel>
             <InfoValue variant="body2">{dayjs(map?.creationTime).format('LLL')}</InfoValue>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel variant="caption">
-              <FormattedMessage id="info.modified-tny" defaultMessage="Last Modified By" />:
+              {'마지막 수정자'}
             </InfoLabel>
             <InfoValue variant="body2">{map?.lastModificationBy}</InfoValue>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel variant="caption">
-              <FormattedMessage id="info.modified-time" defaultMessage="Last Modified Date" />:
+              {'마지막 수정일'}
             </InfoLabel>
             <InfoValue variant="body2">{dayjs(map?.lastModificationTime).format('LLL')}</InfoValue>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel variant="caption">
-              <FormattedMessage id="info.starred" defaultMessage="Starred" />:
+              {'즐겨찾기'}
             </InfoLabel>
-            <InfoValue variant="body2">{Boolean(map?.starred).toString()}</InfoValue>
+            <InfoValue variant="body2">{starred ? 'Y' : 'N'}</InfoValue>
           </InfoRow>
         </InfoSection>
 
-        <StyledDivider />
 
-        <InfoSection>
-          <SectionTitle variant="body1">
-            <FormattedMessage id="info.sharing" defaultMessage="Sharing" />
-          </SectionTitle>
-
-          <InfoRow>
-            <InfoLabel variant="caption">
-              <FormattedMessage id="info.public-visibility" defaultMessage="Publicly Visible" />:
-            </InfoLabel>
-            <InfoValue variant="body2">{Boolean(map?.public).toString()}</InfoValue>
-          </InfoRow>
-        </InfoSection>
       </StyledScrollContainer>
     </BaseDialog>
   );

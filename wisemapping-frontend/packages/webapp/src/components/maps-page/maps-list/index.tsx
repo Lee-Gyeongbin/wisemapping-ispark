@@ -170,7 +170,13 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         id: 'title',
         numeric: false,
         label: '마인드맵 명',
-        style: { width: '35%', whiteSpace: 'nowrap' },
+        style: { width: '25%', whiteSpace: 'nowrap' },
+      },
+      {
+        id: 'description',
+        numeric: false,
+        label: '설명',
+        style: { width: '20%', whiteSpace: 'nowrap' },
       },
       {
         id: 'labels',
@@ -813,11 +819,8 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
           <Box css={classes.cards}>
             {filteredMaps.length === 0 ? (
               <Card>
-                <CardContent>
-                  <FormattedMessage
-                    id="maps.empty-result"
-                    defaultMessage="No matching mindmap found with the current filter criteria."
-                  />
+                <CardContent> 
+                  {'조회된 결과가 없습니다.'}
                 </CardContent>
               </Card>
             ) : (
@@ -939,10 +942,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               {filteredMaps.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} style={{ textAlign: 'center' }}>
-                    <FormattedMessage
-                      id="maps.empty-result"
-                      defaultMessage="No matching mindmap found with the current filter criteria."
-                    />
+                    {'조회된 결과가 없습니다.'}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -993,6 +993,22 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             {row.title}
                           </Link>
                         </Tooltip>
+                      </TableCell>
+
+                      <TableCell
+                        css={[classes.bodyCell, classes.descriptionCell as CSSObject]}
+                        title={row.description || ''}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            fontFamily: '"Pretendard", sans-serif',
+                          }}
+                        >
+                          {row.description || '-'}
+                        </Typography>
                       </TableCell>
 
                       <TableCell css={[classes.bodyCell, classes.labelsCell as CSSObject]}>

@@ -238,7 +238,14 @@ public class MindmapController {
         final List<MindMapHistory> histories = mindmapService.findMindmapHistory(id);
         final RestMindmapHistoryList result = new RestMindmapHistoryList();
         for (MindMapHistory history : histories) {
-            result.addHistory(new RestMindmapHistory(history));
+            final RestMindmapHistory rest = new RestMindmapHistory(history);
+            if (comUserinfoService != null) {
+                final Account editor = history.getEditor();
+                if (editor != null && editor.getFirstname() != null) {
+                    comUserinfoService.findUserNmByUserId(editor.getFirstname()).ifPresent(rest::setCreator);
+                }
+            }
+            result.addHistory(rest);
         }
         return result;
     }
