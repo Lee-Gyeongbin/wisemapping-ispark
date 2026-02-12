@@ -1,0 +1,48 @@
+services:
+  # Backend API (Spring Boot)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: wisemapping-backend
+    ports:
+      - "${BACKEND_PORT:-8081}:8080"
+    volumes:
+      - ./app_prd.yml:/app/config/application_prd.yml:ro
+    environment:
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx2048m -Xms1024m}
+      - SPRING_CONFIG_ADDITIONAL_FILE_CONTENT=${SPRING_CONFIG_ADDITIONAL_FILE_CONTENT:-}
+      - NEW_RELIC_CONFIG_FILE_CONTENT=${NEW_RELIC_CONFIG_FILE_CONTENT:-}
+      - UI_BASE_URL=${UI_BASE_URL:-http://localhost:3000}
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:8081}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:3000,http://localhost:8081}
+    networks:
+      - wisemapping-network
+    restart: unless-stopped
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8080/api/restful/app/config || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 90s
+
+  # Frontend (Nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: wisemapping-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - wisemapping-network
+    restart: unless-stopped
+
+
+networks:
+  wisemapping-network:
+    driver: bridge
+
