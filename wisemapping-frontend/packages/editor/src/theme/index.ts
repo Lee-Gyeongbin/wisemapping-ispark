@@ -24,10 +24,10 @@ const createEditorTheme = (mode: PaletteMode): Theme => {
     palette: {
       mode,
       primary: {
-        light: '#ffb74d',
-        main: '#ffa800',
-        dark: '#e57500',
-        contrastText: isLight ? '#FFFFFF' : '#000000',
+        light: '#42a5f5',
+        main: '#1976d2',
+        dark: '#1565c0',
+        contrastText: '#FFFFFF',
       },
       secondary: {
         light: '#a19f9f',

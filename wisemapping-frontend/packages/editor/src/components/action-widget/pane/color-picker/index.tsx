@@ -22,6 +22,7 @@ import colors from './colors.json';
 import { styled } from '@mui/material/styles';
 import NotInterestedOutlined from '@mui/icons-material/NotInterestedOutlined';
 import { useIntl } from 'react-intl';
+import { useTheme } from '@mui/material/styles';
 
 const NoneColorCircle = styled(Box)<{ selected?: boolean }>(({ selected, theme }) => ({
   width: '18px',
@@ -53,6 +54,7 @@ const ColorPicker = (props: {
   hideNoneOption?: boolean;
 }): ReactElement => {
   const intl = useIntl();
+  const theme = useTheme();
   const currentValue = props.colorModel.getValue();
   const isNoneSelected = currentValue === undefined;
 
@@ -107,7 +109,7 @@ const ColorPicker = (props: {
               height: '18px',
               borderRadius: '50%',
               backgroundColor: color,
-              border: currentValue === color ? '2px solid #ffa800' : '2px solid transparent',
+              border: currentValue === color ? `2px solid ${theme.palette.primary.main}` : '2px solid transparent',
               cursor: 'pointer',
               padding: 0,
               '&:hover': {

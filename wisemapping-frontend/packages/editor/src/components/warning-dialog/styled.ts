@@ -37,9 +37,9 @@ export const StyledLogo = styled.div`
 
 export const Notifier = styled.div<{ theme: Theme }>`
   border: 1px solid
-    ${({ theme }) => (theme.palette.mode === 'dark' ? '#757575' : 'rgb(241, 163, 39)')};
+    ${({ theme }) => (theme.palette.mode === 'dark' ? '#757575' : theme.palette.primary.main)};
   background-color: ${({ theme }) =>
-    theme.palette.mode === 'dark' ? '#424242' : 'rgb(252, 235, 192)'};
+    theme.palette.mode === 'dark' ? '#424242' : theme.palette.primary.light + '20'};
   border-radius: 3px;
   position: fixed;
   padding: 5px 9px;
@@ -80,7 +80,7 @@ export const InfoDialog = styled.div<{ theme: Theme }>`
   left: 50%;
   transform: translateX(-50%);
   background-color: ${({ theme }) => (theme.palette.mode === 'dark' ? '#424242' : 'white')};
-  border: solid 2px ${({ theme }) => (theme.palette.mode === 'dark' ? '#757575' : '#ffa800')};
+  border: solid 2px ${({ theme }) => (theme.palette.mode === 'dark' ? '#757575' : theme.palette.primary.main)};
   border-radius: 9px;
   width: 86.4%;
   max-width: 576px;

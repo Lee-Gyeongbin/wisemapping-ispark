@@ -228,26 +228,26 @@ export const TooltipLink = styled('a')(({ theme }) => ({
   margin: '6px 0',
   background:
     theme.palette.mode === 'dark'
-      ? 'linear-gradient(135deg, #3a3a00 0%, #4a4a00 100%)'
-      : 'linear-gradient(135deg, #fff8f0 0%, #fef5e7 100%)',
-  border: '1px solid #ffa800',
+      ? 'linear-gradient(135deg, #0d2a4a 0%, #0d3a6a 100%)'
+      : 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+  border: `1px solid ${theme.palette.primary.main}`,
   borderRadius: '8px',
   fontSize: '13px',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   textDecoration: 'none',
-  color: '#ffa800',
+  color: theme.palette.primary.main,
   wordBreak: 'break-all',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  boxShadow: '0 2px 4px rgba(255, 168, 0, 0.1)',
+  boxShadow: `0 2px 4px ${theme.palette.primary.main}20`,
   position: 'relative',
   overflow: 'hidden',
   '&:hover': {
-    background: 'linear-gradient(135deg, #ffa800 0%, #e57500 100%)',
+    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
     color: '#ffffff',
-    borderColor: '#e57500',
+    borderColor: theme.palette.primary.dark,
     textDecoration: 'none',
     transform: 'translateY(-1px)',
-    boxShadow: '0 4px 12px rgba(255, 168, 0, 0.3)',
+    boxShadow: `0 4px 12px ${theme.palette.primary.main}4D`,
   },
 }));
 
