@@ -380,6 +380,22 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
   const labelsMenuOpen = Boolean(labelsMenuAnchor);
   const labelToDeleteObj = labels.find((l) => l.id === labelToDelete);
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.self === window.top || !labelsMenuOpen) return;
+    try {
+      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
+    return () => {
+      try {
+        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+      } catch (_) {
+        /* cross-origin 무시 */
+      }
+    };
+  }, [labelsMenuOpen]);
+
   const userLocale = AppI18n.getUserLocale();
   useEffect(() => {
     dayjs.locale('ko');
@@ -678,7 +694,10 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
               MenuListProps={{ 'aria-labelledby': 'labels-button' }}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
               transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-              slotProps={{ paper: { sx: { maxHeight: 320, minWidth: 240 } } }}
+              slotProps={{
+                paper: { sx: { maxHeight: 320, minWidth: 240 } },
+                backdrop: { sx: { backgroundColor: 'rgba(0, 0, 0, 0.3) !important' } },
+              }}
             >
               <MenuItem
                 selected={filter.type !== 'label'}

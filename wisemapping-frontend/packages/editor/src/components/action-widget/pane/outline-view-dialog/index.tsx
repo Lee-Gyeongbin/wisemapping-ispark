@@ -89,6 +89,22 @@ const OutlineViewDialog = ({ open, onClose, mindmap }: OutlineViewDialogProps): 
     }
   }, [open, mindmap]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.self === window.top || !open) return;
+    try {
+      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
+    return () => {
+      try {
+        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+      } catch (_) {
+        /* cross-origin 무시 */
+      }
+    };
+  }, [open]);
+
   const toggleExpanded = (nodeId: string) => {
     const updateNode = (nodes: OutlineNodeData[]): OutlineNodeData[] => {
       return nodes.map((node) => {

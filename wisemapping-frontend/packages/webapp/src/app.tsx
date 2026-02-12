@@ -374,6 +374,10 @@ const AppWithTheme = (): ReactElement => {
                     '.mindplot-div-container': {
                       backgroundColor: `${theme.palette.background.paper} !important`,
                     },
+                    /* MUI Backdrop 기본 색상을 BSC_CMB overlay와 동일하게 0.3으로 통일 (Dialog, Menu 등) */
+                    '.MuiBackdrop-root': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.3) !important',
+                    },
                   }}
                 />
                 <KeyboardContext.Provider value={{ hotkeyEnabled, setHotkeyEnabled }}>

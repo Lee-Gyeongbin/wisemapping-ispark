@@ -15,7 +15,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-import React, { ReactElement, useRef, useState } from 'react';
+import React, { ReactElement, useRef, useState, useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -101,6 +101,22 @@ export const ToolbarSubmenu = ({
 }: ToolbarSubmenuProps): ReactElement => {
   const [open, setOpen] = useState(false);
   const itemRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.self === window.top || !open) return;
+    try {
+      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
+    return () => {
+      try {
+        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+      } catch (_) {
+        /* cross-origin 무시 */
+      }
+    };
+  }, [open]);
 
   const orientationProps = vertical ? verticalAligment : horizontalAligment;
   // If options has custom render, use click-to-close behavior, otherwise hover

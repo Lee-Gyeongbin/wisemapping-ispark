@@ -116,6 +116,13 @@ const createEditorTheme = (mode: PaletteMode): Theme => {
           },
         },
       },
+      MuiBackdrop: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'rgba(0, 0, 0, 0.3) !important',
+          },
+        },
+      },
     },
   });
 };

@@ -30,9 +30,14 @@ import CloseIcon from '@mui/icons-material/Close';
 
 type KeyboardShorcutsHelpProps = {
   closeModal?: () => void;
+  /** Dialog 안에 넣을 때 true: 내부 닫기 버튼/스크롤 제거, 모달 전체 스크롤 사용 */
+  embedInDialog?: boolean;
 };
 
-const KeyboardShorcutsHelp = ({ closeModal }: KeyboardShorcutsHelpProps): ReactElement => {
+const KeyboardShorcutsHelp = ({
+  closeModal,
+  embedInDialog = false,
+}: KeyboardShorcutsHelpProps): ReactElement => {
   return (
     <Box
       sx={{
@@ -40,16 +45,20 @@ const KeyboardShorcutsHelp = ({ closeModal }: KeyboardShorcutsHelpProps): ReactE
         px: 1.5,
         pb: 1,
         width: '500px',
-        maxHeight: '60vh',
-        overflowY: 'auto',
-        backgroundColor: 'background.paper',
-        borderRadius: '8px',
-        border: '1px solid',
-        borderColor: 'divider',
-        position: 'relative',
+        ...(embedInDialog
+          ? {}
+          : {
+              maxHeight: '60vh',
+              overflowY: 'auto',
+              backgroundColor: 'background.paper',
+              borderRadius: '8px',
+              border: '1px solid',
+              borderColor: 'divider',
+              position: 'relative',
+            }),
       }}
     >
-      {closeModal && (
+      {closeModal && !embedInDialog && (
         <IconButton
           onClick={closeModal}
           sx={{

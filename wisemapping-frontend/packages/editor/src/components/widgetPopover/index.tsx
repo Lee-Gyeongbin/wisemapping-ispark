@@ -108,6 +108,22 @@ export const WidgetPopover = ({ widgetManager }: WidgetPopoverProps): React.Reac
   }, [widgetManager, handleWidgetEvent]);
 
   const isOpen = event != 'none';
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.self === window.top || !isOpen) return;
+    try {
+      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
+    return () => {
+      try {
+        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+      } catch (_) {
+        /* cross-origin 무시 */
+      }
+    };
+  }, [isOpen]);
+
   return (
     <>
       {isOpen && (

@@ -26,7 +26,7 @@ import ActionConfig from '../../classes/action/action-config';
 import Capability from '../../classes/action/capability';
 import Editor from '../../classes/model/editor';
 import Model from '../../classes/model/editor';
-import KeyboardShorcutsHelp from '../action-widget/pane/keyboard-shortcut-help';
+import KeyboardShortcutDialog from '../action-widget/pane/keyboard-shortcut-help/KeyboardShortcutDialog';
 import OutlineViewDialog from '../action-widget/pane/outline-view-dialog';
 import LayoutSelector from '../action-widget/pane/layout-selector';
 import NodePropertyValueModelBuilder from '../../classes/model/node-property-builder';
@@ -213,7 +213,7 @@ export function buildVisualizationToolbarConfig(
       onClick: () => trackEditorInteraction('keyboard_shortcuts'),
       options: [
         {
-          render: (closeModal) => <KeyboardShorcutsHelp closeModal={closeModal} />,
+          render: (closeModal) => <KeyboardShortcutDialog closeModal={closeModal} />,
         },
       ],
     },

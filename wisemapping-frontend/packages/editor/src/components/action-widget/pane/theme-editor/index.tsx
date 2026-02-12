@@ -24,7 +24,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
-import React, { ReactElement, useState, useMemo } from 'react';
+import React, { ReactElement, useState, useMemo, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import NodeProperty from '../../../../classes/model/node-property';
 import { ThemeType } from '@wisemapping/mindplot';
@@ -123,6 +123,22 @@ const ThemeEditor = (props: {
     setTheme(props.themeModel.getValue());
     props.closeModal();
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.self === window.top) return;
+    try {
+      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
+    return () => {
+      try {
+        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+      } catch (_) {
+        /* cross-origin 무시 */
+      }
+    };
+  }, []);
 
   return (
     <Dialog

@@ -176,6 +176,9 @@ const createAppTheme = (mode: PaletteMode): Theme => {
         },
       },
       MuiBackdrop: {
+        defaultProps: {
+          sx: { backgroundColor: 'rgba(0, 0, 0, 0.3)' },
+        },
         styleOverrides: {
           root: {
             backgroundColor: 'rgba(0, 0, 0, 0.3) !important',

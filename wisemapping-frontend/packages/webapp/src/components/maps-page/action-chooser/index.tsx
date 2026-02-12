@@ -16,7 +16,7 @@
  *   limitations under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
@@ -61,8 +61,27 @@ interface ActionProps {
   mapId: number;
 }
 
+const BACKDROP_SX = { backgroundColor: 'rgba(0, 0, 0, 0.3) !important' as const };
+
 const ActionChooser = (props: ActionProps): React.ReactElement => {
   const { anchor, onClose, mapId } = props;
+  const isOpen = Boolean(anchor);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.self === window.top || !isOpen) return;
+    try {
+      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
+    return () => {
+      try {
+        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
+      } catch (_) {
+        /* cross-origin 무시 */
+      }
+    };
+  }, [isOpen]);
 
   const handleOnClose = (
     action: ActionType,
@@ -82,9 +101,12 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
     <Menu
       anchorEl={anchor}
       keepMounted
-      open={Boolean(anchor)}
+      open={isOpen}
       onClose={handleOnClose(undefined)}
       elevation={1}
+      slotProps={{
+        backdrop: { sx: BACKDROP_SX },
+      }}
     >
       <MenuItem onClick={handleOnClose('open')} style={{ width: '220px' }}>
         <ListItemIcon>
