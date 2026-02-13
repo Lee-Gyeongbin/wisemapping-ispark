@@ -40,7 +40,7 @@
       "#123C6E",
       "#0F3E64"
     ],
-    "fontFamily": "'Inter', 'Segoe UI', Verdana, sans-serif",
+    "fontFamily": "Apple SD Gothic Neo",
     "fontSize": 10,
     "fontStyle": "normal",
     "fontWeight": "bold",
@@ -54,7 +54,7 @@
     "msgKey": "SUB_TOPIC",
     "borderColor": "#4CCED8",
     "backgroundColor": "#1F2445",
-    "fontFamily": "'Inter', 'Segoe UI', Verdana, sans-serif",
+    "fontFamily": "Apple SD Gothic Neo",
     "fontSize": 9,
     "fontStyle": "normal",
     "fontWeight": "normal",

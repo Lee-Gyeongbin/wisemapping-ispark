@@ -497,7 +497,7 @@ class HTMLTopicSelected {
       key.style.border = '1px solid';
       key.style.borderRadius = '4px';
       key.style.fontSize = '12px';
-      key.style.fontFamily = 'Arial, sans-serif';
+      key.style.fontFamily = "'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
       key.style.display = 'flex';
       key.style.alignItems = 'center';
       key.style.justifyContent = 'center';
@@ -510,7 +510,7 @@ class HTMLTopicSelected {
       const text = document.createElement('span');
       text.textContent = textContent;
       text.style.fontSize = '14px';
-      text.style.fontFamily = 'Arial, sans-serif';
+      text.style.fontFamily = "'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
       text.style.display = 'flex';
       text.style.alignItems = 'center';
       text.style.lineHeight = '1';

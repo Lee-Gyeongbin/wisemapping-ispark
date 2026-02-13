@@ -80,7 +80,24 @@ class DesignerKeyboard extends Keyboard {
     });
 
     this.addShortcut(['insert', 'tab', 'meta+enter'], () => {
+      const win = window as Window & { __wisemappingEditorTabHandled?: boolean };
+      if (win.__wisemappingEditorTabHandled) {
+        win.__wisemappingEditorTabHandled = false;
+        return;
+      }
       designer.createChildForSelectedNode();
+    });
+
+    // 에디터 내부에서 Tab 눌렀을 때 저장 후 하위 주제 생성 (포커스가 뒤로가기로 넘어가는 것 방지)
+    let lastEditorTabCreateChildTime = 0;
+    EventManager.bind(document, 'wisemapping-editor-tab-create-child', () => {
+      const now = Date.now();
+      if (now - lastEditorTabCreateChildTime < 300) return;
+      lastEditorTabCreateChildTime = now;
+      if (!DesignerKeyboard.isDisabled()) {
+        designer.createChildForSelectedNode();
+      }
+      (window as Window & { __wisemappingEditorTabHandled?: boolean }).__wisemappingEditorTabHandled = false;
     });
 
     this.addShortcut('enter', () => {

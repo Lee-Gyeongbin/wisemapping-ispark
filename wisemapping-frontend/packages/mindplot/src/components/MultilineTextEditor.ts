@@ -116,6 +116,16 @@ class EditorComponent extends EventDispatcher<EditorEventType> {
           }
           break;
         }
+        case 'Tab': {
+          const tabEvent = event as KeyboardEvent;
+          tabEvent.preventDefault();
+          tabEvent.stopPropagation();
+          if (tabEvent.repeat) break;
+          (window as Window & { __wisemappingEditorTabHandled?: boolean }).__wisemappingEditorTabHandled = true;
+          this.close(true);
+          document.dispatchEvent(new CustomEvent('wisemapping-editor-tab-create-child'));
+          break;
+        }
         default:
           // No actions...
           break;
@@ -253,7 +263,7 @@ class EditorComponent extends EventDispatcher<EditorEventType> {
     const inputField = this.getTextareaElem();
     // allowed param reassign to avoid risks of existing code relying in this side-effect
     if (!fontStyle.fontFamily) {
-      fontStyle.fontFamily = 'Arial';
+      fontStyle.fontFamily = 'Apple SD Gothic Neo';
     }
     if (!fontStyle.style) {
       fontStyle.style = 'normal';

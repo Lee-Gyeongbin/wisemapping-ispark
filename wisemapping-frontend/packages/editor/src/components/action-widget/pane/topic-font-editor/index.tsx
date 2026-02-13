@@ -42,7 +42,7 @@ import Editor from '../../../../classes/model/editor';
 import { trackFontFormatAction } from '../../../../utils/analytics';
 import { StyledEditorContainer } from '../shared/StyledEditorContainer';
 
-/** font-family 값에서 첫 번째 폰트명만 추출 (예: "Verdana, 'Malgun Gothic', ..." → "Verdana") */
+/** font-family 값에서 첫 번째 폰트명만 추출 (예: "Apple SD Gothic Neo, 'Malgun Gothic', ..." → "Apple SD Gothic Neo") */
 function parseFirstFont(fontFamily: string | undefined): string {
   if (!fontFamily || !fontFamily.trim()) return '';
   const first = fontFamily.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
@@ -179,7 +179,7 @@ const TopicFontEditor = (props: TopicFontEditorProps): ReactElement => {
     }
   };
 
-  // 기본 설정 폰트와 콤보 선택값 맞춤: 테마 기본값이 "Verdana, 'Malgun Gothic', ..." 형태이면 첫 폰트명만 사용
+  // 기본 설정 폰트와 콤보 선택값 맞춤: 테마 기본값이 "Apple SD Gothic Neo, 'Malgun Gothic', ..." 형태이면 첫 폰트명만 사용
   const effectiveFont = currentFont ?? props.fontFamilyModel.getValue();
   const firstFont = parseFirstFont(effectiveFont);
   const comboValue = FONT_OPTIONS.includes(firstFont) ? firstFont : '';
