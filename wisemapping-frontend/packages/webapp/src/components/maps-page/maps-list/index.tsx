@@ -35,7 +35,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
@@ -95,37 +94,6 @@ import {
 dayjs.extend(LocalizedFormat);
 dayjs.extend(relativeTime);
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-type Order = 'asc' | 'desc';
-
-function getComparator(
-  order: Order,
-  orderBy: keyof MapInfo,
-): (a: MapInfo, b: MapInfo) => number {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
-
 interface HeadCell {
   id: keyof MapInfo;
   label?: string;
@@ -136,21 +104,14 @@ interface HeadCell {
 interface EnhancedTableProps {
   classes: ReturnType<typeof useStyles>;
   numSelected: number;
-  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof MapInfo) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  order: Order;
-  orderBy: string;
   rowCount: number;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const intl = useIntl();
 
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-
-  const createSortHandler = (property: keyof MapInfo) => (event: React.MouseEvent<unknown>) => {
-    onRequestSort(event, property);
-  };
+  const { classes, onSelectAllClick, numSelected, rowCount } = props;
 
   const headCells: HeadCell[] = useMemo(
     () => [
@@ -164,19 +125,19 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         id: 'description',
         numeric: false,
         label: '설명',
-        style: { width: '20%', whiteSpace: 'nowrap' },
+        style: { width: '25%', whiteSpace: 'nowrap' },
       },
       {
         id: 'createdBy',
         numeric: false,
         label: '생성자',
-        style: { width: '10%', whiteSpace: 'nowrap' },
+        style: { width: '8%', whiteSpace: 'nowrap' },
       },
       {
         id: 'lastModificationTime',
         numeric: true,
         label: '최종 수정',
-        style: { width: '15%', whiteSpace: 'nowrap' },
+        style: { width: '8%', whiteSpace: 'nowrap' },
       },
     ],
     [intl],
@@ -219,45 +180,52 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           </Typography>
         </TableCell>
 
-        {headCells.map((headCell) => {
-          return (
-            <TableCell
-              key={headCell.id}
-              sortDirection={orderBy === headCell.id ? order : false}
-              style={headCell.style}
-              css={classes.headerCell}
+        {headCells.map((headCell) => (
+          <TableCell key={headCell.id} style={headCell.style} css={classes.headerCell}>
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: '14px',
+                fontFamily: '"Pretendard", sans-serif',
+              }}
             >
-              <TableSortLabel
-                active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={createSortHandler(headCell.id)}
-              >
-                {headCell.label}
+              {headCell.label}
+            </Typography>
+          </TableCell>
+        ))}
 
-                {orderBy === headCell.id && (
-                  <span css={classes.visuallyHidden as Interpolation<Theme>}>
-                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                  </span>
-                )}
-              </TableSortLabel>
-            </TableCell>
-          );
-        })}
-
-        <TableCell padding="checkbox" key="collaboration" css={classes.headerCell} style={{ width: '8%', whiteSpace: 'nowrap' }}>
-          <TableSortLabel active={false} hideSortIcon>
+        <TableCell padding="checkbox" key="collaboration" css={classes.headerCell} style={{ width: '5%', whiteSpace: 'nowrap' }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '14px',
+              fontFamily: '"Pretendard", sans-serif',
+            }}
+          >
             협업/권한
-          </TableSortLabel>
+          </Typography>
         </TableCell>
         <TableCell padding="checkbox" key="starred" css={classes.headerCell} style={{ width: '5%', whiteSpace: 'nowrap' }}>
-          <TableSortLabel active={false} hideSortIcon>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '14px',
+              fontFamily: '"Pretendard", sans-serif',
+            }}
+          >
             즐겨찾기
-          </TableSortLabel>
+          </Typography>
         </TableCell>
         <TableCell padding="checkbox" key="action" css={classes.headerCell} style={{ width: '5%', whiteSpace: 'nowrap' }}>
-        <TableSortLabel active={false} hideSortIcon>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '14px',
+              fontFamily: '"Pretendard", sans-serif',
+            }}
+          >
             더보기
-          </TableSortLabel>
+          </Typography>
         </TableCell>
       </TableRow>
     </TableHead>
@@ -310,10 +278,7 @@ const mapsFilter = (filter: Filter, search: string): ((mapInfo: MapInfo) => bool
 
 export const MapsList = (_props: MapsListProps): React.ReactElement => {
   const classes = useStyles();
-  const [order, setOrder] = React.useState<Order>('desc');
   const [filter, setFilter] = React.useState<Filter>({ type: 'all' });
-
-  const [orderBy, setOrderBy] = React.useState<keyof MapInfo>('lastModificationTime');
   const [selected, setSelected] = React.useState<number[]>([]);
   const [searchCondition, setSearchCondition] = React.useState<string>('');
 
@@ -353,13 +318,13 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
     return mapsData.filter(predicate);
   }, [mapsData, filter, searchCondition]);
 
+  // 기본 정렬: 최종 수정일 역순 (가장 최근 수정이 먼저)
   const sortedMaps = useMemo(() => {
-    return stableSort(filteredMaps, getComparator(order, orderBy));
-  }, [filteredMaps, order, orderBy]);
-
-  // 최종 수정(asc) 기준으로 정렬한 목록 (번호 계산용 - 역순)
-  const sortedMapsByLastModAsc = useMemo(() => {
-    return stableSort(filteredMaps, getComparator('asc', 'lastModificationTime'));
+    return [...filteredMaps].sort((a, b) => {
+      const timeA = new Date(a.lastModificationTime).getTime();
+      const timeB = new Date(b.lastModificationTime).getTime();
+      return timeB - timeA;
+    });
   }, [filteredMaps]);
 
   const pagedMaps = useMemo(() => {
@@ -368,7 +333,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
   }, [sortedMaps, page, rowsPerPage]);
 
   // 페이징 계산
-  const totalPages = Math.ceil(filteredMaps.length / rowsPerPage);
+  const totalPages = Math.ceil(sortedMaps.length / rowsPerPage);
   const pagesPerGroup = 5; // 한 그룹에 표시할 페이지 수
   const currentGroup = Math.floor(page / pagesPerGroup);
   const startPage = currentGroup * pagesPerGroup;
@@ -410,15 +375,9 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
     }
   };
 
-  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof MapInfo) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.target.checked) {
-      const newSelecteds = filteredMaps.map((n) => n.id);
+      const newSelecteds = sortedMaps.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
@@ -585,10 +544,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                 <FormattedMessage id="maps.search-label" defaultMessage="Mind map name" />
               </Box>
               <InputBase
-                placeholder={intl.formatMessage({
-                  id: 'maps.search-action',
-                  defaultMessage: 'Search ...',
-                })}
+                placeholder={'마인드맵명 입력'}
                 sx={[uiInputSizeMd, { minWidth: 200, flex: 1 }]}
                 inputProps={{ 'aria-label': 'search' }}
                 onChange={handleOnSearchChange}
@@ -760,10 +716,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
             <EnhancedTableHead
               classes={classes}
               numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
               rowCount={filteredMaps.length}
             />
 
@@ -778,8 +731,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                 pagedMaps.map((row: MapInfo, index: number) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = row.id;
-                  // 최종 수정(asc) 기준으로 전체 정렬된 목록에서의 번호 계산 (역순)
-                  const rowNumber = sortedMapsByLastModAsc.findIndex((m) => m.id === row.id) + 1;
+                  const rowNumber = page * rowsPerPage + index + 1;
 
                   return (
                     <TableRow
@@ -851,7 +803,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                             fontFamily: '"Pretendard", sans-serif',
                           }}
                         >
-                          {row.description || '-'}
+                          {row.description ?? ''}
                         </Typography>
                       </TableCell>
 
@@ -889,7 +841,7 @@ export const MapsList = (_props: MapsListProps): React.ReactElement => {
                         </Tooltip>
                       </TableCell>
 
-                      <TableCell css={classes.bodyCell} style={{ width: '8%' }}>
+                      <TableCell css={classes.bodyCell}>
                         {row.role === 'owner' ? (
                           row.collaboratorCount && row.collaboratorCount > 0 ? (
                             <Tooltip 
