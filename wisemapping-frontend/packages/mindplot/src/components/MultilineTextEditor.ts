@@ -66,6 +66,7 @@ class EditorComponent extends EventDispatcher<EditorEventType> {
     DOMUtils.attr(textareaElem, 'tabindex', '-1');
     DOMUtils.attr(textareaElem, 'value', '');
     DOMUtils.attr(textareaElem, 'wrap', 'off');
+    DOMUtils.attr(textareaElem, 'lang', 'ko');
     // Prevent browser extensions from interfering with this textarea
     DOMUtils.attr(textareaElem, 'autocomplete', 'off');
     DOMUtils.attr(textareaElem, 'data-lpignore', 'true'); // LastPass ignore

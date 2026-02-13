@@ -137,7 +137,8 @@ class DefaultTheme implements Theme {
   }
 
   getFontFamily(topic: Topic): string {
-    return this.resolve('fontFamily', topic) as string;
+    const base = this.resolve('fontFamily', topic) as string;
+    return `${base}, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif`;
   }
 
   getFontSize(topic: Topic): number {

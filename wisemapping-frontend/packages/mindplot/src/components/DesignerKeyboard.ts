@@ -181,7 +181,10 @@ class DesignerKeyboard extends Keyboard {
       if (topic) {
         event.stopPropagation();
         event.preventDefault();
-        topic.showTextEditor(keyboardEvent.key);
+        const modelText = topic.getModel().getText();
+        const isNewOrEmpty = modelText == null || String(modelText).trim() === '';
+        const useEmpty = isNewOrEmpty || keyboardEvent.isComposing;
+        topic.showTextEditor(useEmpty ? '' : keyboardEvent.key);
       }
     });
   }

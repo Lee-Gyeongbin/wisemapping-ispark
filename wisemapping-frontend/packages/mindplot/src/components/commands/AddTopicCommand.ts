@@ -41,6 +41,7 @@ class AddTopicCommand extends Command {
   }
 
   execute(commandContext: CommandContext) {
+    const singleTopicCreation = this._models.length === 1;
     this._models.forEach((model, index) => {
       // Add a new topic ...
       const topic = commandContext.createTopic(model);
@@ -63,6 +64,13 @@ class AddTopicCommand extends Command {
 
       // Render node ...
       topic.setVisibility(true);
+
+      // When a single topic was added (Tab/Enter), open editor so user can type immediately
+      if (singleTopicCreation) {
+        setTimeout(() => {
+          topic.showTextEditor('');
+        }, 0);
+      }
     });
   }
 

@@ -42,6 +42,40 @@ import Editor from '../../../../classes/model/editor';
 import { trackFontFormatAction } from '../../../../utils/analytics';
 import { StyledEditorContainer } from '../shared/StyledEditorContainer';
 
+/** font-family 값에서 첫 번째 폰트명만 추출 (예: "Verdana, 'Malgun Gothic', ..." → "Verdana") */
+function parseFirstFont(fontFamily: string | undefined): string {
+  if (!fontFamily || !fontFamily.trim()) return '';
+  const first = fontFamily.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+  return first || '';
+}
+
+const FONT_OPTIONS = [
+  'Arial',
+  'Apple SD Gothic Neo',
+  'Baskerville',
+  'Brush Script',
+  'Brush Script MT',
+  'Century Gothic',
+  'Comic Sans MS',
+  'Copperplate',
+  'Courier New',
+  'Cursive',
+  'Fantasy',
+  'Garamond',
+  'Georgia',
+  'Helvetica',
+  'Inter',
+  'Limunari',
+  'Malgun Gothic',
+  'Palatino',
+  'Perpetua',
+  'Pretendard',
+  'Tahoma',
+  'Times',
+  'Times New Roman',
+  'Verdana',
+];
+
 const ActionButton = styled(IconButton)<{ selected?: boolean }>(({ selected, theme }) => ({
   padding: '8px',
   width: '32px',
@@ -145,6 +179,11 @@ const TopicFontEditor = (props: TopicFontEditorProps): ReactElement => {
     }
   };
 
+  // 기본 설정 폰트와 콤보 선택값 맞춤: 테마 기본값이 "Verdana, 'Malgun Gothic', ..." 형태이면 첫 폰트명만 사용
+  const effectiveFont = currentFont ?? props.fontFamilyModel.getValue();
+  const firstFont = parseFirstFont(effectiveFont);
+  const comboValue = FONT_OPTIONS.includes(firstFont) ? firstFont : '';
+
   // Check if any font property is customized
   const hasCustomFont = currentFont !== undefined || props.fontColorModel.getValue() !== undefined;
 
@@ -186,12 +225,12 @@ const TopicFontEditor = (props: TopicFontEditorProps): ReactElement => {
         </Typography>
         <FormControl variant="outlined" fullWidth size="small">
           <Select
-            value={currentFont || ''}
+            value={comboValue}
             onChange={handleFontFamilyChange}
             displayEmpty
             sx={{
               fontSize: '0.656rem',
-              fontFamily: currentFont || 'inherit',
+              fontFamily: comboValue || parseFirstFont(effectiveFont) || 'inherit',
               '& .MuiSelect-select': {
                 py: 1.25,
                 px: 1.5,
@@ -222,42 +261,18 @@ const TopicFontEditor = (props: TopicFontEditorProps): ReactElement => {
               <Typography
                 sx={{ fontStyle: 'italic', color: 'text.secondary', fontSize: '0.656rem' }}
               >
-                {currentFont === undefined
+                {effectiveFont === undefined
                   ? intl.formatMessage({
-                      id: 'editor-panel.font-family-default',
-                      defaultMessage: 'Default',
-                    })
-                  : intl.formatMessage({
                       id: 'editor-panel.font-family-mixed',
                       defaultMessage: 'Mixed',
+                    })
+                  : intl.formatMessage({
+                      id: 'editor-panel.font-family-default',
+                      defaultMessage: 'Default',
                     })}
               </Typography>
             </MenuItem>
-            {[
-              'Arial',
-              'Baskerville',
-              'Georgia',
-              'Helvetica',
-              'Tahoma',
-              'Limunari',
-              'Brush Script MT',
-              'Verdana',
-              'Times',
-              'Times New Roman',
-              'Courier New',
-              'Cursive',
-              'Fantasy',
-              'Inter',
-              'Perpetua',
-              'Brush Script',
-              'Copperplate',
-              'Garamond',
-              'Palatino',
-              'Century Gothic',
-              'Comic Sans MS',
-            ]
-              .sort()
-              .map((f) => (
+            {FONT_OPTIONS.slice().sort().map((f) => (
                 <MenuItem value={f} key={f}>
                   <Typography fontFamily={f} sx={{ fontSize: '0.656rem' }}>
                     {f}
