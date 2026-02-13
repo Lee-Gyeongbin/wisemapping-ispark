@@ -250,8 +250,11 @@ export default class RestClient implements Client {
 
   deleteAccount(): Promise<void> {
     const handler = (success: () => void, reject: (error: ErrorInfo) => void) => {
+      const erpUserId = getErpUserId();
+      const params = erpUserId ? { userId: erpUserId } : undefined;
       this.axios
         .delete(`${this.baseUrl}/api/restful/account`, {
+          params,
           headers: { 'Content-Type': 'text/plain' },
         })
         .then(() => {
@@ -267,12 +270,16 @@ export default class RestClient implements Client {
 
   updateAccountInfo(firstname: string, lastname: string): Promise<void> {
     const handler = (success: () => void, reject: (error: ErrorInfo) => void) => {
+      const erpUserId = getErpUserId();
+      const params = erpUserId ? { userId: erpUserId } : undefined;
       this.axios
         .put(`${this.baseUrl}/api/restful/account/firstname`, firstname, {
+          params,
           headers: { 'Content-Type': 'text/plain' },
         })
         .then(() => {
           return this.axios.put(`${this.baseUrl}/api/restful/account/lastname`, lastname, {
+            params,
             headers: { 'Content-Type': 'text/plain' },
           });
         })
@@ -290,8 +297,11 @@ export default class RestClient implements Client {
 
   updateAccountPassword(pasword: string): Promise<void> {
     const handler = (success: () => void, reject: (error: ErrorInfo) => void) => {
+      const erpUserId = getErpUserId();
+      const params = erpUserId ? { userId: erpUserId } : undefined;
       this.axios
         .put(`${this.baseUrl}/api/restful/account/password`, pasword, {
+          params,
           headers: { 'Content-Type': 'text/plain' },
         })
         .then(() => {
@@ -307,8 +317,11 @@ export default class RestClient implements Client {
 
   updateAccountLanguage(locale: LocaleCode): Promise<void> {
     const handler = (success: () => void, reject: (error: ErrorInfo) => void) => {
+      const erpUserId = getErpUserId();
+      const params = erpUserId ? { userId: erpUserId } : undefined;
       this.axios
         .put(`${this.baseUrl}/api/restful/account/locale`, locale, {
+          params,
           headers: { 'Content-Type': 'text/plain' },
         })
         .then(() => {
@@ -353,8 +366,11 @@ export default class RestClient implements Client {
       success: (account: AccountInfo) => void,
       reject: (error: ErrorInfo) => void,
     ) => {
+      const erpUserId = getErpUserId();
+      const params = erpUserId ? { userId: erpUserId } : undefined;
       this.axios
         .get(`${this.baseUrl}/api/restful/account`, {
+          params,
           headers: { 'Content-Type': 'application/json' },
         })
         .then((response) => {
