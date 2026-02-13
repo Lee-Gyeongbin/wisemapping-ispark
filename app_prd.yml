@@ -53,10 +53,10 @@ spring:
 
 app:
   site:
-    ui-base-url: ${UI_BASE_URL:https://localhost:3000}
-    api-base-url: ${API_BASE_URL:https://localhost:8081}
+    ui-base-url: ${UI_BASE_URL:http://localhost:3000}
+    api-base-url: ${API_BASE_URL:http://localhost:8081}
   security:
-    corsAllowedOrigins: ${CORS_ALLOWED_ORIGINS:https://localhost,https://localhost:80,https://localhost:3000,https://localhost:8081}
+    corsAllowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost,http://localhost:80,http://localhost:3000,http://localhost:8081}
     # ERP 시스템 세션 연동 설정
     sessionUserIdBypassEnabled: true
     sessionUserIdAttribute: userId
