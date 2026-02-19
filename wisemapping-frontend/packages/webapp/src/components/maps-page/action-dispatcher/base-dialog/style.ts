@@ -32,6 +32,7 @@ export const StyledDialogTitle = withEmotionStyles({
 
 export const StyledDialogActions = withEmotionStyles({
   padding: '13px 13px 13px 13px',
+  justifyContent: 'center',
 })(DialogActions);
 
 export const StyledDialog = withEmotionStyles((theme) => ({

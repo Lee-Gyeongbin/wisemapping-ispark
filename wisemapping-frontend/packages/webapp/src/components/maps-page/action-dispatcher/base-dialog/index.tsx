@@ -143,7 +143,7 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
               sx={bscCmbTypeSecondaryButtonSx}
             >
               {onSubmit ? (
-                '취소'
+                '닫기'
               ) : (
                 '닫기'
               )}
