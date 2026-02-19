@@ -140,14 +140,16 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
       <Divider />
 
       {role == 'owner' && (
-        <MenuItem onClick={handleOnClose('share')}>
-          <ListItemIcon>
-            <ShareOutlinedIcon />
-          </ListItemIcon>
-          협업하기
-        </MenuItem>
+        <>
+          <MenuItem onClick={handleOnClose('share')}>
+            <ListItemIcon>
+              <ShareOutlinedIcon />
+            </ListItemIcon>
+            협업하기
+          </MenuItem>
+          <Divider />
+        </>
       )}
-      <Divider />
 
       <MenuItem onClick={handleOnClose('info')}>
         <ListItemIcon>
