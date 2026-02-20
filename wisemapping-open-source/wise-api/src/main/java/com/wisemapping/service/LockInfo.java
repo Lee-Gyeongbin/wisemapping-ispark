@@ -27,7 +27,7 @@ import java.util.Calendar;
 public class LockInfo {
     final private Account user;
     private Calendar timeout;
-    private static final int EXPIRATION_MIN = 30;
+    private static final int EXPIRATION_MIN = 10;
 
     public int getMapId() {
         return mapId;

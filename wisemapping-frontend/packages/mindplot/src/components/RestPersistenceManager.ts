@@ -83,6 +83,8 @@ class RESTPersistenceManager extends PersistenceManager {
                   errorType: 'lock',
                   message: '다른 사용자가 편집 중인 마인드맵입니다.',
                 };
+                // throttle 취소: 다음 저장 시 요청이 나가서 409 메시지를 다시 받을 수 있게 함
+                this._throttledSave.cancel();
                 break;
               default: {
                 error = await this._buildError(response);
