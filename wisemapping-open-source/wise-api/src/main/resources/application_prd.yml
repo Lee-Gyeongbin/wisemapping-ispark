@@ -43,7 +43,7 @@ spring:
             trust: "*"
   # Database configuration options. Examples can be found: https://github.com/wisemapping/wisemapping-open-source/tree/develop/config/database
   datasource:
-    url: jdbc:mysql://13.124.54.126:3306/cmb_public?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://cmb-rds01.ctgu602s472f.ap-northeast-2.rds.amazonaws.com/cmb_public?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: cmb_public
     password: "cmb_public12#$"
