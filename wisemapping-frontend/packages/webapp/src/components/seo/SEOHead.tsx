@@ -109,8 +109,8 @@ const SEOHead: React.FC<SEOProps> = ({
       ))}
 
       {/* Additional SEO Meta Tags */}
-      <meta name="theme-color" content="#000000" />
-      <meta name="msapplication-TileColor" content="#000000" />
+      <meta name="theme-color" content="#ffffff" />
+      <meta name="msapplication-TileColor" content="#ffffff" />
       <meta name="apple-mobile-web-app-title" content="WiseMapping" />
       <meta name="application-name" content="WiseMapping" />
 

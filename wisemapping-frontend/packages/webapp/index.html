@@ -16,12 +16,23 @@
     crossorigin>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="color-scheme" content="light" />
   <meta name="description"
     content="WiseMapping is a free, fast and simple online mind mapping editor for individuals and business. Sign up to start organizing and sharing your ideas and thoughts." />
 
   <!-- Critical CSS for LCP element (Welcome heading) to reduce render delay -->
   <style>
+    /* 라이트 테마 고정 (Edge 등에서 시스템 테마에 따른 배경색 이슈 방지) */
+    html {
+      color-scheme: light;
+      background-color: #ffffff;
+    }
+    body {
+      font-family: "Pretendard", sans-serif;
+      background-color: #ffffff;
+    }
+
     /* Critical styles for LCP element - BSC_CMB 폰트 */
     h1.MuiTypography-h4 {
       font-family: "Pretendard", sans-serif;
@@ -30,11 +41,6 @@
       line-height: 1.235;
       letter-spacing: 0.00735em;
       margin: 0;
-    }
-
-    /* Prevent layout shift during font load */
-    body {
-      font-family: "Pretendard", sans-serif;
     }
   </style>
 

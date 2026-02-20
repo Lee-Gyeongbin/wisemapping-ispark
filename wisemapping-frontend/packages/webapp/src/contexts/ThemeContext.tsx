@@ -16,7 +16,7 @@
  *   limitations under the License.
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import type { PaletteMode } from '@mui/material';
 
 interface ThemeContextType {
@@ -31,20 +31,16 @@ interface ThemeProviderProps {
   children: ReactNode;
 }
 
+// 앱 기본 테마를 라이트로 고정. 시스템 테마(prefers-color-scheme) 미사용 → Edge 등에서 배경색 이슈 방지
+const DEFAULT_THEME_MODE: PaletteMode = 'light';
+
 export const AppThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [mode, setMode] = useState<PaletteMode>(() => {
-    // Check localStorage first, then system preference
     const savedMode = localStorage.getItem('themeMode') as PaletteMode;
-    if (savedMode) {
+    if (savedMode === 'light' || savedMode === 'dark') {
       return savedMode;
     }
-
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-
-    return 'light';
+    return DEFAULT_THEME_MODE;
   });
 
   const toggleMode = () => {
@@ -54,29 +50,11 @@ export const AppThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => 
   };
 
   const initializeThemeFromSystem = () => {
-    // Only initialize if no preference has been set
     if (!localStorage.getItem('themeMode')) {
-      const systemPrefersDark =
-        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const systemMode = systemPrefersDark ? 'dark' : 'light';
-      setMode(systemMode);
-      localStorage.setItem('themeMode', systemMode);
+      setMode(DEFAULT_THEME_MODE);
+      localStorage.setItem('themeMode', DEFAULT_THEME_MODE);
     }
   };
-
-  // Listen for system theme changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only auto-switch if user hasn't set a preference
-      if (!localStorage.getItem('themeMode')) {
-        setMode(e.matches ? 'dark' : 'light');
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
 
   return (
     <ThemeContext.Provider value={{ mode, toggleMode, initializeThemeFromSystem }}>
