@@ -33,5 +33,8 @@ interface MapInfo {
   getZoom(): number;
 
   getId(): string;
+
+  /** owner | editor | viewer. viewer인 경우 편집 권한 없음 */
+  getRole?(): string;
 }
 export default MapInfo;

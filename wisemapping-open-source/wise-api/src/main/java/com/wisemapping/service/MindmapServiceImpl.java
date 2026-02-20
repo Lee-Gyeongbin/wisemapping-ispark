@@ -287,17 +287,6 @@ public class MindmapServiceImpl
         return this.lockManager;
     }
 
-    /**
-     * Cleanup method to properly shutdown the LockManager's scheduler when the
-     * service is destroyed.
-     * This prevents memory leaks from the scheduler thread.
-     */
-    @PreDestroy
-    public void destroy() {
-        if (lockManager instanceof LockManagerImpl) {
-            ((LockManagerImpl) lockManager).shutdown();
-        }
-    }
 
     public void setMindmapManager(MindmapManager mindmapManager) {
         this.mindmapManager = mindmapManager;

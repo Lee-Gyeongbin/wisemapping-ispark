@@ -27,6 +27,7 @@ class MapInfoImpl implements MapInfo {
   private lockedMsg: string | undefined;
   private creatorFullName: string;
   private starred: boolean | undefined;
+  private role: 'owner' | 'editor' | 'viewer';
 
   constructor(
     id: number,
@@ -37,6 +38,7 @@ class MapInfoImpl implements MapInfo {
     lockedMsg: string | undefined,
     zoom: number,
     starred?: boolean,
+    role: 'owner' | 'editor' | 'viewer' = 'viewer',
   ) {
     this.id = id;
     this.client = client;
@@ -46,6 +48,11 @@ class MapInfoImpl implements MapInfo {
     this.lockedMsg = lockedMsg;
     this.creatorFullName = creatorFullName;
     this.starred = starred;
+    this.role = role;
+  }
+
+  getRole(): 'owner' | 'editor' | 'viewer' {
+    return this.role;
   }
 
   isStarred(): Promise<boolean> {
@@ -109,6 +116,7 @@ class MapInfoImpl implements MapInfo {
     zoom?: number;
     starred?: boolean;
     creatorFullName?: string;
+    role?: 'owner' | 'editor' | 'viewer';
   }): void {
     if (metadata.locked !== undefined) {
       this.locked = metadata.locked;
@@ -124,6 +132,9 @@ class MapInfoImpl implements MapInfo {
     }
     if (metadata.creatorFullName !== undefined) {
       this.creatorFullName = metadata.creatorFullName;
+    }
+    if (metadata.role !== undefined) {
+      this.role = metadata.role;
     }
   }
 }

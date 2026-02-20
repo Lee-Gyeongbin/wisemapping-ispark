@@ -185,6 +185,7 @@ const EditorPage = ({ mapId, pageMode, zoom, hid }: EditorPropsType): React.Reac
         editorMetadata.mapMetadata.isLockedBy,
         editorMetadata.zoom,
         editorMetadata.mapMetadata.starred,
+        editorMetadata.mapMetadata.role,
       );
     } else {
       existingMapInfo.updateMetadata({
@@ -193,6 +194,7 @@ const EditorPage = ({ mapId, pageMode, zoom, hid }: EditorPropsType): React.Reac
         zoom: editorMetadata.zoom,
         starred: editorMetadata.mapMetadata.starred,
         creatorFullName: editorMetadata.mapMetadata.creatorFullName,
+        role: editorMetadata.mapMetadata.role,
       });
     }
     mapInfo = mapInfoRef.current!;

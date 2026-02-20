@@ -29,19 +29,14 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 class LockManagerImpl implements LockManager {
-    private static final int ONE_MINUTE_MILLISECONDS = 1000 * 60;
     // Maximum number of concurrent locks to prevent unbounded memory growth
     // This represents a reasonable limit for concurrent editing sessions
     private static final int MAX_LOCKS = 1000;
     private static final int WARN_THRESHOLD = (int) (MAX_LOCKS * 0.8); // Warn at 80% capacity
     
     private final Map<Integer, LockInfo> lockInfoByMapId;
-    private final ScheduledExecutorService expirationScheduler;
     final private static Logger logger = LogManager.getLogger();
 
     @Override
@@ -134,62 +129,5 @@ class LockManagerImpl implements LockManager {
 
     public LockManagerImpl() {
         lockInfoByMapId = new ConcurrentHashMap<>();
-        // Use daemon thread to prevent JVM shutdown issues
-        expirationScheduler = Executors.newScheduledThreadPool(1, r -> {
-            Thread t = new Thread(r, "LockExpirationScheduler");
-            t.setDaemon(true);
-            return t;
-        });
-        
-        expirationScheduler.scheduleAtFixedRate(() -> {
-            synchronized (lockInfoByMapId) {
-                int sizeBefore = lockInfoByMapId.size();
-                logger.debug("Lock expiration scheduler started. Current locks: {} (size: {})", 
-                           lockInfoByMapId.keySet(), sizeBefore);
-                
-                // Search for expired sessions and remove them ....
-                int expiredCount = 0;
-                for (Integer mapId : lockInfoByMapId.keySet()) {
-                    LockInfo lockInfo = lockInfoByMapId.get(mapId);
-                    if (lockInfo != null && lockInfo.isExpired()) {
-                        unlock(mapId);
-                        expiredCount++;
-                    }
-                }
-                
-                int sizeAfter = lockInfoByMapId.size();
-                if (expiredCount > 0) {
-                    logger.debug("Expired and removed {} locks. Size: {} -> {}", expiredCount, sizeBefore, sizeAfter);
-                }
-                
-                // Log warning if map size is still high after cleanup
-                if (sizeAfter >= WARN_THRESHOLD) {
-                    logger.warn("Lock map size ({}) remains high after cleanup. " +
-                              "This may indicate locks are not expiring properly or there are many concurrent sessions.",
-                              sizeAfter);
-                }
-            }
-        }, ONE_MINUTE_MILLISECONDS, ONE_MINUTE_MILLISECONDS, TimeUnit.MILLISECONDS);
-    }
-    
-    /**
-     * Shutdown the expiration scheduler. Should be called when the LockManager is no longer needed.
-     * This prevents memory leaks from the scheduler thread.
-     */
-    public void shutdown() {
-        if (expirationScheduler != null && !expirationScheduler.isShutdown()) {
-            logger.info("Shutting down lock expiration scheduler");
-            expirationScheduler.shutdown();
-            try {
-                if (!expirationScheduler.awaitTermination(5, TimeUnit.SECONDS)) {
-                    logger.warn("Lock expiration scheduler did not terminate gracefully, forcing shutdown");
-                    expirationScheduler.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                logger.warn("Interrupted while waiting for lock expiration scheduler to terminate");
-                expirationScheduler.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-        }
     }
 }

@@ -33,6 +33,7 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
 import UndoAndRedo from '../action-widget/button/undo-and-redo';
 import Button from '@mui/material/Button';
@@ -505,6 +506,29 @@ const AppBar = ({
         </Tooltip>
       ),
       visible: !capability.isHidden('share'),
+    },
+    {
+      render: () => (
+        <Tooltip title={'편집 모드로 전환하기'}>
+          <Button
+            variant="outlined"
+            disableElevation
+            sx={[bscCmbTypeInfoButtonSx, { minWidth: 80 }]}
+            onClick={() => {
+              trackAppBarAction('edit');
+              // 편집 모드로 전환: requestEdit=1 이면 loader에서 role 기반 editorMode 적용
+              const mapId = mapInfo.getId();
+              window.location.href = `/c/maps/${mapId}/edit?requestEdit=Y`;
+            }}
+            startIcon={<EditIcon />}
+          >
+            {'편집하기'}
+          </Button>
+        </Tooltip>
+      ),
+      visible:
+        capability.mode === 'edition-viewer' &&
+        (typeof mapInfo.getRole !== 'function' || mapInfo.getRole?.() !== 'viewer'),
     },
     {
       render: () => accountConfig,

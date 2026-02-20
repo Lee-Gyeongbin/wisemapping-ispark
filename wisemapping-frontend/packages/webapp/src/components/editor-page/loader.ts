@@ -100,18 +100,65 @@ export const loader = (pageMode: PageModeType, bootstrap = false) => {
         result = createJsonResponse(value);
         break;
       }
-      case 'edit':
+      case 'edit': {
+        try {
+          const mapMetadata = await fetchMapMetadataWithCache(mapId, client, bootstrap);
+
+          let editorMode: EditorRenderMode;
+          // 편집하기 버튼 클릭으로 진입한 경우( requestEdit=1 ) role 기반 편집 모드, 아니면 뷰어 모드
+          const url = new URL(request.url);
+          const requestEdit = url.searchParams.get('requestEdit') === 'Y'
+          editorMode = requestEdit
+            ? (`edition-${mapMetadata.role}` as EditorRenderMode)
+            : 'edition-viewer';
+
+          // Build result ...
+          // Safely parse jsonProps with fallback to default zoom
+          let zoom = 0.8; // Default zoom value
+          if (mapMetadata.jsonProps && mapMetadata.jsonProps.trim()) {
+            try {
+              const parsedProps = JSON.parse(mapMetadata.jsonProps.trim());
+              if (parsedProps && typeof parsedProps === 'object' && 'zoom' in parsedProps) {
+                zoom = typeof parsedProps.zoom === 'number' ? parsedProps.zoom : zoom;
+              }
+            } catch (error) {
+              console.warn(
+                `Failed to parse jsonProps for map ${mapMetadata.id}:`,
+                mapMetadata.jsonProps,
+                error,
+              );
+              // Use default zoom value on parse error
+            }
+          }
+          const data: EditorMetadata = {
+            editorMode: editorMode,
+            mapMetadata: mapMetadata,
+            zoom: zoom,
+          };
+
+          // Include XML if requested and available
+          if (bootstrap && mapMetadata.xml) {
+            data.bootstrapXML = mapMetadata.xml;
+          }
+
+          result = createJsonResponse(data);
+        } catch (e) {
+          const error = e as ErrorInfo;
+          if (!error.isAuth) {
+            console.warn(`Map could not be loaded`);
+            console.warn(e);
+          }
+          throw e;
+        }
+        break;
+      }
       case 'view-private': {
         try {
           const mapMetadata = await fetchMapMetadataWithCache(mapId, client, bootstrap);
 
-          // viewonly는 '보기 전용 페이지'일 때만. 다른 사용자 lock은 저장 시 백엔드에서 처리하므로 lock 여부로 편집 막지 않음.
           let editorMode: EditorRenderMode;
-          if (pageMode === 'view-private') {
-            editorMode = 'viewonly-private';
-          } else {
-            editorMode = `edition-${mapMetadata.role}`;
-          }
+          // mapMetadata.role => owner, editor, viewer
+          editorMode = `edition-viewer`; // 편집 버튼 클릭 후 편집모드로 전환
 
           // Build result ...
           // Safely parse jsonProps with fallback to default zoom
