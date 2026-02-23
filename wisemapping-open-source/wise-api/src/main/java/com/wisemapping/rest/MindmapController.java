@@ -560,6 +560,7 @@ public class MindmapController {
                 if (userId != null && !userId.trim().isEmpty()) {
                     comUserinfoService.findUserNmByUserId(userId).ifPresent(restCollab::setName);
                     comUserinfoService.findDeptNmByUserId(userId).ifPresent(restCollab::setDeptNm);
+                    comUserinfoService.findUserStatusCdByUserId(userId).ifPresent(restCollab::setUserStatusCd);
                 }
             }
             collabs.add(restCollab);
@@ -628,6 +629,7 @@ public class MindmapController {
                 result.setFirstname(userId); // USER_ID를 firstname에 저장
                 result.setFullName(userInfo.getUserNm() != null ? userInfo.getUserNm() : "");
                 result.setDeptNm(userInfo.getDeptNm());
+                result.setUserStatusCd(userInfo.getUserStatusCd());
                 result.setCollaborating(false);
                 
                 results.add(result);

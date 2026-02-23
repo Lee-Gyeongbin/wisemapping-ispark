@@ -34,6 +34,14 @@ public interface ComUserinfoService {
     Optional<String> findDeptNmByUserId(@Nullable String userId);
 
     /**
+     * USER_ID로 com_userinfo.USER_STATUS_CD 조회.
+     *
+     * @param userId com_userinfo.USER_ID (Account.firstname과 매핑)
+     * @return USER_STATUS_CD, 없으면 empty
+     */
+    Optional<String> findUserStatusCdByUserId(@Nullable String userId);
+
+    /**
      * com_userinfo 테이블에서 사용자 검색 (협업자 검색용).
      * DELETE_DT가 NULL이 아닌 사용자만 조회하며, 부서정보도 함께 조회.
      *

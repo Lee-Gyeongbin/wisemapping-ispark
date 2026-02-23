@@ -14,15 +14,17 @@ public class ComUserinfoSearchResult {
     private String userNm;
     private String email;
     private String deptNm;
+    private String userStatusCd;
 
     public ComUserinfoSearchResult() {
     }
 
-    public ComUserinfoSearchResult(String userId, String userNm, String email, String deptNm) {
+    public ComUserinfoSearchResult(String userId, String userNm, String email, String deptNm, String userStatusCd) {
         this.userId = userId;
         this.userNm = userNm;
         this.email = email;
         this.deptNm = deptNm;
+        this.userStatusCd = userStatusCd;
     }
 
     public String getUserId() {
@@ -55,5 +57,13 @@ public class ComUserinfoSearchResult {
 
     public void setDeptNm(String deptNm) {
         this.deptNm = deptNm;
+    }
+
+    public String getUserStatusCd() {
+        return userStatusCd;
+    }
+
+    public void setUserStatusCd(String userStatusCd) {
+        this.userStatusCd = userStatusCd;
     }
 }

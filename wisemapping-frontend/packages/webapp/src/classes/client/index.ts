@@ -127,6 +127,7 @@ export type Permission = {
   deptNm?: string;
   email: string;
   role: Role;
+  userStatusCd?: string;
 };
 
 export type UserSearchResult = {
@@ -135,6 +136,7 @@ export type UserSearchResult = {
   lastname: string;
   fullName: string;
   deptNm?: string;
+  userStatusCd?: string;
   collaborating: boolean;
 };
 

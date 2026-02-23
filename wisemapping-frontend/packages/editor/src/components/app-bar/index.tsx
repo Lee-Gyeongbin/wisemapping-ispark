@@ -222,12 +222,6 @@ const AppBar = ({
         setLockConfirmDialog({ open: true, message, lockedBy: undefined });
       } else {
         console.error('Lock acquire failed:', err);
-        $notify(
-          intl.formatMessage({
-            id: 'appbar.edit-lock-failed',
-            defaultMessage: '편집 잠금을 획득하지 못했습니다. 다시 시도해 주세요.',
-          }),
-        );
       }
     } finally {
       setIsAcquiringLock(false);

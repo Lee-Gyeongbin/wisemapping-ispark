@@ -33,6 +33,7 @@ public class RestUserSearchResult {
     private String lastname;
     private String fullName;
     private String deptNm;
+    private String userStatusCd;
     private boolean isCollaborating;
 
     public RestUserSearchResult() {
@@ -107,5 +108,13 @@ public class RestUserSearchResult {
 
     public void setDeptNm(String deptNm) {
         this.deptNm = deptNm;
+    }
+
+    public String getUserStatusCd() {
+        return userStatusCd;
+    }
+
+    public void setUserStatusCd(String userStatusCd) {
+        this.userStatusCd = userStatusCd;
     }
 }

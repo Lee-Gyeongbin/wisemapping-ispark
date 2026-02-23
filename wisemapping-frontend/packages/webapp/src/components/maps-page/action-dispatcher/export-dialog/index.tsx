@@ -17,17 +17,13 @@
  */
 
 import React, { useEffect } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
 import BaseDialog from '../base-dialog';
-import { useStyles } from './style';
 import Alert from '@mui/material/Alert';
-import FormControl from '@mui/material/FormControl';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Radio from '@mui/material/Radio';
 import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import {
   Designer,
   TextExporterFactory,
@@ -43,7 +39,6 @@ import { trackExport } from '../../../../utils/analytics';
 import { bscCmbOutlinedInputSx } from '../../../../theme/ui-input-styles';
 
 type ExportFormat = 'svg' | 'jpg' | 'png' | 'pdf' | 'txt' | 'mm' | 'mmx' | 'wxml' | 'md';
-type ExportGroup = 'image' | 'document' | 'mindmap-tool';
 
 type ExportDialogProps = {
   mapId: number;
@@ -57,46 +52,19 @@ const ExportDialog = ({
   onClose,
   enableImgExport,
 }: ExportDialogProps): React.ReactElement => {
-  const intl = useIntl();
   const [submit, setSubmit] = React.useState<boolean>(false);
   const { data: mapMetadata } = useFetchMapMetadata(mapId);
 
-  const [exportGroup, setExportGroup] = React.useState<ExportGroup>(
-    enableImgExport ? 'image' : 'document',
-  );
-  const [exportFormat, setExportFormat] = React.useState<ExportFormat>(
-    enableImgExport ? 'svg' : 'txt',
-  );
+  const [exportFormat, setExportFormat] = React.useState<ExportFormat>('svg');
 
   // Center/zoom 옵션은 이미지가 잘리는 이슈가 있어 UI 제거 + 항상 false로 export
   const zoomToFit = false;
   const exportTheme: ThemeType = 'prism';
 
-  const classes = useStyles();
-
   const handleOnExportFormatChange = (_event: React.SyntheticEvent, newValue: ExportFormat | null) => {
     if (newValue) {
       setExportFormat(newValue);
     }
-  };
-
-  const handleOnGroupChange = (event) => {
-    const value: ExportGroup = event.target.value;
-    setExportGroup(value);
-
-    let defaultFormat: ExportFormat;
-    switch (value) {
-      case 'document':
-        defaultFormat = 'txt';
-        break;
-      case 'image':
-        defaultFormat = 'svg';
-        break;
-      case 'mindmap-tool':
-        defaultFormat = 'wxml';
-        break;
-    }
-    setExportFormat(defaultFormat);
   };
 
   const handleOnClose = (): void => {
@@ -177,7 +145,7 @@ const ExportDialog = ({
       exporter(exportFormat)
         .then((url: string) => {
           // Track specific export format in Google Analytics
-          trackExport(exportFormat, exportGroup);
+          trackExport(exportFormat, 'image');
 
           // Create hidden anchor to force download ...
           const anchor: HTMLAnchorElement = document.createElement('a');
@@ -207,8 +175,8 @@ const ExportDialog = ({
         onClose={handleOnClose}
         onSubmit={handleOnSubmit}
         title={'맵 내보내기'}
+        description={'맵을 색상과 도형을 모두 포함한 이미지로 얻을 수 있습니다.'}
         useBscCmbTitle
-        description={'원하는 형식으로 맵을 내보내고, 발표 또는 이메일로 공유하여 사용할 수 있습니다.'}
         submitButton={'내보내기'}
       >
         {!enableImgExport && (
@@ -216,190 +184,63 @@ const ExportDialog = ({
             {'이미지(SVG, PNG, JPEG, PDF) 내보내기는 에디터 툴바에서만 가능합니다.'}
           </Alert>
         )}
-        <FormControl component="fieldset">
-          <RadioGroup name="export" value={exportGroup} onChange={handleOnGroupChange}>
-            <FormControl>
-              <FormControlLabel
-                css={classes.label}
-                value="image"
-                disabled={!enableImgExport}
-                control={
-                  <Radio
-                    sx={{
-                      color: '#00aaff',
-                      '&.Mui-checked': { color: '#00aaff' },
-                    }}
-                  />
-                }
-                label={'Image : 맵을 색상과 도형을 모두 포함한 이미지로 얻을 수 있습니다.'}
-                color="secondary"
-                style={{ fontSize: '9px' }}
-              />
-              {exportGroup == 'image' && (
-                <>
-                  <Autocomplete
-                    value={exportFormat}
-                    onChange={handleOnExportFormatChange}
-                    options={['svg', 'png', 'jpg', 'pdf'] as ExportFormat[]}
-                    getOptionLabel={(option) => {
-                      const labels: Partial<Record<ExportFormat, string>> = {
-                        svg: 'SVG',
-                        png: 'PNG',
-                        jpg: 'JPEG',
-                        pdf: 'PDF',
-                        txt: 'TXT',
-                        md: 'MD',
-                        mm: 'MM',
-                        mmx: 'MMX',
-                        wxml: 'WXML',
-                      };
-                      return labels[option] || option;
-                    }}
-                    disableClearable
-                    size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        placeholder="형식 선택"
-                        sx={[
-                          bscCmbOutlinedInputSx,
-                          {
-                            width: 300,
-                            '& .MuiOutlinedInput-root': {
-                              minHeight: 26,
-                            },
-                            '& .MuiOutlinedInput-input': {
-                              padding: '4px 8px',
-                              fontSize: 12,
-                            },
-                          },
-                        ]}
-                      />
-                    )}
-                    sx={{ width: 300, ml: 4.5 }}
-                  />
-                </>
-              )}
-            </FormControl>
-
-            <FormControl>
-              <FormControlLabel
-                css={classes.label}
-                value="document"
-                control={
-                  <Radio
-                    sx={{
-                      color: '#00aaff',
-                      '&.Mui-checked': { color: '#00aaff' },
-                    }}
-                  />
-                }
-                label={'Document : 맵을 자체적으로 준비된 문서로 내보낼 수 있습니다.'}
-                color="secondary"
-              />
-              {exportGroup == 'document' && (
-                <Autocomplete
-                  value={exportFormat}
-                  onChange={handleOnExportFormatChange}
-                  options={['txt', 'md'] as ExportFormat[]}
-                  getOptionLabel={(option) => {
-                    const labels: Partial<Record<ExportFormat, string>> = {
-                      svg: 'SVG',
-                      png: 'PNG',
-                      jpg: 'JPEG',
-                      pdf: 'PDF',
-                    };
-                    return labels[option] || option;
-                  }}
-                  disableClearable
-                  size="small"
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="outlined"
-                      placeholder="형식 선택"
-                      sx={[
-                        bscCmbOutlinedInputSx,
-                        {
-                          width: 300,
-                          '& .MuiOutlinedInput-root': {
-                            minHeight: 26,
-                          },
-                          '& .MuiOutlinedInput-input': {
-                            padding: '4px 8px',
-                            fontSize: 12,
-                          },
-                        },
-                      ]}
-                    />
-                  )}
-                  sx={{ width: 300, ml: 4.5 }}
+        <Paper
+          variant="outlined"
+          sx={{
+            mt: 2,
+            p: 2,
+            border: (theme) => `1px solid ${theme.palette.divider}`,
+            borderRadius: (theme) => theme.shape.borderRadius,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography
+              component="label"
+              variant="body1"
+              color="text.secondary"
+              sx={{ flexShrink: 0 }}
+            >
+              이미지 형식
+            </Typography>
+            <Autocomplete
+              value={exportFormat}
+              onChange={handleOnExportFormatChange}
+              options={['svg', 'png', 'jpg', 'pdf'] as ExportFormat[]}
+              getOptionLabel={(option) => {
+                const labels: Partial<Record<ExportFormat, string>> = {
+                  svg: 'SVG',
+                  png: 'PNG',
+                  jpg: 'JPEG',
+                  pdf: 'PDF',
+                };
+                return labels[option] || option;
+              }}
+              disableClearable
+              size="small"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  placeholder="형식 선택"
+                  sx={[
+                    bscCmbOutlinedInputSx,
+                    {
+                      width: '100%',
+                      '& .MuiOutlinedInput-root': {
+                        minHeight: 26,
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        padding: '4px 8px',
+                        fontSize: 12,
+                      },
+                    },
+                  ]}
                 />
               )}
-            </FormControl>
-
-            {/* <FormControl>
-              <FormControlLabel
-                css={classes.label}
-                value="mindmap-tool"
-                control={
-                  <Radio
-                    sx={{
-                      color: '#00aaff',
-                      '&.Mui-checked': { color: '#00aaff' },
-                    }}
-                  />
-                }
-                label={intl.formatMessage({
-                  id: 'export.document',
-                  defaultMessage:
-                    'Mindmap Tools: Export your mindmap in thirdparty mindmap tool formats',
-                })}
-                color="secondary"
-              />
-              {exportGroup == 'mindmap-tool' && (
-                <Autocomplete
-                  value={exportFormat}
-                  onChange={handleOnExportFormatChange}
-                  options={['wxml', 'mm', 'mmx'] as ExportFormat[]}
-                  getOptionLabel={(option) => {
-                    const labels: Partial<Record<ExportFormat, string>> = {
-                      svg: 'SVG',
-                      png: 'PNG',
-                      jpg: 'JPEG',
-                      pdf: 'PDF',
-                    };
-                    return labels[option] || option;
-                  }}
-                  disableClearable
-                  size="small"
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="outlined"
-                      placeholder="형식 선택"
-                      sx={[
-                        bscCmbOutlinedInputSx,
-                        {
-                          width: 300,
-                          '& .MuiOutlinedInput-root': {
-                            minHeight: 26,
-                          },
-                          '& .MuiOutlinedInput-input': {
-                            padding: '4px 8px',
-                            fontSize: 12,
-                          },
-                        },
-                      ]}
-                    />
-                  )}
-                  sx={{ width: 300, ml: 4.5 }}
-                />
-              )}
-            </FormControl> */}
-          </RadioGroup>
-        </FormControl>
+              sx={{ flex: 1, minWidth: 0 }}
+            />
+          </Box>
+        </Paper>
       </BaseDialog>
     </div>
   );

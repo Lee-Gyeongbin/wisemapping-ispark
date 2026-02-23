@@ -66,7 +66,6 @@ const HistoryDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElemen
       onClose={handleOnClose}
       title={'변경 이력'}
       useBscCmbTitle={true}
-      description={'최근 90일 동안 변경된 내역입니다.'}
     >
       <StyledTableContainer sx={{ marginTop: 2 }}>
         <Table size="small" stickyHeader>

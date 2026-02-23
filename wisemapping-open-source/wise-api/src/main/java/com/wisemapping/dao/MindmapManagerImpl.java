@@ -73,9 +73,7 @@ public class MindmapManagerImpl
         final CriteriaQuery<MindMapHistory> select = cr.select(root)
                 .where(cb.equal(root.get("mindmapId"), mindmapId))
                 .orderBy(cb.desc(root.get("creationTime")));
-        return entityManager.createQuery(select)
-                .setMaxResults(30)
-                .getResultList();
+        return entityManager.createQuery(select).getResultList();
     }
 
     @Override

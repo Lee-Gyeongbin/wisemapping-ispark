@@ -35,6 +35,7 @@ public class RestCollaboration {
     private String userId;
     private String name;
     private String deptNm;
+    private String userStatusCd;
     private String role;
 
     public RestCollaboration(@NotNull Collaboration collaboration) {
@@ -99,5 +100,13 @@ public class RestCollaboration {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserStatusCd() {
+        return userStatusCd;
+    }
+
+    public void setUserStatusCd(String userStatusCd) {
+        this.userStatusCd = userStatusCd;
     }
 }

@@ -223,18 +223,40 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
                   sx={[bscCmbOutlinedInputSx, { minWidth: 200, flex: 1 }]}
                 />
               )}
-              renderOption={(props, option) => (
-                <Box component="li" {...props} key={option.email}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    <Typography variant="body2">{option.fullName || option.email}</Typography>
-                    {option.deptNm && (
-                      <Typography variant="caption" color="text.secondary">
-                        {option.deptNm}
-                      </Typography>
-                    )}
+              renderOption={(props, option) => {
+                const statusLabel =
+                  option.userStatusCd == '002' ? '일시정지' : option.userStatusCd == '003' ? '퇴사' : null;
+                const statusColor =
+                  option.userStatusCd === '002' ? 'warning.main' : option.userStatusCd === '003' ? 'error.main' : undefined;
+                return (
+                  <Box component="li" {...props} key={option.email}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', pb: 0.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, flexWrap: 'wrap' }}>
+                        <Typography variant="body2">{option.fullName || option.email}</Typography>
+                        {statusLabel && statusColor && (
+                          <Typography
+                            component="span"
+                            sx={{
+                              fontSize: '0.75rem',
+                              color: statusColor,
+                              fontWeight: 'bold',
+                              position: 'relative',
+                              top: -1,
+                            }}
+                          >
+                            {statusLabel}
+                          </Typography>
+                        )}
+                      </Box>
+                      {option.deptNm && (
+                        <Typography variant="caption" color="text.secondary">
+                          {option.deptNm}
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                );
+              }}
               sx={{ minWidth: 200, flex: 1 }}
             />
           </Box>
@@ -298,7 +320,39 @@ const ShareDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement 
                       scope="row"
                       css={classes.emailCell as Interpolation<Theme>}
                     >
-                      {formatName(permission)}
+                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, flexWrap: 'wrap' }}>
+                        <Typography variant="body2" component="span">
+                          {formatName(permission)}
+                        </Typography>
+                        {permission.userStatusCd === '002' && (
+                          <Typography
+                            component="span"
+                            sx={{
+                              fontSize: '0.75rem',
+                              color: 'warning.main',
+                              fontWeight: 'bold',
+                              position: 'relative',
+                              top: -1,
+                            }}
+                          >
+                            일시정지
+                          </Typography>
+                        )}
+                        {permission.userStatusCd === '003' && (
+                          <Typography
+                            component="span"
+                            sx={{
+                              fontSize: '0.75rem',
+                              color: 'error.main',
+                              fontWeight: 'bold',
+                              position: 'relative',
+                              top: -1,
+                            }}
+                          >
+                            퇴사
+                          </Typography>
+                        )}
+                      </Box>
                     </TableCell>
                     <TableCell align="center">
                       <RoleIcon role={permission.role} />

@@ -208,6 +208,7 @@ export default class RestClient implements Client {
               name: p.name,
               deptNm: p.deptNm,
               role: p.role,
+              userStatusCd: p.userStatusCd,
             };
           });
           success(perms);
@@ -242,6 +243,7 @@ export default class RestClient implements Client {
             lastname: u.lastname,
             fullName: u.fullName,
             deptNm: u.deptNm,
+            userStatusCd: u.userStatusCd,
             collaborating: u.collaborating || false,
           }));
           success(users);
