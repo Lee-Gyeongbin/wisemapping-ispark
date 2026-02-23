@@ -46,61 +46,66 @@ class RESTPersistenceManager extends PersistenceManager {
     events.onError(error);
   }
 
-  // Throttle saves to prevent multiple saves within 10 seconds
+  private _doSave(
+    mapId: string,
+    data: { id: string; xml: string; properties: string },
+    query: string,
+    events: { onSuccess: () => void; onError: (error: PersistenceError) => void },
+  ): void {
+    const headers = this._buildHttpHeader('application/json; charset=utf-8', 'application/json');
+    fetch(`${this.documentUrl.replace('{id}', mapId)}?${query}`, {
+      method: 'PUT',
+      body: new Blob([JSON.stringify(data)], { type: 'text/plain' }),
+      headers,
+    })
+      .then(async (response: Response) => {
+        if (response.ok) {
+          events.onSuccess();
+        } else {
+          console.error(`Saving error: ${response.status}`);
+          let error: PersistenceError;
+          switch (response.status) {
+            case 401:
+            case 403:
+              error = {
+                severity: 'FATAL',
+                errorType: 'auth',
+                message: $msg('SESSION_EXPIRED'),
+              };
+              break;
+            case 409:
+              error = {
+                severity: 'WARNING',
+                errorType: 'lock',
+                message: '다른 사용자가 편집 중인 마인드맵입니다.',
+              };
+              this._throttledSave.cancel();
+              break;
+            default:
+              error = await this._buildError(response);
+          }
+          this._handleError(error, events);
+        }
+      })
+      .catch(() => {
+        const error: PersistenceError = {
+          severity: 'SEVERE',
+          errorType: 'unexpected',
+          message: $msg('SAVE_COULD_NOT_BE_COMPLETED'),
+        };
+        this._handleError(error, events);
+      });
+  }
+
+  // Throttle autosave only (saveHistory false). 저장 버튼(saveHistory true)은 throttle 없이 즉시 실행.
   private _throttledSave = throttle(
     (
       mapId: string,
       data: { id: string; xml: string; properties: string },
       query: string,
-      events,
+      events: { onSuccess: () => void; onError: (error: PersistenceError) => void },
     ) => {
-      const headers = this._buildHttpHeader('application/json; charset=utf-8', 'application/json');
-      fetch(`${this.documentUrl.replace('{id}', mapId)}?${query}`, {
-        method: 'PUT',
-        // Blob helps to reduce the memory on large payload.
-        body: new Blob([JSON.stringify(data)], { type: 'text/plain' }),
-        headers,
-      })
-        .then(async (response: Response) => {
-          if (response.ok) {
-            events.onSuccess();
-          } else {
-            console.error(`Saving error: ${response.status}`);
-
-            let error: PersistenceError;
-            switch (response.status) {
-              case 401:
-              case 403:
-                error = {
-                  severity: 'FATAL',
-                  errorType: 'auth',
-                  message: $msg('SESSION_EXPIRED'),
-                };
-                break;
-              case 409:
-                error = {
-                  severity: 'WARNING',
-                  errorType: 'lock',
-                  message: '다른 사용자가 편집 중인 마인드맵입니다.',
-                };
-                // throttle 취소: 다음 저장 시 요청이 나가서 409 메시지를 다시 받을 수 있게 함
-                this._throttledSave.cancel();
-                break;
-              default: {
-                error = await this._buildError(response);
-              }
-            }
-            this._handleError(error, events);
-          }
-        })
-        .catch(() => {
-          const error: PersistenceError = {
-            severity: 'SEVERE',
-            errorType: 'unexpected',
-            message: $msg('SAVE_COULD_NOT_BE_COMPLETED'),
-          };
-          this._handleError(error, events);
-        });
+      this._doSave(mapId, data, query, events);
     },
     10000,
     { leading: true, trailing: false },
@@ -112,9 +117,12 @@ class RESTPersistenceManager extends PersistenceManager {
       xml: new XMLSerializer().serializeToString(mapXml),
       properties: pref,
     };
-
     const query = `minor=${!saveHistory}`;
-    this._throttledSave(mapId, data, query, events);
+    if (saveHistory) {
+      this._doSave(mapId, data, query, events);
+    } else {
+      this._throttledSave(mapId, data, query, events);
+    }
   }
 
   discardChanges(mapId: string): void {

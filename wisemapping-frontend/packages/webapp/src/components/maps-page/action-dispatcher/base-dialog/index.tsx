@@ -44,6 +44,8 @@ export type DialogProps = {
   description?: string;
 
   submitButton?: string;
+  /** 닫기/취소 버튼 문구 (기본: '닫기') */
+  closeButton?: string;
   actionUrl?: string;
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
   papercss?: CSSObject;
@@ -76,7 +78,7 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
       }
     };
   }, []);
-  const { onClose, onSubmit, maxWidth = 'sm', papercss, isLoading = false, useBscCmbTitle, titleStartIcon } = props;
+  const { onClose, onSubmit, maxWidth = 'sm', papercss, isLoading = false, useBscCmbTitle, titleStartIcon, closeButton = '닫기' } = props;
 
   const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -142,11 +144,7 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
               disabled={isLoading}
               sx={bscCmbTypeSecondaryButtonSx}
             >
-              {onSubmit ? (
-                '닫기'
-              ) : (
-                '닫기'
-              )}
+              {closeButton}
             </Button>
             {onSubmit && (
               <AsyncButton

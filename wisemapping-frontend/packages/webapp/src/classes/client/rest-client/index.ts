@@ -91,6 +91,12 @@ export default class RestClient implements Client {
         })
         .then((response) => {
           const data = response.data;
+          // 잠금 여부: API는 isLockedBy만 내려줌. 값이 있으면 다른 사용자가 편집 중(locked)
+          const hasLockHolder =
+            data.isLockedBy != null && String(data.isLockedBy).trim() !== '';
+          if (data.isLocked === undefined) {
+            data.isLocked = hasLockHolder;
+          }
           success(data);
         })
         .catch((error) => {
@@ -691,6 +697,45 @@ export default class RestClient implements Client {
         });
     };
     return new Promise(handler);
+  }
+
+  lockMindmap(id: number, lock: boolean): Promise<void> {
+    return this.axios
+      .put(`${this.baseUrl}/api/restful/maps/${id}/lock`, lock.toString(), {
+        headers: { 'Content-Type': 'text/plain' },
+      })
+      .then(() => undefined)
+      .catch((error) => {
+        const errorInfo = this.parseResponseOnError(error.response);
+        return Promise.reject(errorInfo);
+      });
+  }
+
+  lockMindmapForce(id: number): Promise<void> {
+    return this.axios
+      .put(`${this.baseUrl}/api/restful/maps/${id}/lock/force`, 'true', {
+        headers: { 'Content-Type': 'text/plain' },
+      })
+      .then(() => undefined)
+      .catch((error) => {
+        const errorInfo = this.parseResponseOnError(error.response);
+        return Promise.reject(errorInfo);
+      });
+  }
+
+  getMapLockInfo(id: number): Promise<{ locked: boolean; lockedByUserId?: string | null }> {
+    return this.axios
+      .get(`${this.baseUrl}/api/restful/maps/${id}/lock`, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then((res) => ({
+        locked: res.data?.locked ?? false,
+        lockedByUserId: res.data?.lockedByUserId ?? null,
+      }))
+      .catch((error) => {
+        const errorInfo = this.parseResponseOnError(error.response);
+        return Promise.reject(errorInfo);
+      });
   }
 
   fetchLabels(): Promise<Label[]> {

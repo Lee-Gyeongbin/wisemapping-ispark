@@ -600,6 +600,18 @@ export default class AdminClient implements AdminClientInterface {
     return Promise.resolve();
   }
 
+  lockMindmap(_id: number, _lock: boolean): Promise<void> {
+    return Promise.resolve();
+  }
+
+  lockMindmapForce(_id: number): Promise<void> {
+    return Promise.resolve();
+  }
+
+  getMapLockInfo(_id: number): Promise<{ locked: boolean; lockedByUserId?: string | null }> {
+    return Promise.resolve({ locked: false, lockedByUserId: null });
+  }
+
   updateMapToPublic(_id: number, _isPublic: boolean): Promise<void> {
     return Promise.resolve();
   }

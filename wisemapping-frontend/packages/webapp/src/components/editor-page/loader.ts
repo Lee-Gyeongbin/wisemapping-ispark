@@ -105,7 +105,7 @@ export const loader = (pageMode: PageModeType, bootstrap = false) => {
           const mapMetadata = await fetchMapMetadataWithCache(mapId, client, bootstrap);
 
           let editorMode: EditorRenderMode;
-          // 편집하기 버튼 클릭으로 진입한 경우( requestEdit=1 ) role 기반 편집 모드, 아니면 뷰어 모드
+          // 편집하기 버튼 클릭으로 진입한 경우( requestEdit=Y ) role 기반 편집 모드, 아니면 뷰어 모드
           const url = new URL(request.url);
           const requestEdit = url.searchParams.get('requestEdit') === 'Y'
           editorMode = requestEdit

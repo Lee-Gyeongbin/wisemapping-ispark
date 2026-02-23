@@ -77,6 +77,7 @@ const WarningDialog = ({ capability, message }: FooterPropsType): React.ReactEle
     return { msgExt: msgExtValue, msg: msgValue };
   }, [capability.mode, capability.isMobile, intl]);
 
+
   const [open, setOpen] = useState<boolean>(Boolean(msgExt || message).valueOf());
   return (
     <>
@@ -100,7 +101,11 @@ const WarningDialog = ({ capability, message }: FooterPropsType): React.ReactEle
               </button>
             </CloseButton>
             {msgExt && <p>{`${msg} ${msgExt}`}</p>}
-            {message && <p>{message}</p>}
+            {message && (
+              <p>
+                <strong>{message}</strong>님이 수정 중인 맵입니다.
+              </p>
+            )}
           </InfoDialogContent>
         </InfoDialog>
       )}

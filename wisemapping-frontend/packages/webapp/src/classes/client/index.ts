@@ -176,6 +176,13 @@ interface Client {
   updateStarred(id: number, starred: boolean): Promise<void>;
   updateMapToPublic(id: number, isPublic: boolean): Promise<void>;
 
+  /** Lock the map for the current user (for editing). Fails if another user holds the lock. */
+  lockMindmap(id: number, lock: boolean): Promise<void>;
+  /** Force-unlock whoever holds the lock and lock with the current user. */
+  lockMindmapForce(id: number): Promise<void>;
+  /** 현재 맵의 Lock 상태 조회 (저장 전 Lock 보유자 비교용). */
+  getMapLockInfo(id: number): Promise<{ locked: boolean; lockedByUserId?: string | null }>;
+
   createLabel(title: string, color: string): Promise<number>;
   fetchLabels(): Promise<Label[]>;
   deleteLabel(id: number): Promise<void>;

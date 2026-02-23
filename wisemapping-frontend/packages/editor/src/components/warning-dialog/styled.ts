@@ -69,7 +69,7 @@ export const CloseButton = styled.div`
   button img {
     width: 18px;
     height: 18px;
-    filter: invert(73%) sepia(21%) saturate(4699%) hue-rotate(357deg) brightness(98%) contrast(108%);
+    filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(226deg) brightness(104%) contrast(97%);
   }
 `;
 

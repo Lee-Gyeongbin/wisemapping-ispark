@@ -118,6 +118,13 @@ class LockManagerImpl implements LockManager {
         return result;
     }
 
+    @Override
+    public void forceUnlock(@NotNull Mindmap mindmap) {
+        if (lockInfoByMapId.remove(mindmap.getId()) != null) {
+            logger.debug("Force unlock map id: {}", mindmap.getId());
+        }
+    }
+
     private void verifyHasLock(@NotNull Mindmap mindmap, @NotNull Account user) throws LockException, AccessDeniedSecurityException {
         if (isLocked(mindmap) && !isLockedBy(mindmap, user)) {
             LockInfo current = getLockInfo(mindmap);

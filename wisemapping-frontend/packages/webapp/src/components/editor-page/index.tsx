@@ -181,7 +181,7 @@ const EditorPage = ({ mapId, pageMode, zoom, hid }: EditorPropsType): React.Reac
         client,
         editorMetadata.mapMetadata.title,
         editorMetadata.mapMetadata.creatorFullName,
-        editorMetadata.mapMetadata.isLocked,
+        editorMetadata.mapMetadata.isLocked ?? false,
         editorMetadata.mapMetadata.isLockedBy,
         editorMetadata.zoom,
         editorMetadata.mapMetadata.starred,
@@ -189,7 +189,7 @@ const EditorPage = ({ mapId, pageMode, zoom, hid }: EditorPropsType): React.Reac
       );
     } else {
       existingMapInfo.updateMetadata({
-        locked: editorMetadata.mapMetadata.isLocked,
+        locked: editorMetadata.mapMetadata.isLocked ?? false,
         lockedMsg: editorMetadata.mapMetadata.isLockedBy,
         zoom: editorMetadata.zoom,
         starred: editorMetadata.mapMetadata.starred,

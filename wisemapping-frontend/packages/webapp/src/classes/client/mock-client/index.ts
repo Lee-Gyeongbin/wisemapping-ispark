@@ -435,6 +435,18 @@ class MockClient implements Client {
     return Promise.resolve();
   }
 
+  lockMindmap(_id: number, _lock: boolean): Promise<void> {
+    return Promise.resolve();
+  }
+
+  lockMindmapForce(_id: number): Promise<void> {
+    return Promise.resolve();
+  }
+
+  getMapLockInfo(_id: number): Promise<{ locked: boolean; lockedByUserId?: string | null }> {
+    return Promise.resolve({ locked: false, lockedByUserId: null });
+  }
+
   renameMap(id: number, basicInfo: BasicMapInfo): Promise<void> {
     const exists = this.maps.find((m) => m.title == basicInfo.title) != undefined;
     if (!exists) {

@@ -16,6 +16,7 @@
  *   limitations under the License.
  */
 import React, { ReactElement, useEffect, useState, useRef, useMemo } from 'react';
+import Box from '@mui/material/Box';
 import MaterialToolbar from '@mui/material/Toolbar';
 import MaterialAppBar from '@mui/material/AppBar';
 import { ToolbarMenuItem } from '../toolbar';
@@ -50,7 +51,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { trackAppBarAction } from '../../utils/analytics';
 import debounce from 'lodash/debounce';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
+import BaseDialog from '../../../../webapp/src/components/maps-page/action-dispatcher/base-dialog';
 import {
+  bscCmbAlertModalPaper,
   bscCmbOutlinedInputSx,
   bscCmbTypeInfoButtonSx,
 } from '../../../../webapp/src/theme/ui-input-styles';
@@ -94,8 +97,20 @@ const AppBar = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [currentTitle, setCurrentTitle] = useState<string>(mapInfo.getTitle());
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(() => model?.isMapLoadded() ?? false);
+  const [lockConfirmDialog, setLockConfirmDialog] = useState<{
+    open: boolean;
+    message: string;
+    lockedBy?: string;
+  }>({ open: false, message: '' });
+  const [saveBlockedDialog, setSaveBlockedDialog] = useState<{
+    open: boolean;
+    mapId?: string;
+  }>({ open: false });
+  const [saveCompleteModal, setSaveCompleteModal] = useState<boolean>(false);
+  const [isAcquiringLock, setIsAcquiringLock] = useState<boolean>(false);
   const canRename = !capability.isHidden('rename');
   const inputRef = useRef<HTMLInputElement>(null);
+  const lockPollStoppedRef = useRef(false);
   const intl = useIntl();
   const { mode, toggleMode } = useTheme();
   const muiTheme = useMuiTheme();
@@ -163,6 +178,97 @@ const AppBar = ({
     setEditedTitle(currentTitle);
   };
 
+  const showLoadingInParent = () => {
+    try {
+      if (typeof window !== 'undefined' && window.parent !== window) {
+        window.parent.postMessage({ type: 'wisemapping-show-loading' }, '*');
+      }
+    } catch (_) {
+      /* cross-origin 무시 */
+    }
+  };
+
+  const proceedToEdit = () => {
+    trackAppBarAction('edit');
+    const mapId = mapInfo.getId();
+    showLoadingInParent();
+    window.location.href = `/c/maps/${mapId}/edit?requestEdit=Y`;
+  };
+
+  const handleEditClick = async () => {
+    const locked =
+      typeof mapInfo.isLocked === 'function' ? mapInfo.isLocked() : false;
+    if (locked) {
+      const lockedBy = mapInfo.getLockedBy?.()?.trim();
+      const message = lockedBy
+        ? `${lockedBy}님이 수정 중인 맵입니다.\n수정중인 정보가 사라질 수 있습니다.\n계속하시겠습니까?`
+        : '다른 사용자가 수정 중인 맵입니다.\n수정중인 정보가 사라질 수 있습니다.\n계속하시겠습니까?';
+      setLockConfirmDialog({ open: true, message, lockedBy });
+      return;
+    }
+    if (typeof mapInfo.acquireLock !== 'function') {
+      proceedToEdit();
+      return;
+    }
+    setIsAcquiringLock(true);
+    try {
+      await mapInfo.acquireLock();
+      proceedToEdit();
+    } catch (err) {
+      const status = err && typeof (err as { status?: number }).status === 'number' ? (err as { status: number }).status : 0;
+      if (status === 409) {
+        const message =
+          '다른 사용자가 수정 중인 맵입니다.\n수정중인 정보가 사라질 수 있습니다.\n계속하시겠습니까?';
+        setLockConfirmDialog({ open: true, message, lockedBy: undefined });
+      } else {
+        console.error('Lock acquire failed:', err);
+        $notify(
+          intl.formatMessage({
+            id: 'appbar.edit-lock-failed',
+            defaultMessage: '편집 잠금을 획득하지 못했습니다. 다시 시도해 주세요.',
+          }),
+        );
+      }
+    } finally {
+      setIsAcquiringLock(false);
+    }
+  };
+
+  const handleLockConfirmClose = () => {
+    setLockConfirmDialog({ open: false, message: '', lockedBy: undefined });
+  };
+
+  const handleSaveBlockedClose = () => {
+    const mapId = saveBlockedDialog.mapId;
+    setSaveBlockedDialog({ open: false, mapId: undefined });
+    if (mapId) {
+      window.location.href = `/c/maps/${mapId}/edit`;
+    }
+  };
+
+  const handleLockConfirmSubmit = async (_e: React.FormEvent<HTMLFormElement>) => {
+    setLockConfirmDialog({ open: false, message: '', lockedBy: undefined });
+    if (typeof mapInfo.forceAcquireLock !== 'function') {
+      proceedToEdit();
+      return;
+    }
+    setIsAcquiringLock(true);
+    try {
+      await mapInfo.forceAcquireLock();
+      proceedToEdit();
+    } catch (err) {
+      console.error('Force lock acquire failed:', err);
+      $notify(
+        intl.formatMessage({
+          id: 'appbar.edit-force-lock-failed',
+          defaultMessage: '편집 권한을 가져오지 못했습니다. 다시 시도해 주세요.',
+        }),
+      );
+    } finally {
+      setIsAcquiringLock(false);
+    }
+  };
+
   // Focus input when editing starts
   useEffect(() => {
     if (isEditingTitle && inputRef.current) {
@@ -188,19 +294,43 @@ const AppBar = ({
   const handleDebouncedSave = useMemo(
     () =>
       debounce(
-        () => {
+        async () => {
           if (!model) {
             return;
           }
+          if (typeof mapInfo.fetchLatestLockInfo === 'function' && typeof mapInfo.getCurrentUserId === 'function') {
+            try {
+              const [lockInfo, currentUserId] = await Promise.all([
+                mapInfo.fetchLatestLockInfo(),
+                mapInfo.getCurrentUserId(),
+              ]);
+              const lockUserId = lockInfo.lockedByUserId?.trim();
+              const userId = currentUserId?.trim();
+              if (lockInfo.isLocked && lockUserId && userId && lockUserId !== userId) {
+                setSaveBlockedDialog({ open: true, mapId: mapInfo.getId() });
+                return;
+              }
+            } catch (e) {
+              console.warn('Lock check before save failed:', e);
+            }
+          }
           trackAppBarAction('save');
-          model.save(true).catch((error) => {
-            console.error('Save failed from app bar:', error);
-          });
+          const mapId = mapInfo.getId();
+          model
+            .save(true)
+            .then(() => mapInfo.releaseLock?.()?.catch((err) => console.warn('Unlock after save failed:', err)))
+            .then(() => {
+              showLoadingInParent();
+              window.location.href = `/c/maps/${mapId}/edit?saveComplete=1`;
+            })
+            .catch((error) => {
+              console.error('Save failed from app bar:', error);
+            });
         },
         5000,
         { leading: true, trailing: true },
       ),
-    [model],
+    [model, mapInfo, intl],
   );
 
   // Cleanup debounced function on unmount
@@ -209,6 +339,65 @@ const AppBar = ({
       handleDebouncedSave.cancel();
     };
   }, [handleDebouncedSave]);
+
+  // 저장 후 조회 모드로 돌아온 경우(saveComplete=1) 저장 완료 모달 표시
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('saveComplete') === '1') {
+      setSaveCompleteModal(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('saveComplete');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+  }, []);
+
+  // 편집 화면에 머물 때 3초마다 Lock 정보 조회, 다른 사용자가 Lock 보유 시 모달 후 리다이렉트
+  const isEditScreen =
+    capability.mode !== 'edition-viewer' && Boolean(model?.isMapLoadded());
+  useEffect(() => {
+    if (
+      !isEditScreen ||
+      saveBlockedDialog.open ||
+      typeof mapInfo.fetchLatestLockInfo !== 'function' ||
+      typeof mapInfo.getCurrentUserId !== 'function'
+    ) {
+      return;
+    }
+    lockPollStoppedRef.current = false;
+    const tick = () => {
+      if (
+        lockPollStoppedRef.current ||
+        typeof mapInfo.fetchLatestLockInfo !== 'function' ||
+        typeof mapInfo.getCurrentUserId !== 'function'
+      ) {
+        return;
+      }
+      Promise.all([
+        mapInfo.fetchLatestLockInfo!(),
+        mapInfo.getCurrentUserId!(),
+      ])
+        .then(([lockInfo, userId]) => {
+          if (lockPollStoppedRef.current) return;
+          const lockUserId = lockInfo.lockedByUserId?.trim();
+          const uid = (userId ?? '').trim();
+          if (
+            lockInfo.isLocked &&
+            lockUserId &&
+            uid &&
+            lockUserId !== uid
+          ) {
+            lockPollStoppedRef.current = true;
+            setSaveBlockedDialog({ open: true, mapId: mapInfo.getId() });
+          }
+        })
+        .catch((err) => {
+          console.warn('Lock poll tick failed:', err);
+        });
+    };
+    const id = setInterval(tick, 3000);
+    tick();
+    return () => clearInterval(id);
+  }, [isEditScreen, mapInfo, saveBlockedDialog.open]);
 
   useEffect(() => {
     const latestTitle = mapInfo.getTitle();
@@ -381,16 +570,6 @@ const AppBar = ({
         ]
       : [undefined]),
     {
-      icon: <SaveOutlinedIcon />,
-      onClick: handleDebouncedSave,
-      tooltip: keyTooltip(
-        '저장',
-        'S',
-      ),
-      visible: !capability.isHidden('save'),
-      disabled: () => !model?.isMapLoadded(),
-    },
-    {
       icon: <HelpOutlineOutlinedIcon />,
       onClick: () => {
         trackAppBarAction('info');
@@ -477,58 +656,60 @@ const AppBar = ({
       visible: !capability.isHidden('export'),
       disabled: () => !isMapLoaded,
     },
-    // 테마 토글 삭제
     // {
-    //   icon: mode === 'dark' ? <Brightness7 /> : <Brightness4 />,
-    //   tooltip: intl.formatMessage({
-    //     id: 'appbar.tooltip-theme-toggle',
-    //     defaultMessage: 'Toggle Theme',
-    //   }),
-    //   onClick: () => {
-    //     trackAppBarAction('theme_toggle');
-    //     toggleMode();
-    //   },
+    //   render: () => (
+    //     <Tooltip title={'다른 사용자와 협업하기'}>
+    //       <Button
+    //         variant="outlined"
+    //         disableElevation
+    //         sx={[bscCmbTypeInfoButtonSx, { minWidth: 80 }]}
+    //         onClick={() => {
+    //           trackAppBarAction('share');
+    //           onAction('share');
+    //         }}
+    //       >
+    //         {'협업하기'}
+    //       </Button>
+    //     </Tooltip>
+    //   ),
+    //   visible: !capability.isHidden('share'),
     // },
     {
       render: () => (
-        <Tooltip title={'다른 사용자와 협업하기'}>
+        <Tooltip title={'수정하기'}>
           <Button
             variant="outlined"
             disableElevation
             sx={[bscCmbTypeInfoButtonSx, { minWidth: 80 }]}
-            onClick={() => {
-              trackAppBarAction('share');
-              onAction('share');
-            }}
-          >
-            {'협업하기'}
-          </Button>
-        </Tooltip>
-      ),
-      visible: !capability.isHidden('share'),
-    },
-    {
-      render: () => (
-        <Tooltip title={'편집 모드로 전환하기'}>
-          <Button
-            variant="outlined"
-            disableElevation
-            sx={[bscCmbTypeInfoButtonSx, { minWidth: 80 }]}
-            onClick={() => {
-              trackAppBarAction('edit');
-              // 편집 모드로 전환: requestEdit=1 이면 loader에서 role 기반 editorMode 적용
-              const mapId = mapInfo.getId();
-              window.location.href = `/c/maps/${mapId}/edit?requestEdit=Y`;
-            }}
+            onClick={handleEditClick}
             startIcon={<EditIcon />}
+            disabled={isAcquiringLock}
           >
-            {'편집하기'}
+            {isAcquiringLock ? '...' : '수정'}
           </Button>
         </Tooltip>
       ),
       visible:
         capability.mode === 'edition-viewer' &&
         (typeof mapInfo.getRole !== 'function' || mapInfo.getRole?.() !== 'viewer'),
+    },
+    {
+      render: () => (
+        <Tooltip title={keyTooltip('저장', 'S')}>
+          <Button
+            variant="outlined"
+            disableElevation
+            sx={[bscCmbTypeInfoButtonSx, { minWidth: 80 }]}
+            onClick={handleDebouncedSave}
+            startIcon={<SaveOutlinedIcon />}
+            disabled={!model?.isMapLoadded()}
+          >
+            {'저장'}
+          </Button>
+        </Tooltip>
+      ),
+      visible: !capability.isHidden('save'),
+      disabled: () => !model?.isMapLoadded(),
     },
     {
       render: () => accountConfig,
@@ -614,6 +795,107 @@ const AppBar = ({
           })}
         </MaterialToolbar>
       </MaterialAppBar>
+
+      {lockConfirmDialog.open && (
+        <BaseDialog
+          onClose={handleLockConfirmClose}
+          onSubmit={handleLockConfirmSubmit}
+          title="수정하기"
+          useBscCmbTitle={true}
+          papercss={bscCmbAlertModalPaper}
+          submitButton="수정"
+        >
+          <Box
+            sx={{
+              padding: '40px 30px',
+              textAlign: 'left',
+              fontFamily: '"Pretendard", sans-serif',
+              fontSize: 15,
+              color: '#333',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-line',
+              '& .MuiTypography-root': {
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                color: 'inherit',
+              },
+            }}
+          >
+            {lockConfirmDialog.lockedBy ? (
+              <>
+                <strong>{lockConfirmDialog.lockedBy}</strong>
+                {'님이 수정 중인 맵입니다.\n수정중인 정보가 사라질 수 있습니다.\n계속하시겠습니까?'}
+              </>
+            ) : (
+              lockConfirmDialog.message
+            )}
+          </Box>
+        </BaseDialog>
+      )}
+
+      {saveBlockedDialog.open && (
+        <BaseDialog
+          onClose={handleSaveBlockedClose}
+          title="저장 불가"
+          useBscCmbTitle={true}
+          papercss={bscCmbAlertModalPaper}
+          closeButton="확인"
+        >
+          <Box
+            sx={{
+              padding: '40px 30px',
+              textAlign: 'left',
+              fontFamily: '"Pretendard", sans-serif',
+              fontSize: 15,
+              color: '#333',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-line',
+              '& .MuiTypography-root': {
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                color: 'inherit',
+              },
+            }}
+          >
+            {'다른 사용자가 수정 중인 맵입니다.\n조회화면으로 이동합니다.'}
+          </Box>
+        </BaseDialog>
+      )}
+
+      {saveCompleteModal && (
+        <BaseDialog
+          onClose={() => setSaveCompleteModal(false)}
+          title={intl.formatMessage({
+            id: 'appbar.save-complete-title',
+            defaultMessage: '저장 완료',
+          })}
+          useBscCmbTitle={true}
+          papercss={bscCmbAlertModalPaper}
+          closeButton="확인"
+        >
+          <Box
+            sx={{
+              padding: '40px 30px',
+              textAlign: 'left',
+              fontFamily: '"Pretendard", sans-serif',
+              fontSize: 15,
+              color: '#333',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-line',
+              '& .MuiTypography-root': {
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                color: 'inherit',
+              },
+            }}
+          >
+            {intl.formatMessage({
+              id: 'appbar.save-complete-message',
+              defaultMessage: '저장이 완료되었습니다.',
+            })}
+          </Box>
+        </BaseDialog>
+      )}
     </>
   );
 };

@@ -35,6 +35,12 @@ public interface LockManager {
 
     boolean isLockedBy(@NotNull Mindmap mindmap, @NotNull Account user);
 
+    /**
+     * Removes the lock on the mindmap regardless of who holds it.
+     * Used when a collaborator explicitly takes over editing (force acquire).
+     */
+    void forceUnlock(@NotNull Mindmap mindmap);
+
     long generateSession();
 
     @NotNull

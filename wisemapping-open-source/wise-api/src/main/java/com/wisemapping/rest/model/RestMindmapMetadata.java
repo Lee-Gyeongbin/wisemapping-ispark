@@ -40,6 +40,8 @@ public class RestMindmapMetadata {
     private boolean locked;
     private String title;
     private String isLockedBy;
+    /** Lock 보유자 사용자 ID (Account.firstname). 클라이언트에서 현재 사용자와 비교용. */
+    private String lockedByUserId;
 
     private String creatorFullName;
     private String role;
@@ -153,6 +155,14 @@ public class RestMindmapMetadata {
 
     public void setIsLockedBy(String isLockedBy) {
         this.isLockedBy = isLockedBy;
+    }
+
+    public String getLockedByUserId() {
+        return lockedByUserId;
+    }
+
+    public void setLockedByUserId(String lockedByUserId) {
+        this.lockedByUserId = lockedByUserId;
     }
 
     public String getCreatorFullName() {

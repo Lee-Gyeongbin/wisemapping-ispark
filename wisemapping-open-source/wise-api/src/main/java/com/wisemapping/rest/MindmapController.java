@@ -117,8 +117,9 @@ public class MindmapController {
         boolean isLocked = false;
         final LockManager lockManager = this.mindmapService.getLockManager();
         String lockFullName = null;
+        LockInfo lockInfo = null;
         if (lockManager.isLocked(mindmap) && !lockManager.isLockedBy(mindmap, user)) {
-            final LockInfo lockInfo = lockManager.getLockInfo(mindmap);
+            lockInfo = lockManager.getLockInfo(mindmap);
             isLocked = true;
             lockFullName = lockInfo.getUser().getFullName();
         }
@@ -142,7 +143,7 @@ public class MindmapController {
             metadata.setXml(xmlStr);
         }
 
-        // com_userinfo.USER_NM으로 createdBy, lastModificationBy 치환 (Account.firstname = USER_ID)
+        // com_userinfo.USER_NM으로 createdBy, lastModificationBy, isLockedBy 치환 (Account.firstname = USER_ID)
         if (comUserinfoService != null) {
             if (mindmap.getCreator() != null && mindmap.getCreator().getFirstname() != null) {
                 comUserinfoService.findUserNmByUserId(mindmap.getCreator().getFirstname())
@@ -151,6 +152,17 @@ public class MindmapController {
             if (mindmap.getLastEditor() != null && mindmap.getLastEditor().getFirstname() != null) {
                 comUserinfoService.findUserNmByUserId(mindmap.getLastEditor().getFirstname())
                         .ifPresent(metadata::setLastModificationBy);
+            }
+            if (lockInfo != null && lockInfo.getUser().getFirstname() != null) {
+                String lockUserId = lockInfo.getUser().getFirstname();
+                String userNm = comUserinfoService.findUserNmByUserId(lockUserId).orElse(null);
+                String deptNm = comUserinfoService.findDeptNmByUserId(lockUserId).orElse(null);
+                if (userNm != null) {
+                    String display = (deptNm != null && !deptNm.isEmpty())
+                            ? userNm + " (" + deptNm + ")"
+                            : userNm;
+                    metadata.setIsLockedBy(display);
+                }
             }
         }
 
@@ -958,6 +970,19 @@ public class MindmapController {
         mindmapService.updateMindmap(mindmap, false);
     }
 
+    /**
+     * 현재 맵의 Lock 상태 조회 (LockManager에 저장된 LockInfo 기준).
+     * 저장 전 다른 사용자 Lock 보유 여부 확인용.
+     */
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/lock", produces = { "application/json" })
+    @ResponseBody
+    public RestLockStatus getLockStatus(@PathVariable int id) throws WiseMappingException {
+        final Mindmap mindmap = findMindmapById(id);
+        final LockInfo lockInfo = mindmapService.getLockManager().getLockInfo(mindmap);
+        return RestLockStatus.from(lockInfo);
+    }
+
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}/lock", consumes = { "text/plain" }, produces = {
             "application/json" })
@@ -976,6 +1001,22 @@ public class MindmapController {
             lockManager.unlock(mindmap, user);
         }
         return result;
+    }
+
+    /**
+     * Force-unlock the mindmap (whoever holds the lock) and lock it with the current user.
+     * Used when the user confirms to take over editing from another user.
+     */
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @RequestMapping(method = RequestMethod.PUT, value = "/{id}/lock/force", consumes = { "text/plain" }, produces = {
+            "application/json" })
+    public ResponseEntity<RestLockInfo> forceLockMindmap(@PathVariable int id) throws WiseMappingException {
+        final Account user = Utils.getUser();
+        final LockManager lockManager = mindmapService.getLockManager();
+        final Mindmap mindmap = findMindmapById(id);
+        lockManager.forceUnlock(mindmap);
+        final LockInfo lockInfo = lockManager.lock(mindmap, user);
+        return new ResponseEntity<>(new RestLockInfo(lockInfo, user), HttpStatus.OK);
     }
 
     private void saveMindmapDocument(boolean minor, @NotNull final Mindmap mindMap, @NotNull final Account user)

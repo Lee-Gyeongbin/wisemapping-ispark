@@ -17,6 +17,7 @@
  */
 import { MapInfo } from '@wisemapping/editor';
 import Client from '../client';
+import { getErpUserId } from '../erp-user-id';
 
 class MapInfoImpl implements MapInfo {
   private client: Client;
@@ -44,7 +45,7 @@ class MapInfoImpl implements MapInfo {
     this.client = client;
     this.title = title;
     this.zoom = zoom;
-    this.locked = locked;
+    this.locked = locked ?? false;
     this.lockedMsg = lockedMsg;
     this.creatorFullName = creatorFullName;
     this.starred = starred;
@@ -102,12 +103,45 @@ class MapInfoImpl implements MapInfo {
     return this.lockedMsg ? this.lockedMsg : '';
   }
 
+  getLockedBy(): string {
+    return this.lockedMsg ?? '';
+  }
+
   getZoom(): number {
     return this.zoom;
   }
 
   getId(): string {
     return String(this.id);
+  }
+
+  acquireLock(): Promise<void> {
+    return this.client.lockMindmap(this.id, true);
+  }
+
+  forceAcquireLock(): Promise<void> {
+    return this.client.lockMindmapForce(this.id);
+  }
+
+  releaseLock(): Promise<void> {
+    return this.client.lockMindmap(this.id, false);
+  }
+
+  async fetchLatestLockInfo(): Promise<{ isLocked: boolean; lockedByUserId?: string }> {
+    const data = await this.client.getMapLockInfo(this.id);
+    return {
+      isLocked: data.locked ?? false,
+      lockedByUserId: data.lockedByUserId ?? undefined,
+    };
+  }
+
+  async getCurrentUserId(): Promise<string | null> {
+    const erpUserId = getErpUserId();
+    if (erpUserId) {
+      return erpUserId;
+    }
+    const account = await this.client.fetchAccountInfo();
+    return account?.firstname ?? null;
   }
 
   updateMetadata(metadata: {
@@ -119,7 +153,7 @@ class MapInfoImpl implements MapInfo {
     role?: 'owner' | 'editor' | 'viewer';
   }): void {
     if (metadata.locked !== undefined) {
-      this.locked = metadata.locked;
+      this.locked = metadata.locked ?? false;
     }
     if (metadata.lockedMsg !== undefined) {
       this.lockedMsg = metadata.lockedMsg;
