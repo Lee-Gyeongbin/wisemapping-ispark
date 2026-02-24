@@ -142,13 +142,10 @@ const AppBar = ({
       setCurrentTitle(editedTitle.trim());
       setIsEditingTitle(false);
       // Update the document title as well
-      document.title = `${editedTitle.trim()} | WiseMapping`;
+      document.title = `${editedTitle.trim()} | 마인드맵`;
       // Show success notification
       $notify(
-        intl.formatMessage({
-          id: 'appbar.title-renamed',
-          defaultMessage: 'Mind map has been renamed',
-        }),
+        '마인드맵 명이 변경되었습니다.',
       );
     } catch (error) {
       console.error(

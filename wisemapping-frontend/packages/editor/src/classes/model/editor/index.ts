@@ -22,6 +22,7 @@ import {
   DesignerModel,
   WidgetBuilder,
   Topic,
+  $notify,
 } from '@wisemapping/mindplot';
 import Capability from '../../action/capability';
 import { trackEditorInteraction } from '../../../utils/analytics';
@@ -126,9 +127,14 @@ class Editor {
         // Debounced autosave triggered by model updates
         // Waits 15 seconds after the last change before saving
         const debouncedAutoSave = debounce(() => {
-          component.save(false).catch((error) => {
-            console.error('Autosave failed:', error);
-          });
+          component
+            .save(false)
+            .then(() => {
+              $notify('마인드맵이 자동 저장되었습니다.');
+            })
+            .catch((error) => {
+              console.error('Autosave failed:', error);
+            });
         }, 15000);
 
         // Trigger autosave on model updates

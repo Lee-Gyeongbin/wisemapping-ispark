@@ -187,6 +187,19 @@ class DesignerKeyboard extends Keyboard {
         return;
       }
 
+      // 입력 필드(상단 마인드맵명 등)에 포커스가 있으면 에디터로 포커스를 넘기지 않음
+      const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
+      if (activeEl) {
+        const tag = activeEl.tagName?.toUpperCase();
+        const isInputField =
+          tag === 'INPUT' ||
+          tag === 'TEXTAREA' ||
+          (activeEl as HTMLElement).isContentEditable;
+        if (isInputField) {
+          return;
+        }
+      }
+
       // Is a modifier ?
       const keyboardEvent = event as KeyboardEvent;
       if (keyboardEvent.ctrlKey || keyboardEvent.altKey || keyboardEvent.metaKey) {
