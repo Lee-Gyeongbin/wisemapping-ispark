@@ -143,11 +143,20 @@ public class MindmapController {
             metadata.setXml(xmlStr);
         }
 
-        // com_userinfo.USER_NM으로 createdBy, lastModificationBy, isLockedBy 치환 (Account.firstname = USER_ID)
+        // com_userinfo.USER_NM으로 createdBy, creatorFullName, lastModificationBy, isLockedBy 치환 (Account.firstname = USER_ID)
+        // creatorFullName은 com_deptinfo 조인으로 "이름 [부서]" 형식 표시
         if (comUserinfoService != null) {
             if (mindmap.getCreator() != null && mindmap.getCreator().getFirstname() != null) {
-                comUserinfoService.findUserNmByUserId(mindmap.getCreator().getFirstname())
-                        .ifPresent(metadata::setCreatedBy);
+                String creatorUserId = mindmap.getCreator().getFirstname();
+                String creatorUserNm = comUserinfoService.findUserNmByUserId(creatorUserId).orElse(null);
+                if (creatorUserNm != null) {
+                    metadata.setCreatedBy(creatorUserNm);
+                    String creatorDeptNm = comUserinfoService.findDeptNmByUserId(creatorUserId).orElse(null);
+                    String creatorDisplay = (creatorDeptNm != null && !creatorDeptNm.isEmpty())
+                            ? creatorUserNm + " [" + creatorDeptNm + "]"
+                            : creatorUserNm;
+                    metadata.setCreatorFullName(creatorDisplay);
+                }
             }
             if (mindmap.getLastEditor() != null && mindmap.getLastEditor().getFirstname() != null) {
                 comUserinfoService.findUserNmByUserId(mindmap.getLastEditor().getFirstname())
