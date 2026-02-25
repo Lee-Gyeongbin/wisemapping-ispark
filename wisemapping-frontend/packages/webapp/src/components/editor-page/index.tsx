@@ -46,7 +46,7 @@ import { createThemeVariantStorage } from '../../services/createThemeVariantStor
 const buildPersistenceManagerForEditor = (
   _mode: EditorRenderMode,
   setSessionExpired: (value: boolean) => void,
-  _hid?: number,
+  hid?: number,
 ): PersistenceManager => {
   if (AppConfig.isRestClient()) {
     const baseUrl = AppConfig.getApiBaseUrl();
@@ -55,6 +55,7 @@ const buildPersistenceManagerForEditor = (
       revertUrl: `${baseUrl}/api/restful/maps/{id}/history/latest`,
       lockUrl: `${baseUrl}/api/restful/maps/{id}/lock`,
       jwt: undefined,
+      ...(hid != null && { historyId: hid }),
     });
     result.addErrorHandler((error: PersistenceError) => {
       if (error.errorType === 'auth') {

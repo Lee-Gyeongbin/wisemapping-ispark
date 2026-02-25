@@ -184,8 +184,8 @@ export const loader = (pageMode: PageModeType, bootstrap = false) => {
             zoom: zoom,
           };
 
-          // Include XML if requested and available
-          if (bootstrap && mapMetadata.xml) {
+          // Include XML if requested and available (히스토리 뷰가 아닐 때만 — 히스토리 뷰는 loadMapDom으로 해당 버전 로드)
+          if (bootstrap && mapMetadata.xml && !params.hid) {
             data.bootstrapXML = mapMetadata.xml;
           }
 

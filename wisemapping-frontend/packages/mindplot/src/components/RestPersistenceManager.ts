@@ -29,7 +29,15 @@ class RESTPersistenceManager extends PersistenceManager {
 
   private jwt: string | undefined;
 
-  constructor(options: { documentUrl: string; revertUrl: string; lockUrl: string; jwt?: string }) {
+  private historyId: number | undefined;
+
+  constructor(options: {
+    documentUrl: string;
+    revertUrl: string;
+    lockUrl: string;
+    jwt?: string;
+    historyId?: number;
+  }) {
     $assert(options.documentUrl, 'documentUrl can not be null');
     $assert(options.revertUrl, 'revertUrl can not be null');
     $assert(options.lockUrl, 'lockUrl can not be null');
@@ -39,6 +47,7 @@ class RESTPersistenceManager extends PersistenceManager {
     this.revertUrl = options.revertUrl;
     this.lockUrl = options.lockUrl;
     this.jwt = options.jwt;
+    this.historyId = options.historyId;
   }
 
   private _handleError(error: PersistenceError, events): void {
@@ -167,7 +176,9 @@ class RESTPersistenceManager extends PersistenceManager {
   }
 
   loadMapDom(mapId: string): Promise<Document> {
-    const url = `${this.documentUrl.replace('{id}', mapId)}/xml`;
+    const base = this.documentUrl.replace('{id}', mapId);
+    const docPath = this.historyId != null ? `/${this.historyId}/document` : '/document';
+    const url = `${base.replace('/document', docPath)}/xml`;
     const headers = this._buildHttpHeader('text/plain; charset=utf-8', 'application/xml');
 
     return fetch(url, {
