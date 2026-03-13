@@ -122,6 +122,7 @@ public class ComUserinfoServiceImpl implements ComUserinfoService {
             sql.append("WHERE u.DELETE_DT IS NULL ");
             sql.append("AND u.JIKGUB_CD NOT IN ('001', '002', '010') ");
             sql.append("AND u.POS_CD NOT IN ('001', '002', '012') ");
+            sql.append("AND u.USER_STATUS_CD NOT IN ('002', '003') ");
             // sql.append("AND u.USER_ID NOT LIKE '%admin%' "); // 관리자 제외 TODO : 필요시 주석 해제
             
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
