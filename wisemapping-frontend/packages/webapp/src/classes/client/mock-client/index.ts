@@ -20,6 +20,7 @@ import Client, {
   AuthenticationType,
   BasicMapInfo,
   ChangeHistory,
+  ForwardSystemItem,
   ImportMapInfo,
   Label,
   MapInfo,
@@ -287,6 +288,10 @@ class MockClient implements Client {
     perm = perm.concat(permissions);
     this.permissionsByMap.set(id, perm);
     return Promise.resolve();
+  }
+
+  fetchForwardSystemOptions(): Promise<ForwardSystemItem[]> {
+    return Promise.resolve([]);
   }
 
   searchUsersForCollaboration(mapId: number, searchTerm: string, limit: number = 10): Promise<UserSearchResult[]> {

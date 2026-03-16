@@ -31,6 +31,7 @@ import InfoDialog from './info-dialog';
 import DeleteMultiselectDialog from './delete-multiselect-dialog';
 import ExportDialog from './export-dialog';
 import ShareDialog from './share-dialog';
+import AvtDialog from './avt-dialog';
 import { trackMindmapListAction } from '../../../utils/analytics';
 
 export type BasicMapInfo = {
@@ -116,6 +117,7 @@ const ActionDispatcher = ({
         <ExportDialog onClose={handleOnClose} mapId={mapsId[0]} enableImgExport={fromEditor} />
       )}
       {action === 'share' && <ShareDialog onClose={handleOnClose} mapId={mapsId[0]} />}
+      {action === 'avt' && <AvtDialog onClose={handleOnClose} mapId={mapsId[0]} />}
     </span>
   );
 };

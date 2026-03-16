@@ -32,6 +32,7 @@ import Client, {
   MapMetadata,
   LoginErrorInfo,
   UserSearchResult,
+  ForwardSystemItem,
 } from '..';
 import AppI18n, { Locale, LocaleCode, localeFromStr } from '../../app-i18n';
 import { setAnalyticsUserId, clearAnalyticsUserId } from '../../../utils/analytics';
@@ -247,6 +248,30 @@ export default class RestClient implements Client {
             collaborating: u.collaborating || false,
           }));
           success(users);
+        })
+        .catch((error) => {
+          const errorInfo = this.parseResponseOnError(error.response);
+          reject(errorInfo);
+        });
+    };
+    return new Promise(handler);
+  }
+
+  fetchForwardSystemOptions(): Promise<ForwardSystemItem[]> {
+    const handler = (
+      success: (items: ForwardSystemItem[]) => void,
+      reject: (error: ErrorInfo) => void,
+    ) => {
+      this.axios
+        .get(`${this.baseUrl}/api/restful/maps/options/forward-systems`, {
+          headers: { 'Content-Type': 'application/json' },
+        })
+        .then((response) => {
+          const items: ForwardSystemItem[] = (response.data as any[]).map((u) => ({
+            id: u.id ?? '',
+            label: u.label ?? '',
+          }));
+          success(items);
         })
         .catch((error) => {
           const errorInfo = this.parseResponseOnError(error.response);

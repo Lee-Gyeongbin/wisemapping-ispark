@@ -24,6 +24,8 @@ import com.wisemapping.rest.model.*;
 import com.wisemapping.security.Utils;
 import com.wisemapping.service.ComUserinfoService;
 import com.wisemapping.service.ComUserinfoSearchResult;
+import com.wisemapping.service.HcmStdMapItem;
+import com.wisemapping.service.HcmStdMapService;
 import com.wisemapping.service.*;
 import com.wisemapping.service.SpamDetectionService;
 import com.wisemapping.service.spam.SpamContentExtractor;
@@ -82,6 +84,9 @@ public class MindmapController {
 
     @Autowired(required = false)
     private ComUserinfoService comUserinfoService;
+
+    @Autowired(required = false)
+    private HcmStdMapService hcmStdMapService;
 
     @Autowired
     private MetricsService metricsService;
@@ -650,6 +655,21 @@ public class MindmapController {
             }
         }
         
+        return results;
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @RequestMapping(method = RequestMethod.GET, value = "/options/forward-systems", produces = { "application/json" })
+    @ResponseBody
+    public List<RestForwardSystemItem> getForwardSystemOptions() {
+        final List<RestForwardSystemItem> results = new ArrayList<>();
+        if (hcmStdMapService != null) {
+            for (HcmStdMapItem item : hcmStdMapService.findForwardSystemOptions()) {
+                results.add(new RestForwardSystemItem(
+                        item.getStdId() != null ? item.getStdId() : "",
+                        item.getStdNm() != null ? item.getStdNm() : ""));
+            }
+        }
         return results;
     }
 

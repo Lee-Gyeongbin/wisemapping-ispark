@@ -26,6 +26,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import HistoryOutlined from '@mui/icons-material/HistoryOutlined';
 
 import { FormattedMessage } from 'react-intl';
@@ -38,6 +39,7 @@ import { trackMindmapListAction } from '../../../utils/analytics';
 export type ActionType =
   | 'open'
   | 'share'
+  | 'avt'
   | 'import'
   | 'delete'
   | 'info'
@@ -146,6 +148,12 @@ const ActionChooser = (props: ActionProps): React.ReactElement => {
               <ShareOutlinedIcon />
             </ListItemIcon>
             협업하기
+          </MenuItem>
+          <MenuItem onClick={handleOnClose('avt')}>
+            <ListItemIcon>
+              <AccountTreeOutlinedIcon />
+            </ListItemIcon>
+            전략및전방워크매핑
           </MenuItem>
           <Divider />
         </>

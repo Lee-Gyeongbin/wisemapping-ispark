@@ -58,6 +58,8 @@ export const useFetchMapById = (id: number): MapLoadResult => {
       description: data.description ?? '',
       public: data.public ?? false,
       role: data.role,
+      stdId: data.stdId,
+      planId: data.planId,
     };
   } else if (!isLoading && error) {
     errorMsg = error;

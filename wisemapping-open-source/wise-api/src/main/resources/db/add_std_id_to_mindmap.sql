@@ -1,0 +1,6 @@
+-- Add STD_ID, PLAN_ID columns to MINDMAP table.
+-- Run this on existing MySQL databases. New installs use schema-mysql.sql which already includes these.
+--
+-- MySQL:
+--   ALTER TABLE MINDMAP ADD COLUMN std_id VARCHAR(255) CHARACTER SET UTF8MB4;
+--   ALTER TABLE MINDMAP ADD COLUMN plan_id VARCHAR(255) CHARACTER SET UTF8MB4;

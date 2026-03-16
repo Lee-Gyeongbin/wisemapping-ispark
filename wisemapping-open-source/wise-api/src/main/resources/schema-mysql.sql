@@ -40,6 +40,10 @@ CREATE TABLE IF NOT EXISTS MINDMAP (
   edition_date   DATETIME,
   creator_id     INTEGER            NOT NULL,
   last_editor_id INTEGER            NOT NULL,
+  std_id         VARCHAR(255)
+                 CHARACTER SET UTF8MB4,
+  plan_id        VARCHAR(255)
+                 CHARACTER SET UTF8MB4,
   FOREIGN KEY (creator_id) REFERENCES ACCOUNT (collaborator_id)
     ON DELETE CASCADE
     ON UPDATE NO ACTION

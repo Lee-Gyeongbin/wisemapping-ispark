@@ -110,6 +110,13 @@ public class Mindmap implements Serializable {
 
     private String title;
 
+    /** 전방체계 STD_ID (HCM_STD_MAP.STD_ID 참조) */
+    @Column(name = "std_id", length = 255)
+    private String stdId;
+
+    @Column(name = "plan_id", length = 255)
+    private String planId;
+
     @OneToOne(mappedBy = "mindmap", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore
     private MindmapXml mindmapXml;
@@ -341,6 +348,24 @@ public class Mindmap implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Nullable
+    public String getStdId() {
+        return stdId;
+    }
+
+    public void setStdId(@Nullable String stdId) {
+        this.stdId = stdId;
+    }
+
+    @Nullable
+    public String getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(@Nullable String planId) {
+        this.planId = planId;
     }
 
     @NotNull

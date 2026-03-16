@@ -55,6 +55,9 @@ public class RestMindmapMetadata {
     private boolean starred;
     private boolean public_;
     private String xml;
+    /** 전방체계 STD_ID (HCM_STD_MAP.STD_ID) */
+    private String stdId;
+    private String planId;
 
     // Default constructor for Jackson deserialization
     public RestMindmapMetadata() {
@@ -110,6 +113,8 @@ public class RestMindmapMetadata {
 
         this.starred = collaborator != null && mindmap.isStarred(collaborator);
         this.public_ = mindmap.isPublic();
+        this.stdId = mindmap.getStdId();
+        this.planId = mindmap.getPlanId();
     }
 
     private static String resolveRole(Mindmap mindmap, Collaborator collaborator) {
@@ -245,5 +250,21 @@ public class RestMindmapMetadata {
 
     public void setXml(String xml) {
         this.xml = xml;
+    }
+
+    public String getStdId() {
+        return stdId;
+    }
+
+    public void setStdId(String stdId) {
+        this.stdId = stdId;
+    }
+
+    public String getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(String planId) {
+        this.planId = planId;
     }
 }

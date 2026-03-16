@@ -58,6 +58,9 @@ export type MapInfo = {
   public: boolean;
   role: Role;
   collaboratorCount?: number;
+  /** 전방체계 STD_ID (HCM_STD_MAP.STD_ID) */
+  stdId?: string;
+  planId?: string;
 };
 
 export type MapMetadata = {
@@ -77,6 +80,9 @@ export type MapMetadata = {
   starred?: boolean;
   public?: boolean;
   xml?: string; // Map XML content (included when ?xml=true query parameter is provided)
+  /** 전방체계 STD_ID (HCM_STD_MAP.STD_ID) */
+  stdId?: string;
+  planId?: string;
 };
 
 export type ChangeHistory = {
@@ -130,6 +136,11 @@ export type Permission = {
   userStatusCd?: string;
 };
 
+export type ForwardSystemItem = {
+  id: string;
+  label: string;
+};
+
 export type UserSearchResult = {
   email: string;
   firstname: string;
@@ -168,6 +179,7 @@ interface Client {
   addMapPermissions(id: number, message: string, permissions: Permission[]): Promise<void>;
   deleteMapPermission(id: number, email: string): Promise<void>;
   searchUsersForCollaboration(mapId: number, searchTerm: string, limit?: number): Promise<UserSearchResult[]>;
+  fetchForwardSystemOptions(): Promise<ForwardSystemItem[]>;
 
   duplicateMap(id: number, basicInfo: BasicMapInfo): Promise<number>;
 
