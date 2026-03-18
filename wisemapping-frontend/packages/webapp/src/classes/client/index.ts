@@ -141,6 +141,11 @@ export type ForwardSystemItem = {
   label: string;
 };
 
+export type ForwardWorkItem = {
+  id: string;
+  label: string;
+};
+
 export type UserSearchResult = {
   email: string;
   firstname: string;
@@ -180,12 +185,15 @@ interface Client {
   deleteMapPermission(id: number, email: string): Promise<void>;
   searchUsersForCollaboration(mapId: number, searchTerm: string, limit?: number): Promise<UserSearchResult[]>;
   fetchForwardSystemOptions(): Promise<ForwardSystemItem[]>;
+  fetchForwardWorkOptions(startDate: string, endDate: string, stdId: string): Promise<ForwardWorkItem[]>;
 
   duplicateMap(id: number, basicInfo: BasicMapInfo): Promise<number>;
 
   updateAccountLanguage(locale: LocaleCode): Promise<void>;
   updateAccountPassword(pasword: string): Promise<void>;
   updateAccountInfo(firstname: string, lastname: string): Promise<void>;
+
+  updateForwardMapping(id: number, stdId: string | null, planId: string | null): Promise<void>;
 
   updateStarred(id: number, starred: boolean): Promise<void>;
   updateMapToPublic(id: number, isPublic: boolean): Promise<void>;

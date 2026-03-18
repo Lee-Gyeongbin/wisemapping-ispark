@@ -16,8 +16,8 @@
  *   limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from 'react-query';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -28,12 +28,13 @@ import BaseDialog from '../base-dialog';
 import { SimpleDialogProps } from '..';
 import { useFetchMapById } from '../../../../classes/middleware';
 import { ClientContext } from '../../../../classes/provider/client-context';
-import { ErrorInfo, ForwardSystemItem } from '../../../../classes/client';
+import { ErrorInfo, ForwardSystemItem, ForwardWorkItem } from '../../../../classes/client';
 import { InfoRow, InfoLabel, InfoValue } from '../info-dialog/styled';
-import { bscCmbOutlinedInputSx, bscCmbTypeInfoButtonSx } from '../../../../theme/ui-input-styles';
-
-// 전방워크 옵션 타입 (추후 API 연동 시 사용)
-type ForwardWorkOption = { id: string; label: string };
+import {
+  bscCmbAlertModalPaper,
+  bscCmbOutlinedInputSx,
+  bscCmbTypeInfoButtonSx,
+} from '../../../../theme/ui-input-styles';
 
 const formatDateLocal = (d: Date): string => {
   const year = d.getFullYear();
@@ -54,6 +55,7 @@ const getDefaultDateRange = (): { start: string; end: string } => {
 
 const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement => {
   const client = useContext(ClientContext);
+  const queryClient = useQueryClient();
   const { data: map } = useFetchMapById(mapId);
   const { data: forwardSystemOptions = [], isLoading: isForwardSystemLoading } = useQuery<
     ForwardSystemItem[],
@@ -62,15 +64,47 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
     staleTime: 60000, // 1분 캐시
   });
   const [forwardSystem, setForwardSystem] = useState<ForwardSystemItem | null>(null);
-  const [forwardWork, setForwardWork] = useState<ForwardWorkOption | null>(null);
+  const [forwardWork, setForwardWork] = useState<ForwardWorkItem | null>(null);
   const [forwardSystemInput, setForwardSystemInput] = useState<string>('');
   const [forwardWorkInput, setForwardWorkInput] = useState<string>('');
   const [startDate, setStartDate] = useState<string>(() => getDefaultDateRange().start);
   const [endDate, setEndDate] = useState<string>(() => getDefaultDateRange().end);
+  const [forwardWorkOptions, setForwardWorkOptions] = useState<ForwardWorkItem[]>([]);
+  const [isForwardWorkLoading, setIsForwardWorkLoading] = useState<boolean>(false);
+  const [isSaveAlertOpen, setIsSaveAlertOpen] = useState<boolean>(false);
 
-  const forwardWorkOptions: ForwardWorkOption[] = [];
+  const initialPlanIdApplied = useRef(false);
 
-  // 모달 열 때 map.stdId와 전방체계 옵션을 매핑하여 초기 선택
+  const fetchForwardWorkOptions = useCallback(
+    (stdId: string, planIdToSelect?: string) => {
+      const sd = startDate.replaceAll('-', '');
+      const ed = endDate.replaceAll('-', '');
+      setIsForwardWorkLoading(true);
+      client
+        .fetchForwardWorkOptions(sd, ed, stdId)
+        .then((items) => {
+          setForwardWorkOptions(items);
+          if (planIdToSelect) {
+            const matched = items.find((opt) => opt.id === planIdToSelect);
+            if (matched) {
+              setForwardWork(matched);
+              setForwardWorkInput(matched.label);
+              return;
+            }
+          }
+          setForwardWork(null);
+          setForwardWorkInput('');
+        })
+        .catch(() => {
+          setForwardWorkOptions([]);
+        })
+        .finally(() => {
+          setIsForwardWorkLoading(false);
+        });
+    },
+    [client, startDate, endDate],
+  );
+
   useEffect(() => {
     if (map?.stdId && forwardSystemOptions.length > 0) {
       const matched = forwardSystemOptions.find((opt) => opt.id === map.stdId);
@@ -81,27 +115,54 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
     }
   }, [map?.stdId, forwardSystemOptions]);
 
+  useEffect(() => {
+    if (forwardSystem) {
+      const planId = !initialPlanIdApplied.current && map?.planId ? map.planId : undefined;
+      if (planId) initialPlanIdApplied.current = true;
+      fetchForwardWorkOptions(forwardSystem.id, planId);
+    } else {
+      setForwardWorkOptions([]);
+      setForwardWork(null);
+      setForwardWorkInput('');
+    }
+  }, [forwardSystem]);
+
   const handleSearch = (): void => {
-    // 검색 로직은 추후 구현
+    if (forwardSystem) {
+      fetchForwardWorkOptions(forwardSystem.id);
+    }
   };
 
-  const handleOnSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+  const handleOnSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    // 저장 로직은 추후 구현
-    onClose(true);
+    if (!mapId) {
+      return;
+    }
+
+    const stdId = forwardSystem ? forwardSystem.id : null;
+    const planId = forwardWork ? forwardWork.id : null;
+
+    await client.updateForwardMapping(mapId, stdId, planId);
+    // 목록 및 메타데이터 갱신
+    queryClient.invalidateQueries('maps');
+    queryClient.invalidateQueries(`maps-metadata-${mapId}`);
+    // CMB 스타일 저장 완료 모달 알림 오픈
+    setIsSaveAlertOpen(true);
   };
 
   return (
-    <BaseDialog
-      onClose={onClose}
-      onSubmit={handleOnSubmit}
-      title={'전략및전방워크매핑'}
-      useBscCmbTitle={true}
-      closeButton={'닫기'}
-      submitButton={'저장'}
-      maxWidth="md"
-    >
-      <Box
+    <>
+      {!isSaveAlertOpen && (
+        <BaseDialog
+          onClose={onClose}
+          onSubmit={handleOnSubmit}
+          title={'전략및전방워크매핑'}
+          useBscCmbTitle={true}
+          closeButton={'닫기'}
+          submitButton={'저장'}
+          maxWidth="md"
+        >
+          <Box
         sx={(theme) => ({
           padding: 2,
           border: `1px solid ${theme.palette.divider}`,
@@ -205,19 +266,65 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
               onChange={(_event, newValue) => setForwardWork(newValue)}
               inputValue={forwardWorkInput}
               onInputChange={(_event, newInputValue) => setForwardWorkInput(newInputValue)}
+              loading={isForwardWorkLoading}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   variant="outlined"
                   placeholder={'전방워크 검색'}
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {isForwardWorkLoading ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
                   sx={[bscCmbOutlinedInputSx, { minWidth: 200, flex: 1 }]}
                 />
               )}
             />
           </Box>
-        </InfoRow>
-      </Box>
-    </BaseDialog>
+          </InfoRow>
+          </Box>
+        </BaseDialog>
+      )}
+      {isSaveAlertOpen && (
+        <BaseDialog
+          onClose={() => {
+            setIsSaveAlertOpen(false);
+            onClose(true);
+          }}
+          title={'저장 완료'}
+          useBscCmbTitle={true}
+          papercss={bscCmbAlertModalPaper}
+          closeButton="확인"
+          maxWidth="sm"
+        >
+          <Box
+            sx={{
+              padding: '40px 30px',
+              textAlign: 'left',
+              fontFamily: '"Pretendard", sans-serif',
+              fontSize: 15,
+              color: '#333',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-line',
+              '& .MuiTypography-root': {
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                color: 'inherit',
+              },
+            }}
+          >
+            <Typography>{'저장이 완료되었습니다.'}</Typography>
+          </Box>
+        </BaseDialog>
+      )}
+    </>
   );
 };
 

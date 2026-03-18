@@ -21,6 +21,7 @@ import Client, {
   BasicMapInfo,
   ChangeHistory,
   ForwardSystemItem,
+  ForwardWorkItem,
   ImportMapInfo,
   Label,
   MapInfo,
@@ -294,6 +295,10 @@ class MockClient implements Client {
     return Promise.resolve([]);
   }
 
+  fetchForwardWorkOptions(_startDate: string, _endDate: string, _stdId: string): Promise<ForwardWorkItem[]> {
+    return Promise.resolve([]);
+  }
+
   searchUsersForCollaboration(mapId: number, searchTerm: string, limit: number = 10): Promise<UserSearchResult[]> {
     // Mock 사용자 목록
     const mockUsers: UserSearchResult[] = [
@@ -426,6 +431,15 @@ class MockClient implements Client {
     const mapInfo = this.maps.find((m) => m.id == id);
     if (mapInfo) {
       mapInfo.public = isPublic;
+    }
+    return Promise.resolve();
+  }
+
+  updateForwardMapping(id: number, stdId: string | null, planId: string | null): Promise<void> {
+    const mapInfo = this.maps.find((m) => m.id == id);
+    if (mapInfo) {
+      mapInfo.stdId = stdId ?? undefined;
+      mapInfo.planId = planId ?? undefined;
     }
     return Promise.resolve();
   }

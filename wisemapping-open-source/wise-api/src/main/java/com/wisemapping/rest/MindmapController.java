@@ -88,6 +88,9 @@ public class MindmapController {
     @Autowired(required = false)
     private HcmStdMapService hcmStdMapService;
 
+    @Autowired(required = false)
+    private HcmAvtPlanService hcmAvtPlanService;
+
     @Autowired
     private MetricsService metricsService;
 
@@ -674,12 +677,44 @@ public class MindmapController {
     }
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @RequestMapping(method = RequestMethod.GET, value = "/options/forward-works", produces = { "application/json" })
+    @ResponseBody
+    public List<RestForwardWorkItem> getForwardWorkOptions(
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam String stdId) {
+        final List<RestForwardWorkItem> results = new ArrayList<>();
+        if (hcmAvtPlanService != null) {
+            for (HcmAvtPlanItem item : hcmAvtPlanService.findForwardWorkOptions(startDate, endDate, stdId)) {
+                results.add(new RestForwardWorkItem(
+                        item.getPlanId() != null ? item.getPlanId() : "",
+                        item.getPlanNm() != null ? item.getPlanNm() : ""));
+            }
+        }
+        return results;
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}/description", consumes = { "text/plain" }, produces = {
             "application/json" })
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void updateDescription(@RequestBody String description, @PathVariable int id) throws WiseMappingException {
         final Mindmap mindmap = findMindmapById(id);
         mindmap.setDescription(description);
+        mindmapService.updateMindmap(mindmap, false);
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @RequestMapping(method = RequestMethod.PUT, value = "/{id}/forward-mapping", consumes = {
+            "application/json" }, produces = { "application/json" })
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void updateForwardMapping(@RequestBody Map<String, String> request, @PathVariable int id)
+            throws WiseMappingException {
+        final Mindmap mindmap = findMindmapById(id);
+        final String stdId = request.get("stdId");
+        final String planId = request.get("planId");
+        mindmap.setStdId(stdId);
+        mindmap.setPlanId(planId);
         mindmapService.updateMindmap(mindmap, false);
     }
 

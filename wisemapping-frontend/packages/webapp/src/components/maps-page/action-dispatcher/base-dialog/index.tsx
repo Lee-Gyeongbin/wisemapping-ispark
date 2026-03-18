@@ -17,7 +17,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import Box from '@mui/material/Box';
 import { ErrorInfo } from '../../../../classes/client';
 import { StyledDialog, StyledDialogActions, StyledDialogContent, StyledDialogTitle } from './style';
@@ -44,7 +44,7 @@ export type DialogProps = {
   description?: string;
 
   submitButton?: string;
-  /** 닫기/취소 버튼 문구 (기본: '닫기') */
+  /** 닫기/취소 버튼 문구 (기본: '닫기', 빈 문자열이면 버튼 숨김) */
   closeButton?: string;
   actionUrl?: string;
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
@@ -55,7 +55,7 @@ export type DialogProps = {
 
 const BaseDialog = (props: DialogProps): React.ReactElement => {
   const { setHotkeyEnabled } = useContext(KeyboardContext);
-  const intl = useIntl();
+  useIntl();
   useEffect(() => {
     setHotkeyEnabled(false);
     return () => {
@@ -65,20 +65,21 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
 
   useEffect(() => {
     if (typeof window === 'undefined' || window.self === window.top) return;
-    try {
-      window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
-    } catch (_) {
-      /* cross-origin 무시 */
-    }
+    window.parent.postMessage({ type: 'wisemapping-modal-open' }, '*');
     return () => {
-      try {
-        window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
-      } catch (_) {
-        /* cross-origin 무시 */
-      }
+      window.parent.postMessage({ type: 'wisemapping-modal-close' }, '*');
     };
   }, []);
-  const { onClose, onSubmit, maxWidth = 'sm', papercss, isLoading = false, useBscCmbTitle, titleStartIcon, closeButton = '닫기' } = props;
+  const {
+    onClose,
+    onSubmit,
+    maxWidth = 'sm',
+    papercss,
+    isLoading = false,
+    useBscCmbTitle,
+    titleStartIcon,
+    closeButton = '닫기',
+  } = props;
 
   const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -137,15 +138,17 @@ const BaseDialog = (props: DialogProps): React.ReactElement => {
           </StyledDialogContent>
 
           <StyledDialogActions>
-            <Button
-              type="button"
-              variant="contained"
-              onClick={onClose}
-              disabled={isLoading}
-              sx={bscCmbTypeSecondaryButtonSx}
-            >
-              {closeButton}
-            </Button>
+            {closeButton !== '' && (
+              <Button
+                type="button"
+                variant="contained"
+                onClick={onClose}
+                disabled={isLoading}
+                sx={bscCmbTypeSecondaryButtonSx}
+              >
+                {closeButton}
+              </Button>
+            )}
             {onSubmit && (
               <AsyncButton
                 variant="contained"

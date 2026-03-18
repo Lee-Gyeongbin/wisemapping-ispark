@@ -33,6 +33,7 @@ import Client, {
   LoginErrorInfo,
   UserSearchResult,
   ForwardSystemItem,
+  ForwardWorkItem,
 } from '..';
 import AppI18n, { Locale, LocaleCode, localeFromStr } from '../../app-i18n';
 import { setAnalyticsUserId, clearAnalyticsUserId } from '../../../utils/analytics';
@@ -275,6 +276,53 @@ export default class RestClient implements Client {
         })
         .catch((error) => {
           const errorInfo = this.parseResponseOnError(error.response);
+          reject(errorInfo);
+        });
+    };
+    return new Promise(handler);
+  }
+
+  fetchForwardWorkOptions(startDate: string, endDate: string, stdId: string): Promise<ForwardWorkItem[]> {
+    const handler = (
+      success: (items: ForwardWorkItem[]) => void,
+      reject: (error: ErrorInfo) => void,
+    ) => {
+      this.axios
+        .get(`${this.baseUrl}/api/restful/maps/options/forward-works`, {
+          headers: { 'Content-Type': 'application/json' },
+          params: { startDate, endDate, stdId },
+        })
+        .then((response) => {
+          const items: ForwardWorkItem[] = (response.data as any[]).map((u) => ({
+            id: u.id ?? '',
+            label: u.label ?? '',
+          }));
+          success(items);
+        })
+        .catch((error) => {
+          const errorInfo = this.parseResponseOnError(error.response);
+          reject(errorInfo);
+        });
+    };
+    return new Promise(handler);
+  }
+
+  updateForwardMapping(id: number, stdId: string | null, planId: string | null): Promise<void> {
+    const handler = (success: () => void, reject: (error: ErrorInfo) => void) => {
+      this.axios
+        .put(
+          `${this.baseUrl}/api/restful/maps/${id}/forward-mapping`,
+          { stdId, planId },
+          {
+            headers: { 'Content-Type': 'application/json' },
+          },
+        )
+        .then(() => {
+          success();
+        })
+        .catch((error) => {
+          const response = error.response;
+          const errorInfo = this.parseResponseOnError(response);
           reject(errorInfo);
         });
     };
