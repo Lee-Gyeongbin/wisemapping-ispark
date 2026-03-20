@@ -295,7 +295,7 @@ class MockClient implements Client {
     return Promise.resolve([]);
   }
 
-  fetchForwardWorkOptions(_startDate: string, _endDate: string, _stdId: string): Promise<ForwardWorkItem[]> {
+  fetchForwardWorkOptions(_startDate: string, _endDate: string): Promise<ForwardWorkItem[]> {
     return Promise.resolve([]);
   }
 

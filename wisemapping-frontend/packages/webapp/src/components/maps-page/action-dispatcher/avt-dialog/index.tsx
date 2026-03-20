@@ -76,12 +76,12 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
   const initialPlanIdApplied = useRef(false);
 
   const fetchForwardWorkOptions = useCallback(
-    (stdId: string, planIdToSelect?: string) => {
+    (planIdToSelect?: string) => {
       const sd = startDate.replaceAll('-', '');
       const ed = endDate.replaceAll('-', '');
       setIsForwardWorkLoading(true);
       client
-        .fetchForwardWorkOptions(sd, ed, stdId)
+        .fetchForwardWorkOptions(sd, ed)
         .then((items) => {
           setForwardWorkOptions(items);
           if (planIdToSelect) {
@@ -116,21 +116,22 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
   }, [map?.stdId, forwardSystemOptions]);
 
   useEffect(() => {
-    if (forwardSystem) {
-      const planId = !initialPlanIdApplied.current && map?.planId ? map.planId : undefined;
-      if (planId) initialPlanIdApplied.current = true;
-      fetchForwardWorkOptions(forwardSystem.id, planId);
-    } else {
-      setForwardWorkOptions([]);
-      setForwardWork(null);
-      setForwardWorkInput('');
+    if (initialPlanIdApplied.current) {
+      return;
     }
-  }, [forwardSystem]);
+    if (!mapId) {
+      return;
+    }
+    if (!map) {
+      return;
+    }
+
+    initialPlanIdApplied.current = true;
+    fetchForwardWorkOptions(map?.planId ? map.planId : undefined);
+  }, [mapId, map, fetchForwardWorkOptions]);
 
   const handleSearch = (): void => {
-    if (forwardSystem) {
-      fetchForwardWorkOptions(forwardSystem.id);
-    }
+    fetchForwardWorkOptions();
   };
 
   const handleOnSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {

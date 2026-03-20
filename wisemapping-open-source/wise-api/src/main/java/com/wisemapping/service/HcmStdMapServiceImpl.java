@@ -38,11 +38,37 @@ public class HcmStdMapServiceImpl implements HcmStdMapService {
     public List<HcmStdMapItem> findForwardSystemOptions() {
         List<HcmStdMapItem> results = new ArrayList<>();
         try {
-            final String sql = "SELECT A.STD_ID, A.STD_NM FROM " + tableName + " A "
-                    + "WHERE 1=1 "
-                    + "AND A.STD_LEVEL_CD = '3' "
-                    + "AND A.DELETE_DT IS NULL "
-                    + "ORDER BY A.SORT_ORDER";
+            final String sql = "WITH RECURSIVE STD_TREE AS ( "
+                    + "    SELECT "
+                    + "        STD_ID, "
+                    + "        STD_NM, "
+                    + "        UP_STD_ID, "
+                    + "        CAST(STD_LEVEL_CD AS CHAR(10)) AS STD_LEVEL_CD, "
+                    + "        STD_ATT_CD, "
+                    + "        CAST(LPAD(SORT_ORDER, 10, '0') AS CHAR(4000)) AS SORT_PATH "
+                    + "    FROM " + tableName + " "
+                    + "    WHERE DELETE_DT IS NULL "
+                    + "      AND STD_LEVEL_CD = 1 "
+                    + "    UNION ALL "
+                    + "    SELECT "
+                    + "        A.STD_ID, "
+                    + "        CONCAT(UP.STD_NM, ' > ', A.STD_NM) AS STD_NM, "
+                    + "        A.UP_STD_ID, "
+                    + "        CAST(UP.STD_LEVEL_CD + 1 AS CHAR(10)) AS STD_LEVEL_CD, "
+                    + "        A.STD_ATT_CD, "
+                    + "        CONCAT(UP.SORT_PATH, '-', LPAD(A.SORT_ORDER, 10, '0')) AS SORT_PATH "
+                    + "    FROM " + tableName + " A "
+                    + "    INNER JOIN STD_TREE UP "
+                    + "        ON A.UP_STD_ID = UP.STD_ID "
+                    + "    WHERE A.DELETE_DT IS NULL "
+                    + ") "
+                    + "SELECT "
+                    + "    A.STD_ID, "
+                    + "    A.STD_NM "
+                    + "FROM STD_TREE A "
+                    + "WHERE A.STD_LEVEL_CD = 3 "
+                    + "  AND A.STD_ATT_CD = '001' "
+                    + "ORDER BY A.SORT_PATH";
 
             Query query = entityManager.createNativeQuery(sql);
             @SuppressWarnings("unchecked")

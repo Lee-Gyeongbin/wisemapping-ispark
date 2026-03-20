@@ -185,7 +185,7 @@ interface Client {
   deleteMapPermission(id: number, email: string): Promise<void>;
   searchUsersForCollaboration(mapId: number, searchTerm: string, limit?: number): Promise<UserSearchResult[]>;
   fetchForwardSystemOptions(): Promise<ForwardSystemItem[]>;
-  fetchForwardWorkOptions(startDate: string, endDate: string, stdId: string): Promise<ForwardWorkItem[]>;
+  fetchForwardWorkOptions(startDate: string, endDate: string): Promise<ForwardWorkItem[]>;
 
   duplicateMap(id: number, basicInfo: BasicMapInfo): Promise<number>;
 

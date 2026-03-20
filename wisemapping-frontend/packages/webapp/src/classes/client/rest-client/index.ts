@@ -282,7 +282,7 @@ export default class RestClient implements Client {
     return new Promise(handler);
   }
 
-  fetchForwardWorkOptions(startDate: string, endDate: string, stdId: string): Promise<ForwardWorkItem[]> {
+  fetchForwardWorkOptions(startDate: string, endDate: string): Promise<ForwardWorkItem[]> {
     const handler = (
       success: (items: ForwardWorkItem[]) => void,
       reject: (error: ErrorInfo) => void,
@@ -290,7 +290,7 @@ export default class RestClient implements Client {
       this.axios
         .get(`${this.baseUrl}/api/restful/maps/options/forward-works`, {
           headers: { 'Content-Type': 'application/json' },
-          params: { startDate, endDate, stdId },
+          params: { startDate, endDate },
         })
         .then((response) => {
           const items: ForwardWorkItem[] = (response.data as any[]).map((u) => ({

@@ -19,8 +19,7 @@ public interface HcmAvtPlanService {
      *
      * @param startDate 시작일 (yyyyMMdd)
      * @param endDate   종료일 (yyyyMMdd)
-     * @param stdId     전방체계 STD_ID
      * @return PLAN_ID, PLAN_NM 리스트
      */
-    List<HcmAvtPlanItem> findForwardWorkOptions(String startDate, String endDate, String stdId);
+    List<HcmAvtPlanItem> findForwardWorkOptions(String startDate, String endDate);
 }

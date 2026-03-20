@@ -681,11 +681,10 @@ public class MindmapController {
     @ResponseBody
     public List<RestForwardWorkItem> getForwardWorkOptions(
             @RequestParam String startDate,
-            @RequestParam String endDate,
-            @RequestParam String stdId) {
+            @RequestParam String endDate) {
         final List<RestForwardWorkItem> results = new ArrayList<>();
         if (hcmAvtPlanService != null) {
-            for (HcmAvtPlanItem item : hcmAvtPlanService.findForwardWorkOptions(startDate, endDate, stdId)) {
+            for (HcmAvtPlanItem item : hcmAvtPlanService.findForwardWorkOptions(startDate, endDate)) {
                 results.add(new RestForwardWorkItem(
                         item.getPlanId() != null ? item.getPlanId() : "",
                         item.getPlanNm() != null ? item.getPlanNm() : ""));
