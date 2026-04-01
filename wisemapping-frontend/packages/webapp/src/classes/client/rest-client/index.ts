@@ -34,6 +34,7 @@ import Client, {
   UserSearchResult,
   ForwardSystemItem,
   ForwardWorkItem,
+  PgmAuthResponse,
 } from '..';
 import AppI18n, { Locale, LocaleCode, localeFromStr } from '../../app-i18n';
 import { setAnalyticsUserId, clearAnalyticsUserId } from '../../../utils/analytics';
@@ -249,6 +250,25 @@ export default class RestClient implements Client {
             collaborating: u.collaborating || false,
           }));
           success(users);
+        })
+        .catch((error) => {
+          const errorInfo = this.parseResponseOnError(error.response);
+          reject(errorInfo);
+        });
+    };
+    return new Promise(handler);
+  }
+
+  fetchPgmAuth(pgmId: string): Promise<PgmAuthResponse> {
+    const handler = (success: (r: PgmAuthResponse) => void, reject: (error: ErrorInfo) => void) => {
+      this.axios
+        .get(`${this.baseUrl}/api/restful/maps/options/pgm-auth`, {
+          headers: { 'Content-Type': 'application/json' },
+          params: { pgmId },
+        })
+        .then((response) => {
+          const yn = (response.data as { authYn?: string })?.authYn;
+          success({ authYn: yn === 'Y' ? 'Y' : 'N' });
         })
         .catch((error) => {
           const errorInfo = this.parseResponseOnError(error.response);

@@ -91,6 +91,9 @@ public class MindmapController {
     @Autowired(required = false)
     private HcmAvtPlanService hcmAvtPlanService;
 
+    @Autowired(required = false)
+    private ComPgmAuthService comPgmAuthService;
+
     @Autowired
     private MetricsService metricsService;
 
@@ -659,6 +662,19 @@ public class MindmapController {
         }
         
         return results;
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @RequestMapping(method = RequestMethod.GET, value = "/options/pgm-auth", produces = { "application/json" })
+    @ResponseBody
+    public RestPgmAuthResponse getPgmAuth(@RequestParam String pgmId) {
+        if (comPgmAuthService == null) {
+            return new RestPgmAuthResponse("N");
+        }
+        final Account user = Utils.getUser();
+        final String userId = user != null ? user.getFirstname() : null;
+        final String authYn = comPgmAuthService.resolveAuthYn(userId, pgmId);
+        return new RestPgmAuthResponse(authYn);
     }
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")

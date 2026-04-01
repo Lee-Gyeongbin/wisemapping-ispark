@@ -53,15 +53,31 @@ const getDefaultDateRange = (): { start: string; end: string } => {
   };
 };
 
+/** InfoValue(body2)와 동일한 라벨 타이포 — InfoLabel 기본(caption·secondary·500) 오버라이드 */
+const infoLabelLikeValueSx = {
+  fontWeight: 400,
+  color: 'text.primary',
+} as const;
+
+/** 전방체계 편집 영역 노출 여부 — COM_PGM_AUTH.PGM_ID */
+const PGM_ID_AVT_FORWARD_SYSTEM = 'PGM1910';
+
 const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement => {
   const client = useContext(ClientContext);
   const queryClient = useQueryClient();
   const { data: map } = useFetchMapById(mapId);
+  const { data: pgmAuth } = useQuery(['pgm-auth', PGM_ID_AVT_FORWARD_SYSTEM], () =>
+    client.fetchPgmAuth(PGM_ID_AVT_FORWARD_SYSTEM),
+  {
+    staleTime: 60000,
+  });
+  const showForwardSystemRow = pgmAuth?.authYn === 'Y';
   const { data: forwardSystemOptions = [], isLoading: isForwardSystemLoading } = useQuery<
     ForwardSystemItem[],
     ErrorInfo
   >('forward-system-options', () => client.fetchForwardSystemOptions(), {
     staleTime: 60000, // 1분 캐시
+    enabled: showForwardSystemRow,
   });
   const [forwardSystem, setForwardSystem] = useState<ForwardSystemItem | null>(null);
   const [forwardWork, setForwardWork] = useState<ForwardWorkItem | null>(null);
@@ -106,6 +122,9 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
   );
 
   useEffect(() => {
+    if (!showForwardSystemRow) {
+      return;
+    }
     if (map?.stdId && forwardSystemOptions.length > 0) {
       const matched = forwardSystemOptions.find((opt) => opt.id === map.stdId);
       if (matched) {
@@ -113,7 +132,7 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
         setForwardSystemInput(matched.label);
       }
     }
-  }, [map?.stdId, forwardSystemOptions]);
+  }, [map?.stdId, forwardSystemOptions, showForwardSystemRow]);
 
   useEffect(() => {
     if (initialPlanIdApplied.current) {
@@ -140,7 +159,11 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
       return;
     }
 
-    const stdId = forwardSystem ? forwardSystem.id : null;
+    const stdId = showForwardSystemRow
+      ? forwardSystem
+        ? forwardSystem.id
+        : null
+      : (map?.stdId ?? null);
     const planId = forwardWork ? forwardWork.id : null;
 
     await client.updateForwardMapping(mapId, stdId, planId);
@@ -171,53 +194,63 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
         })}
       >
         <InfoRow>
-          <InfoLabel variant="caption">{'• 마인드맵명 :'}</InfoLabel>
+          <InfoLabel variant="body2" sx={infoLabelLikeValueSx}>
+            {'• 마인드맵명 :'}
+          </InfoLabel>
           <InfoValue variant="body2" sx={{ flex: 1 }}>{map?.title ?? '-'}</InfoValue>
         </InfoRow>
 
-        <InfoRow sx={{ alignItems: 'center' }}>
-          <InfoLabel variant="caption">
-            {'전방체계'}
-            <Box component="span" sx={{ color: 'error.main', ml: 0.5 }}>
-              {'*'}
+        {showForwardSystemRow && (
+          <InfoRow sx={{ alignItems: 'center' }}>
+            <InfoLabel variant="body2" sx={infoLabelLikeValueSx}>
+              {'전방체계'}
+            </InfoLabel>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Autocomplete
+                fullWidth
+                size="small"
+                options={forwardSystemOptions}
+                getOptionLabel={(option) => option.label}
+                value={forwardSystem}
+                onChange={(_event, newValue) => setForwardSystem(newValue)}
+                inputValue={forwardSystemInput}
+                onInputChange={(_event, newInputValue) => setForwardSystemInput(newInputValue)}
+                loading={isForwardSystemLoading}
+                renderOption={(props, option) => (
+                  <li {...props}>
+                    <Typography variant="body2" color="text.primary" component="span">
+                      {option.label}
+                    </Typography>
+                  </li>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder={'전방체계 검색'}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {isForwardSystemLoading ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                    sx={[bscCmbOutlinedInputSx, { minWidth: 200, flex: 1 }]}
+                  />
+                )}
+              />
             </Box>
-          </InfoLabel>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Autocomplete
-              fullWidth
-              size="small"
-              options={forwardSystemOptions}
-              getOptionLabel={(option) => option.label}
-              value={forwardSystem}
-              onChange={(_event, newValue) => setForwardSystem(newValue)}
-              inputValue={forwardSystemInput}
-              onInputChange={(_event, newInputValue) => setForwardSystemInput(newInputValue)}
-              loading={isForwardSystemLoading}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  placeholder={'전방체계 검색'}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {isForwardSystemLoading ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                  sx={[bscCmbOutlinedInputSx, { minWidth: 200, flex: 1 }]}
-                />
-              )}
-            />
-          </Box>
-        </InfoRow>
+          </InfoRow>
+        )}
 
         <InfoRow sx={{ alignItems: 'center' }}>
-          <InfoLabel variant="caption">{'• 실행기간'}</InfoLabel>
+          <InfoLabel variant="body2" sx={infoLabelLikeValueSx}>
+            {'• 실행기간'}
+          </InfoLabel>
           <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
             <TextField
               type="date"
@@ -251,11 +284,8 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
         </InfoRow>
 
         <InfoRow sx={{ alignItems: 'center' }}>
-          <InfoLabel variant="caption">
+          <InfoLabel variant="body2" sx={infoLabelLikeValueSx}>
             {'전방워크'}
-            <Box component="span" sx={{ color: 'error.main', ml: 0.5 }}>
-              {'*'}
-            </Box>
           </InfoLabel>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Autocomplete
@@ -268,6 +298,13 @@ const AvtDialog = ({ mapId, onClose }: SimpleDialogProps): React.ReactElement =>
               inputValue={forwardWorkInput}
               onInputChange={(_event, newInputValue) => setForwardWorkInput(newInputValue)}
               loading={isForwardWorkLoading}
+              renderOption={(props, option) => (
+                <li {...props}>
+                  <Typography variant="body2" color="text.primary" component="span">
+                    {option.label}
+                  </Typography>
+                </li>
+              )}
               renderInput={(params) => (
                 <TextField
                   {...params}

@@ -22,6 +22,7 @@ import Client, {
   ChangeHistory,
   ForwardSystemItem,
   ForwardWorkItem,
+  PgmAuthResponse,
   ImportMapInfo,
   Label,
   MapInfo,
@@ -289,6 +290,10 @@ class MockClient implements Client {
     perm = perm.concat(permissions);
     this.permissionsByMap.set(id, perm);
     return Promise.resolve();
+  }
+
+  fetchPgmAuth(_pgmId: string): Promise<PgmAuthResponse> {
+    return Promise.resolve({ authYn: 'Y' });
   }
 
   fetchForwardSystemOptions(): Promise<ForwardSystemItem[]> {

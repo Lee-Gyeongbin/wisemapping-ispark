@@ -146,6 +146,10 @@ export type ForwardWorkItem = {
   label: string;
 };
 
+export type PgmAuthResponse = {
+  authYn: 'Y' | 'N';
+};
+
 export type UserSearchResult = {
   email: string;
   firstname: string;
@@ -186,6 +190,7 @@ interface Client {
   searchUsersForCollaboration(mapId: number, searchTerm: string, limit?: number): Promise<UserSearchResult[]>;
   fetchForwardSystemOptions(): Promise<ForwardSystemItem[]>;
   fetchForwardWorkOptions(startDate: string, endDate: string): Promise<ForwardWorkItem[]>;
+  fetchPgmAuth(pgmId: string): Promise<PgmAuthResponse>;
 
   duplicateMap(id: number, basicInfo: BasicMapInfo): Promise<number>;
 
