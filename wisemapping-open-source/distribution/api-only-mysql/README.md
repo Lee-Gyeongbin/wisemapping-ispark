@@ -7,7 +7,7 @@ ERP 시스템과 연동하기 위한 WiseMapping Backend API를 Docker로 실행
 | 구성        | 실행 방법 |
 |------------|-----------|
 | **Backend**  | Docker (API 이미지, 포트 8081) |
-| **Database** | 외부 MySQL 서버 (61.97.187.218:3307) |
+| **Database** | 외부 MySQL 서버 (110.165.17.88:3307) |
 
 ---
 
@@ -130,7 +130,7 @@ docker-compose up -d
 1. `app.yml`의 MySQL 연결 정보 확인
 2. Docker 컨테이너에서 외부 MySQL 서버 접근 가능한지 확인:
    ```bash
-   docker exec -it wisemapping-api ping 61.97.187.218
+   docker exec -it wisemapping-api ping 110.165.17.88
    ```
 
 ### 로그 확인

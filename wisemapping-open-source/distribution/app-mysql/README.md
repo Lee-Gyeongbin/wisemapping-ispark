@@ -7,7 +7,7 @@ ERP 시스템과 연동하기 위한 WiseMapping 전체 애플리케이션(Front
 | 구성        | 실행 방법 |
 |------------|-----------|
 | **Frontend + Backend**  | Docker (포트 3000) |
-| **Database** | 외부 MySQL 서버 (61.97.187.218:3307) |
+| **Database** | 외부 MySQL 서버 (110.165.17.88:3307) |
 
 ---
 
@@ -118,7 +118,7 @@ wisemapping.baseUrl=http://localhost:8080
 1. `app.yml`의 MySQL 연결 정보 확인
 2. Docker 컨테이너에서 외부 MySQL 서버 접근 가능한지 확인:
    ```bash
-   docker exec -it wisemapping-app ping 61.97.187.218
+   docker exec -it wisemapping-app ping 110.165.17.88
    ```
 
 ### 로그 확인
