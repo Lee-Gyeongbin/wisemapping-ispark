@@ -82,7 +82,12 @@ public class UserServiceImpl
         newUser.setPassword(UUID.randomUUID().toString());
 
         try {
-            userManager.createUser(newUser);
+            final Collaborator col = userManager.getCollaboratorBy(email);
+            if (col != null) {
+                userManager.createUser(newUser, col);
+            } else {
+                userManager.createUser(newUser);
+            }
             logger.info("Auto-created WiseMapping account for external user: {}", email);
             return userManager.getUserBy(email);
         } catch (Exception e) {
